@@ -9,8 +9,6 @@ Use this skill when the user asks to scaffold a new Java / Spring Boot
 The user types something like "bootstrap a new Spring Boot service",
 "set up a Java backend", "create a new Spring Boot app called X".
 
-If the slash form is wired by the consumer, also `/{{slash-name}}`.
-
 ## What you do
 
 ### Phase 0 — Pre-flight (ask, don't guess)

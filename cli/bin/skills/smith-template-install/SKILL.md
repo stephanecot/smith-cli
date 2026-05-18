@@ -1,18 +1,18 @@
 ---
 name: smith-template-install
-description: Builds adapted SKILL artefacts for a consumer project from a framework template set under cli/templates/<framework>/<version>/. Resolves the closest compatible version (guesses when --version is omitted), then dispatches smith-template-customizer + smith-single-template-adapter to produce SKILL.md files in the consumer project's `.claude/skills/` (Claude Code) or `.github/prompts/` (GitHub Copilot). Upserts the adapted skills into `.smith/smith-config.json` `skills[]`. Trigger with `/smith-template-install --framework <name> [--version <ver>] --ai <provider>`. Requires /smith-init to have run on the consumer project.
+description: Builds adapted SKILL artefacts for a consumer project from a framework template set under cli/templates/<framework>/<version>/. Resolves the closest compatible version (guesses when --version is omitted), then dispatches smith-template-customizer + smith-single-template-adapter to produce SKILL.md files in the consumer project's `.claude/skills/` (Claude Code) or `.github/prompts/` (GitHub Copilot). Upserts the adapted skills into `.smith/config.json` `skills[]`. Trigger with `/smith-template-install --framework <name> [--version <ver>] --ai <provider>`. Requires /smith-init to have run on the consumer project.
 ---
 
 # Skill — `/smith-template-install`
 
 Read-only on `cli/templates/`. Produces adapted SKILL files in the
 consumer project's `.claude/skills/` (Claude Code) or `.github/prompts/`
-(GitHub Copilot). Upserts entries into `.smith/smith-config.json`
+(GitHub Copilot). Upserts entries into `.smith/config.json`
 `skills[]` (per the contract documented in `smith-config-format`).
 
 ## Pre-conditions
 
-- `.smith/project-config.json` and `.smith/smith-config.json` must both
+- `.smith/architecture.json` and `.smith/config.json` must both
   exist on the consumer project (markers that `/smith-init` ran).
 - `cli/templates/index.json` must list at least one entry for the
   requested `<framework>`.
@@ -41,7 +41,7 @@ compatible version from `cli/templates/index.json` (see below).
    `framework`.
 2. If only one version exists for that framework → use it.
 3. If multiple versions exist :
-   - Read `.smith/project-config.json` to find the project's actual
+   - Read `.smith/architecture.json` to find the project's actual
      version for that framework (e.g. `angular: 21.2.0`).
    - Pick the largest template version `≤` the project version
      (downward match). If none, pick the smallest available template
@@ -53,15 +53,15 @@ compatible version from `cli/templates/index.json` (see below).
 1. **Validate inputs** and resolve the version as described above.
 2. **Dispatch `smith-template-customizer`** with :
    - the absolute path of `cli/templates/<framework>/<version>/` ;
-   - the absolute path of the consumer project's `.smith/project-config.json` ;
+   - the absolute path of the consumer project's `.smith/architecture.json` ;
    - the resolved `--ai` provider.
 3. **Receive the customizer's report** — list of adapted SKILL files
    with their source template + output path + adaptation flags.
-4. **Update `.smith/smith-config.json`** at the consumer project root :
+4. **Update `.smith/config.json`** at the consumer project root :
    - The canonical shape of the file + the `skills[]` entry shape are
      documented in the sibling skill **`smith-config-format`** ; consult
      its body and use the template at
-     `${CLAUDE_SKILL_DIR}/../smith-config-format/template/smith-config.template.json`
+     `${CLAUDE_SKILL_DIR}/../smith-config-format/template/config.template.json`
      as the source of truth.
    - For each adapted skill, **upsert** an entry in the `skills[]`
      array keyed by `name` :
@@ -75,13 +75,13 @@ compatible version from `cli/templates/index.json` (see below).
      ```
    - Re-running with a newer template version replaces entries with the
      same `name` — never duplicates.
-   - **Preserve unknown keys** : round-trip anything in `smith-config.json`
+   - **Preserve unknown keys** : round-trip anything in `config.json`
      that you don't explicitly touch.
    - **Update `generated_at`** to the current ISO-8601 UTC time.
    - Atomic write (tempfile → fsync → rename).
-   - **Do not touch `.smith/project-config.json`** — that file describes
+   - **Do not touch `.smith/architecture.json`** — that file describes
      the project's tech stack, not Smith outputs. Format spec lives in
-     the sibling skill `smith-project-config-format`.
+     the sibling skill `smith-architecture-format`.
 5. **Relay the customizer's `GENERATION_REPORT.MD`** to the user as
    the final output. Do not paraphrase ; quote the report's headline
    summary line.
@@ -103,5 +103,5 @@ compatible version from `cli/templates/index.json` (see below).
 ```
 ✅ Built {{N}} skills from template `<framework>/<version>` for provider `<ai>`.
 {{Y}} kept, {{Z}} rejected, {{F}} flagged. See .smith/GENERATION_REPORT.MD.
-.smith/smith-config.json updated — skills[] now lists {{T}} entries.
+.smith/config.json updated — skills[] now lists {{T}} entries.
 ```

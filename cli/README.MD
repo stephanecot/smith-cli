@@ -22,10 +22,10 @@ Smith writes two narrative specs + two structured JSON files under `.smith/` :
 
 - `FUNCTIONAL_SPECIFICATION.MD` — what the system does (PO / QA / onboarding).
 - `TECHNICAL_SPECIFICATION.MD` — architecture for a senior engineer.
-- `project-config.json` — **what the project IS**. Detected languages /
+- `architecture.json` — **what the project IS**. Detected languages /
   runtimes / frameworks / build / test / infra / database tools, each with
   `name`, `version`, `tags`. Re-detected on every `/smith-init` rerun.
-- `smith-config.json` — **what Smith DID**. Provider, spec paths,
+- `config.json` — **what Smith DID**. Provider, spec paths,
   `AGENTS.md` pointer, list of adapted skills (with source template),
   list of installed bundles (with version + tags + files). Upserted by
   `/smith-bundle-install` and `/smith-template-install`. Both JSONs feed
@@ -54,13 +54,13 @@ on any Smith-related question.
 
 | Command | What it does |
 |---|---|
-| `/smith-init "<description>"` | Bootstrap — creates `.smith/project-config.json` (stack with tags) + `.smith/smith-config.json` (Smith state) + `AGENTS.md` at the project root. Idempotent. |
+| `/smith-init "<description>"` | Bootstrap — creates `.smith/architecture.json` (stack with tags) + `.smith/config.json` (Smith state) + `AGENTS.md` at the project root. Idempotent. |
 | `/smith-generate-docs` | Writes `.smith/FUNCTIONAL_SPECIFICATION.MD` and `.smith/TECHNICAL_SPECIFICATION.MD` by filling macro templates ; dispatches the two doc-writer agents in parallel. Does NOT touch the JSON config files. |
 | `/smith-help` | Reference — auto-loads on Smith questions. |
-| `/smith-dashboard` | Render `.smith/dashboard.html` from `project-config.json` + `smith-config.json`. |
+| `/smith-dashboard` | Render `.smith/dashboard.html` from `architecture.json` + `config.json`. |
 | `/smith-bundle-list [--tag X[,Y]]` | List bundles (intersection filter). |
-| `/smith-bundle-install --name X --ia <provider>` | Copy a bundle into your project's `.claude/` (or `.github/`). Upserts `bundles[]` in `.smith/smith-config.json`. |
-| `/smith-template-install --framework <name> [--version <ver>] --ai <provider>` | Adapt a framework template set to a consumer project. Upserts `skills[]` in `.smith/smith-config.json`. |
+| `/smith-bundle-install --name X --ia <provider>` | Copy a bundle into your project's `.claude/` (or `.github/`). Upserts `bundles[]` in `.smith/config.json`. |
+| `/smith-template-install --framework <name> [--version <ver>] --ai <provider>` | Adapt a framework template set to a consumer project. Upserts `skills[]` in `.smith/config.json`. |
 
 ### CLI-maintainer (live under `cli/.claude/skills/` — dev-time only, NOT shipped)
 
@@ -74,7 +74,7 @@ on any Smith-related question.
 All slash commands except `/smith-init` and `/smith-help` require
 `/smith-init` to have run on the consumer project. They check for
 `.smith/FUNCTIONAL_SPECIFICATION.MD` as a marker. `/smith-dashboard` also
-requires both `.smith/project-config.json` and `.smith/smith-config.json`,
+requires both `.smith/architecture.json` and `.smith/config.json`,
 which `/smith-init` writes alongside the specs.
 
 ## Layout

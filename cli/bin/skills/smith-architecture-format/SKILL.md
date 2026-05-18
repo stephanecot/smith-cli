@@ -1,20 +1,20 @@
 ---
-name: smith-project-config-format
-description: Source of truth for the format of `.smith/project-config.json` — the project identity file (name + description + summary + detected stack with kebab-case tags). Documents every field, its type, allowed values, defaults, and who is allowed to write it. Ships the canonical macro template under `template/project-config.template.json`. Auto-load whenever the user asks how `project-config.json` is laid out, what a stack field means, what the tag taxonomy is, or who writes / re-writes it. Sister skill `smith-config-format` covers the OTHER file (`.smith/smith-config.json`, the Smith state file) — keep the scope separate.
-when_to_use: User asks about `.smith/project-config.json`, the project identity file, the detected stack arrays (`languages` / `runtimes` / `frameworks` / `build_tools` / `test_tools` / `infra_tools` / `databases`), or the kebab-case tag taxonomy. Also fires when a skill needs to compose or re-detect the project descriptor.
+name: smith-architecture-format
+description: Source of truth for the format of `.smith/architecture.json` — the project identity file (name + description + summary + detected stack with kebab-case tags). Documents every field, its type, allowed values, defaults, and who is allowed to write it. Ships the canonical macro template under `template/architecture.template.json`. Auto-load whenever the user asks how `architecture.json` is laid out, what a stack field means, what the tag taxonomy is, or who writes / re-writes it. Sister skill `smith-config-format` covers the OTHER file (`.smith/config.json`, the Smith state file) — keep the scope separate.
+when_to_use: User asks about `.smith/architecture.json`, the project identity file, the detected stack arrays (`languages` / `runtimes` / `frameworks` / `build_tools` / `test_tools` / `infra_tools` / `databases`), or the kebab-case tag taxonomy. Also fires when a skill needs to compose or re-detect the project descriptor.
 user-invocable: false
 ---
 
-# `.smith/project-config.json` — format reference
+# `.smith/architecture.json` — format reference
 
-This skill is the **single source of truth** for `.smith/project-config.json`,
+This skill is the **single source of truth** for `.smith/architecture.json`,
 the project identity file Smith writes once per consumer project. Every
 field, type, default and ownership rule is documented below. The macro
-template under `template/project-config.template.json` is the canonical
+template under `template/architecture.template.json` is the canonical
 fill-in-the-blank skeleton that `/smith-init` reads to produce the file.
 
 The sister skill `smith-config-format` covers the OTHER managed file
-(`.smith/smith-config.json` — the Smith state file). Their scopes never
+(`.smith/config.json` — the Smith state file). Their scopes never
 overlap : one file describes what the project IS, the other describes
 what Smith has DONE to it.
 
@@ -25,9 +25,9 @@ by `/smith-init` and never re-written by other Smith skills.
 
 | Field | Value |
 |---|---|
-| Path                  | `.smith/project-config.json` |
+| Path                  | `.smith/architecture.json` |
 | Purpose               | What the project IS — name + description + detected stack with `tags[]`. |
-| Template              | `template/project-config.template.json` |
+| Template              | `template/architecture.template.json` |
 | Created by            | `/smith-init` (idempotent — if file exists, do not touch). |
 | Re-written by         | Nobody. To re-detect the stack, delete the file and re-run `/smith-init`. |
 | Read by               | `/smith-dashboard`, `/smith-template-install`, `/smith-generate-docs`. |
@@ -69,10 +69,10 @@ provider / integration). Example : Spring Boot →
 
 ## Mutator contract
 
-Any Smith skill that writes `.smith/project-config.json` MUST :
+Any Smith skill that writes `.smith/architecture.json` MUST :
 
 1. **Read the canonical template** from
-   `template/project-config.template.json` first to know the full shape
+   `template/architecture.template.json` first to know the full shape
    — even when re-detecting one section. Missing keys must not be
    dropped.
 2. **Atomic write** : write to `<file>.tmp`, fsync, then `mv` over the
@@ -83,13 +83,13 @@ Any Smith skill that writes `.smith/project-config.json` MUST :
 4. **Update `generated_at`** on every successful write.
 
 Today the only writer is `/smith-init`. Every other Smith skill treats
-`project-config.json` as read-only.
+`architecture.json` as read-only.
 
 ## Skills that read this skill
 
-| Skill | What it does with `project-config.json` |
+| Skill | What it does with `architecture.json` |
 |---|---|
-| `/smith-init`             | Reads `template/project-config.template.json`, fills the placeholders from stack detection, atomic-writes the file. The ONLY writer. |
+| `/smith-init`             | Reads `template/architecture.template.json`, fills the placeholders from stack detection, atomic-writes the file. The ONLY writer. |
 | `/smith-template-install` | Reads `project.frameworks[]` to pick the right framework template set (`angular/21`, `java-spring-boot/4`, …). Read-only. |
 | `/smith-generate-docs`    | Reads the descriptor to seed the technical / functional specifications. Read-only. |
 | `/smith-dashboard`        | Reads it to render the «Project» card of the HTML dashboard. Read-only. |

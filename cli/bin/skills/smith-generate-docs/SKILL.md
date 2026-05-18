@@ -1,6 +1,6 @@
 ---
 name: smith-generate-docs
-description: Generate the project's two narrative specs under .smith/ — FUNCTIONAL_SPECIFICATION.MD (what the system does) and TECHNICAL_SPECIFICATION.MD (architecture for a senior engineer). Dispatches the two doc-writer agents in parallel ; each fills a macro template from cli/.claude/skills/smith-generate-docs/template/. Idempotent — regenerates the docs on every run, even when they already exist. Does NOT touch project-config.json or smith-config.json. Trigger with `/smith-generate-docs`. Requires /smith-init to have run.
+description: Generate the project's two narrative specs under .smith/ — FUNCTIONAL_SPECIFICATION.MD (what the system does) and TECHNICAL_SPECIFICATION.MD (architecture for a senior engineer). Dispatches the two doc-writer agents in parallel ; each fills a macro template from cli/.claude/skills/smith-generate-docs/template/. Idempotent — regenerates the docs on every run, even when they already exist. Does NOT touch architecture.json or config.json. Trigger with `/smith-generate-docs`. Requires /smith-init to have run.
 ---
 
 # Skill — `/smith-generate-docs`
@@ -8,13 +8,13 @@ description: Generate the project's two narrative specs under .smith/ — FUNCTI
 Owns the narrative documentation pipeline for Smith. Dispatches two
 doc-writer agents in parallel — each fills a macro template with content
 derived from the project — and writes their outputs to `.smith/`.
-Read-only on `.smith/project-config.json` (only consults it for project
-name + detected stack) and `.smith/smith-config.json` (only consults
+Read-only on `.smith/architecture.json` (only consults it for project
+name + detected stack) and `.smith/config.json` (only consults
 `provider`) ; never writes to either.
 
 ## Pre-conditions
 
-- `.smith/project-config.json` AND `.smith/smith-config.json` must both
+- `.smith/architecture.json` AND `.smith/config.json` must both
   exist (markers that `/smith-init` has run). If either is missing,
   halt with one line :
   ```
@@ -35,9 +35,9 @@ name + detected stack) and `.smith/smith-config.json` (only consults
 
 ## What you do
 
-1. **Read `.smith/project-config.json`** for project name + detected
+1. **Read `.smith/architecture.json`** for project name + detected
    stack (languages / runtimes / frameworks / build / test / infra
-   tools / databases, each with tags). Read `.smith/smith-config.json`
+   tools / databases, each with tags). Read `.smith/config.json`
    for `provider`. Do not write to either file.
 
 2. **Scan the project source** to build a `ProjectSummary` :
@@ -80,7 +80,7 @@ name + detected stack) and `.smith/smith-config.json` (only consults
 
 ## What you do NOT do
 
-- **Don't** touch `.smith/project-config.json` or `.smith/smith-config.json`.
+- **Don't** touch `.smith/architecture.json` or `.smith/config.json`.
   The doc files are narrative ; the two JSONs hold structured state.
   They live separately.
 - **Don't** modify `AGENTS.md`. That's `/smith-init`'s output and the
@@ -88,7 +88,7 @@ name + detected stack) and `.smith/smith-config.json` (only consults
 - **Don't** adapt any skill template. The template→skill pipeline was
   removed.
 - **Don't** produce a `.smith/TECHNICAL_index.yaml` — the structured
-  stack data already lives in `project-config.json`. Don't duplicate.
+  stack data already lives in `architecture.json`. Don't duplicate.
 - **Don't** dispatch the doc-writer agents serially. They were
   designed for parallelism — running them in sequence wastes wall-clock
   time without buying anything.

@@ -1,23 +1,23 @@
 ---
 name: smith-config-format
-description: Source of truth for the format of `.smith/smith-config.json` — the Smith state file (provider + spec paths + AGENTS.md pointer + adapted skills + installed bundles). Documents every field, its type, allowed values, defaults, and who is allowed to write it. Ships the canonical macro template under `template/smith-config.template.json`. Auto-load whenever the user asks how `smith-config.json` is laid out, what a field means, or which skill upserts which list. Sister skill `smith-project-config-format` covers the OTHER file (`.smith/project-config.json`, the project identity file) — keep the scope separate.
-when_to_use: User asks about `.smith/smith-config.json`, the Smith state file, the `skills[]` or `bundles[]` lists, the provider field, the `specifications.*` paths, or the mutator contract used by `/smith-bundle-install` / `/smith-template-install`. Also fires when a skill needs to compose or upsert into this JSON.
+description: Source of truth for the format of `.smith/config.json` — the Smith state file (provider + spec paths + AGENTS.md pointer + adapted skills + installed bundles). Documents every field, its type, allowed values, defaults, and who is allowed to write it. Ships the canonical macro template under `template/config.template.json`. Auto-load whenever the user asks how `config.json` is laid out, what a field means, or which skill upserts which list. Sister skill `smith-architecture-format` covers the OTHER file (`.smith/architecture.json`, the project identity file) — keep the scope separate.
+when_to_use: User asks about `.smith/config.json`, the Smith state file, the `skills[]` or `bundles[]` lists, the provider field, the `specifications.*` paths, or the mutator contract used by `/smith-bundle-install` / `/smith-template-install`. Also fires when a skill needs to compose or upsert into this JSON.
 user-invocable: false
 ---
 
-# `.smith/smith-config.json` — format reference
+# `.smith/config.json` — format reference
 
-This skill is the **single source of truth** for `.smith/smith-config.json`,
+This skill is the **single source of truth** for `.smith/config.json`,
 the Smith state file. It tracks what Smith has done to the consumer
 project : which provider runs the show, where the narrative
 specifications live, which skills have been adapted from templates,
 which bundles have been installed. Every field, type, default and
 ownership rule is documented below. The macro template under
-`template/smith-config.template.json` is the canonical fill-in-the-blank
+`template/config.template.json` is the canonical fill-in-the-blank
 skeleton that `/smith-init` and the install mutators read.
 
-The sister skill `smith-project-config-format` covers the OTHER managed
-file (`.smith/project-config.json` — the project identity file). Their
+The sister skill `smith-architecture-format` covers the OTHER managed
+file (`.smith/architecture.json` — the project identity file). Their
 scopes never overlap : one file describes what the project IS, the other
 describes what Smith has DONE to it.
 
@@ -28,9 +28,9 @@ by `/smith-init` and never re-written by other Smith skills.
 
 | Field | Value |
 |---|---|
-| Path                  | `.smith/smith-config.json` |
+| Path                  | `.smith/config.json` |
 | Purpose               | What Smith has DONE — provider, spec paths, AGENTS.md pointer, adapted skills, installed bundles. |
-| Template              | `template/smith-config.template.json` |
+| Template              | `template/config.template.json` |
 | Created by            | `/smith-init` (idempotent — if file exists, do not touch). |
 | Updated by            | `/smith-bundle-install` (upserts `bundles[]`), `/smith-template-install` (upserts `skills[]`). |
 | Read by               | `/smith-dashboard`, `/smith-bundle-install`, `/smith-template-install`, `/smith-generate-docs`. |
@@ -95,10 +95,10 @@ never duplicates.
 
 ## Mutator contract
 
-Any Smith skill that mutates `.smith/smith-config.json` MUST :
+Any Smith skill that mutates `.smith/config.json` MUST :
 
 1. **Read the canonical template** from
-   `template/smith-config.template.json` first to know the full shape —
+   `template/config.template.json` first to know the full shape —
    even when only upserting one section. Missing keys must not be
    dropped.
 2. **Atomic write** : write to `<file>.tmp`, fsync, then `mv` over the
@@ -110,9 +110,9 @@ Any Smith skill that mutates `.smith/smith-config.json` MUST :
 
 ## Skills that read this skill
 
-| Skill | What it does with `smith-config.json` |
+| Skill | What it does with `config.json` |
 |---|---|
-| `/smith-init`             | Reads `template/smith-config.template.json`, fills the placeholders, atomic-writes the empty shell. |
+| `/smith-init`             | Reads `template/config.template.json`, fills the placeholders, atomic-writes the empty shell. |
 | `/smith-bundle-install`   | Reads the bundle entry shape, upserts the `bundles[]` array keyed by `name`. |
 | `/smith-template-install` | Reads the skill entry shape, upserts the `skills[]` array keyed by `name`. |
 | `/smith-generate-docs`    | Reads `specifications.*` to know where to write the spec files. Read-only on this skill's shape. |

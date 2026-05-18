@@ -1,6 +1,6 @@
 ---
-name: agent-status
+name: ia-status
 description: Print the current contents of AGENT_STATUS.MD (running totals per agent / tool + last 50 events). Read-only — the file is maintained automatically by the ia-stats hooks. Trigger with `/agent-status`.
 ---
 
-<!-- @smith-include: ../../../common/skills/agent-status.md -->
+<!-- @smith-include: ../../../common/skills/ia-stats.md -->

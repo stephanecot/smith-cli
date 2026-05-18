@@ -9,8 +9,6 @@ and the user wants a working `npm run build` baseline.
 The user types something like "bootstrap a new Angular app",
 "set up an Angular frontend", "create a new SPA called X".
 
-If the slash form is wired by the consumer, also `/{{slash-name}}`.
-
 ## What you do
 
 ### Phase 0 — Pre-flight (ask, don't guess)
@@ -21,8 +19,8 @@ Ask the user via `AskUserQuestion` (or inline questions) :
    directory's base name, kebab-cased. Use `--name` if passed.
 2. **Routing** : on / off. Default `on` — modern apps almost always
    have routes.
-3. **Tailwind v4** : on / off. Default `on` (matches the Smith Angular
-   skill set under `cli/templates/angular/21/skills/`).
+3. **Tailwind v4** : on / off. Default `on` — matches the project's
+   sibling Angular skills (design-system, etc.) which assume Tailwind.
 4. **i18n with Transloco** : on / off. Default `on`. If yes, ask which
    languages (default `fr` + `en`, `fr` is the default lang).
 5. **OpenAPI client** : on / off. Default `off`. If yes, ask for the

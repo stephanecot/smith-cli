@@ -1,0 +1,6 @@
+# Smith CLI — minimal init marker.
+# Other config files (architecture.json, config.json, …) are
+# created by their own skills, not by /smith-init.
+initialized_at: "{{initialized_at_iso8601}}"
+provider: {{provider}}
+enabled: true

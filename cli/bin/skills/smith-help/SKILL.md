@@ -1,6 +1,6 @@
 ---
 name: smith-help
-description: Reference for the Smith CLI consumer surface. Use this skill whenever the developer asks how Smith works, what `/smith-init` / `/smith-generate-docs` / `/smith-dashboard` / `/smith-bundle-list` / `/smith-bundle-install` / `/smith-template-install` do, what `.smith/project-config.json` + `.smith/smith-config.json` + `AGENTS.md` contain, or how to get started. Covers ONLY the consumer-facing skills shipped under `cli/bin/skills/` — CLI-maintainer commands (`/smith-bundle-add`, `/smith-provider-add`, `/smith-template-add`, `/smith-build`) are out of scope. Auto-load on any question about Smith, smith-cli, smith bundles, or `/smith-*` slash commands.
+description: Reference for the Smith CLI consumer surface. Use this skill whenever the developer asks how Smith works, what `/smith-init` / `/smith-generate-docs` / `/smith-dashboard` / `/smith-bundle-list` / `/smith-bundle-install` / `/smith-template-install` do, what `.smith/architecture.json` + `.smith/config.json` + `AGENTS.md` contain, or how to get started. Covers ONLY the consumer-facing skills shipped under `cli/bin/skills/` — CLI-maintainer commands (`/smith-bundle-add`, `/smith-provider-add`, `/smith-template-add`, `/smith-build`) are out of scope. Auto-load on any question about Smith, smith-cli, smith bundles, or `/smith-*` slash commands.
 when_to_use: User says "how do I", "what does", "where is", "what is smith", "smith cli", "smith bundle", "smith template", "smith provider", or types any `/smith-*` slash command and asks what it does. Also fires when the user wants to discover what Smith can do, get an overview, or pick the right command for their goal.
 ---
 
@@ -30,13 +30,13 @@ on any Smith-related question.
 
 | Command | Pre-init required ? | Purpose |
 |---|:---:|---|
-| `/smith-init "<description>" [--provider claude-code\|github-copilot]` | no — it IS the init | Bootstrap : creates `.smith/project-config.json` (stack with tags) + `.smith/smith-config.json` (Smith state) + `AGENTS.md`. Idempotent — skips files that already exist. |
+| `/smith-init "<description>" [--provider claude-code\|github-copilot]` | no — it IS the init | Bootstrap : creates `.smith/architecture.json` (stack with tags) + `.smith/config.json` (Smith state) + `AGENTS.md`. Idempotent — skips files that already exist. |
 | `/smith-generate-docs` | yes | Writes `.smith/FUNCTIONAL_SPECIFICATION.MD` and `.smith/TECHNICAL_SPECIFICATION.MD` by filling macro templates ; dispatches two doc-writer agents in parallel ; does NOT touch the JSON config files. |
 | `/smith-help` | no | This skill — auto-loads on Smith-related questions. |
-| `/smith-dashboard` | yes | Renders `.smith/dashboard.html` from `project-config.json` + `smith-config.json`. Read-only on the two JSONs ; idempotent regeneration. |
+| `/smith-dashboard` | yes | Renders `.smith/dashboard.html` from `architecture.json` + `config.json`. Read-only on the two JSONs ; idempotent regeneration. |
 | `/smith-bundle-list [--tag X[,Y]]` | yes | Read-only listing of `cli/bundles/config.json`. Multiple `--tag` values are AND'd. |
-| `/smith-bundle-install --name X --ia <provider>` | yes | Copies a bundle's files into the consumer project's `.claude/` (or `.github/`). Upserts `bundles[]` in `.smith/smith-config.json`. |
-| `/smith-template-install --framework <name> [--version <ver>] --ai <provider>` | yes | Reads a template set, dispatches `smith-template-customizer` + `smith-single-template-adapter`, writes adapted SKILL files to the consumer's `.claude/skills/` (or `.github/prompts/`). Upserts `skills[]` in `.smith/smith-config.json`. |
+| `/smith-bundle-install --name X --ia <provider>` | yes | Copies a bundle's files into the consumer project's `.claude/` (or `.github/`). Upserts `bundles[]` in `.smith/config.json`. |
+| `/smith-template-install --framework <name> [--version <ver>] --ai <provider>` | yes | Reads a template set, dispatches `smith-template-customizer` + `smith-single-template-adapter`, writes adapted SKILL files to the consumer's `.claude/skills/` (or `.github/prompts/`). Upserts `skills[]` in `.smith/config.json`. |
 
 Legend : **yes** = requires `/smith-init` on the consumer project ;
 **no** = standalone.
@@ -66,7 +66,7 @@ cli/
 │   ├── claude-code/
 │   └── github-copilot/
 ├── bin/                          # ← the 7 consumer skills documented in this skill
-│   ├── skills/                   # smith-init / smith-help / smith-generate-docs / smith-dashboard / smith-bundle-{list,install} / smith-template-install / smith-project-config-format / smith-config-format
+│   ├── skills/                   # smith-init / smith-help / smith-generate-docs / smith-dashboard / smith-bundle-{list,install} / smith-template-install / smith-architecture-format / smith-config-format
 │   └── agents/                   # smith-functional-doc-writer + smith-technical-doc-writer + smith-template-customizer + smith-single-template-adapter
 ├── releases/                     # output of /smith-build (maintainer-side)
 └── .claude/                      # CLI-MAINTAINER skills — not shipped, out of scope here
@@ -149,7 +149,7 @@ to have `cli/` checked out — you only need the files Smith copies in.
 ```
 cd <consumer-project>            # the project you want to agentify
 /smith-init "<one-line description>"
-# Smith writes .smith/project-config.json + .smith/smith-config.json + AGENTS.md.
+# Smith writes .smith/architecture.json + .smith/config.json + AGENTS.md.
 /smith-generate-docs
 # Smith writes .smith/FUNCTIONAL_SPECIFICATION.MD + .smith/TECHNICAL_SPECIFICATION.MD.
 /smith-template-install --framework angular --version 21 --ai claude-code

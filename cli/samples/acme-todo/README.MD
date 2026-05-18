@@ -12,8 +12,8 @@ the pipeline yourself.
 |---|---|
 | `FUNCTIONAL_SPECIFICATION.MD` | Functional spec written by `smith-functional-doc-writer` (Phase 1). |
 | `TECHNICAL_SPECIFICATION.MD` | Architecture brief written by `smith-technical-doc-writer` (Phase 1). |
-| `project-config.json` | **What the project IS** — detected languages, runtimes, frameworks, build / test / infra tools, databases ; each entry carries a `tags[]` list. Written once by `/smith-init`. Not touched by `/smith-bundle-install` or `/smith-generate-docs`. |
-| `smith-config.json` | **What Smith DID** — provider, spec paths, AGENTS.md pointer, list of installed bundles (version + tags + files). Upserted by `/smith-bundle-install`. |
+| `architecture.json` | **What the project IS** — detected languages, runtimes, frameworks, build / test / infra tools, databases ; each entry carries a `tags[]` list. Written once by `/smith-init`. Not touched by `/smith-bundle-install` or `/smith-generate-docs`. |
+| `config.json` | **What Smith DID** — provider, spec paths, AGENTS.md pointer, list of installed bundles (version + tags + files). Upserted by `/smith-bundle-install`. |
 | `dashboard.html` | Static HTML overview rendered from both JSONs by `/smith-dashboard`. Open in a browser. |
 
 The fictional `CLAUDE.md` Phase-3 brief is also at this folder's root

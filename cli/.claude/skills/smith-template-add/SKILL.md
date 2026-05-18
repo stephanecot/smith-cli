@@ -11,7 +11,7 @@ Scaffolds a new framework / version template directory under
 
 ## Pre-conditions
 
-- The Smith CLI workspace must itself be initialised (`.smith/project-config.json`
+- The Smith CLI workspace must itself be initialised (`.smith/architecture.json`
   exists at the workspace root — `/smith-init` was run on the cli/ project).
 - `<framework>/<version>` must not already exist under `cli/templates/`.
 

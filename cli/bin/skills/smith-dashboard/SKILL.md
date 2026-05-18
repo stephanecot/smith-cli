@@ -1,13 +1,13 @@
 ---
 name: smith-dashboard
-description: Generates a self-contained static HTML dashboard at .smith/dashboard.html by combining .smith/project-config.json (tech stack) + .smith/smith-config.json (adapted skills + installed bundles + spec paths). Single-page overview of the project's Smith state with frameworks, build/test/infra tools, skills with their source template, bundles with version + tags + files, and links to the spec files. Uses a fixed HTML template so the rendering stays consistent across regenerations. Trigger with `/smith-dashboard`. Requires /smith-init to have run.
+description: Generates a self-contained static HTML dashboard at .smith/dashboard.html by combining .smith/architecture.json (tech stack) + .smith/config.json (adapted skills + installed bundles + spec paths). Single-page overview of the project's Smith state with frameworks, build/test/infra tools, skills with their source template, bundles with version + tags + files, and links to the spec files. Uses a fixed HTML template so the rendering stays consistent across regenerations. Trigger with `/smith-dashboard`. Requires /smith-init to have run.
 ---
 
 # Skill — `/smith-dashboard`
 
 Renders a one-page static HTML dashboard summarising everything Smith
 knows about the consumer project. Read-only on
-`.smith/project-config.json` + `.smith/smith-config.json` ;
+`.smith/architecture.json` + `.smith/config.json` ;
 write-only on `.smith/dashboard.html`. **No script, no dependencies.**
 You do the rendering inline by string-substituting the template at
 `${CLAUDE_SKILL_DIR}/template/dashboard.template.html`.
@@ -15,8 +15,8 @@ You do the rendering inline by string-substituting the template at
 ## Pre-conditions
 
 - `.smith/FUNCTIONAL_SPECIFICATION.MD` must exist (`/smith-init` marker).
-- `.smith/project-config.json` must exist (tech stack).
-- `.smith/smith-config.json` must exist (Smith outputs + skills + bundles).
+- `.smith/architecture.json` must exist (tech stack).
+- `.smith/config.json` must exist (Smith outputs + skills + bundles).
   If either is missing, halt and tell the user to re-run `/smith-init`.
 
 ## How to invoke
@@ -30,7 +30,7 @@ No arguments. Re-running overwrites the previous `dashboard.html`.
 ## What you do
 
 1. **Read both JSON files** from the consumer project's root —
-   `.smith/project-config.json` (call it `pc`) and `.smith/smith-config.json`
+   `.smith/architecture.json` (call it `pc`) and `.smith/config.json`
    (call it `sc`).
 2. **Read the template** at `${CLAUDE_SKILL_DIR}/template/dashboard.template.html`.
 3. **Build the substitution map** — for each placeholder below, compute
@@ -95,8 +95,8 @@ No arguments. Re-running overwrites the previous `dashboard.html`.
    ```
 
 6. **String-substitute** every placeholder in the template with its
-   computed value. Two runs against the same `project-config.json` +
-   `smith-config.json` MUST produce byte-identical HTML.
+   computed value. Two runs against the same `architecture.json` +
+   `config.json` MUST produce byte-identical HTML.
 
 7. **Write `.smith/dashboard.html`** atomically (write to
    `.smith/dashboard.html.tmp`, then `mv` over the final path). Use the
@@ -113,7 +113,7 @@ No arguments. Re-running overwrites the previous `dashboard.html`.
 
 - Don't invoke any external tool, language runtime, or package manager.
   The rendering happens entirely through your `Read` + `Write` capabilities.
-- Don't edit `.smith/project-config.json` or `.smith/smith-config.json` —
+- Don't edit `.smith/architecture.json` or `.smith/config.json` —
   the mutator skills (`/smith-init`, `/smith-bundle-install`,
   `/smith-bundle-install`) own them.
 - Don't add data to the dashboard that isn't already in those two files.

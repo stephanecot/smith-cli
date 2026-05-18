@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mv cli/samples/angular-sample/.smith/project-config.json cli/samples/angular-sample/.smith/architecture.json)",
+      "Bash(mv cli/samples/angular-sample/.smith/smith-config.json cli/samples/angular-sample/.smith/config.json)",
+      "Bash(mv cli/samples/angular-sample/.claude/skills/smith-architecture-format/template/project-config.template.json cli/samples/angular-sample/.claude/skills/smith-architecture-format/template/architecture.template.json)",
+      "Bash(mv cli/samples/angular-sample/.claude/skills/smith-config-format/template/smith-config.template.json cli/samples/angular-sample/.claude/skills/smith-config-format/template/config.template.json)",
+      "Bash(git mv *)",
+      "Bash(mv cli/samples/angular-sample/.claude/skills/smith-architecture-format cli/samples/angular-sample/.claude/skills/smith-architecture-format)",
+      "Bash(xargs sed *)",
+      "Bash(rm -rf cli/samples/angular-sample)",
+      "Bash(mkdir -p cli/samples/angular-sample/.claude)",
+      "Bash(cp -r cli/bin/skills cli/samples/angular-sample/.claude/)",
+      "Bash(cp -r cli/bin/agents cli/samples/angular-sample/.claude/)"
+    ]
+  }
+}

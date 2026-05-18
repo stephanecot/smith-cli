@@ -17,7 +17,7 @@ write the resulting SKILL files, and emit a generation report.
 
 - `template_dir` — absolute path of `cli/templates/<framework>/<version>/`.
 - `project_config_path` — absolute path of the consumer project's
-  `.smith/project-config.json` (read-only).
+  `.smith/architecture.json` (read-only).
 - `target_provider` — `claude-code` or `github-copilot`. Determines the
   output artefact shape :
   - `claude-code` → `.claude/skills/smith-<framework>-<slug>/SKILL.md` with
@@ -27,7 +27,7 @@ write the resulting SKILL files, and emit a generation report.
 
 ## Procedure
 
-1. **Read the project signal once.** Load `project-config.json`. Extract
+1. **Read the project signal once.** Load `architecture.json`. Extract
    a `ProjectStack` :
    - dominant language + exact runtime version,
    - every direct framework with its exact version,
@@ -81,7 +81,7 @@ write the resulting SKILL files, and emit a generation report.
   the same output filenames so version-control diffs are clean.
 - **No hidden state.** Every decision (kept / rejected / flagged) must
   be traceable in the report.
-- **Refuse partial inputs.** If `project-config.json` is missing or
+- **Refuse partial inputs.** If `architecture.json` is missing or
   malformed, halt with `customizer.precondition_failed` — do not try to
   guess the stack.
 
@@ -89,6 +89,6 @@ write the resulting SKILL files, and emit a generation report.
 
 - Phase-1 spec generation — that's `/smith-generate-docs`'s agents.
 - Bundle installation — that's `/smith-bundle-install`.
-- Updating `smith-config.json` — that's `/smith-template-install`'s job
+- Updating `config.json` — that's `/smith-template-install`'s job
   (this agent only reports back what it wrote ; the caller does the
   upsert).

@@ -28,12 +28,12 @@ dispersion of todo lists across personal note apps with a single, audited backlo
 ## When to load which spec
 - User asks WHAT → read `.smith/FUNCTIONAL_SPECIFICATION.MD`.
 - User asks HOW (architecture / modules / persistence) → read `.smith/TECHNICAL_SPECIFICATION.MD`.
-- User asks which framework / version / build / test / infra tool → read `.smith/project-config.json` (`project.frameworks` + `project.*_tools`).
+- User asks which framework / version / build / test / infra tool → read `.smith/architecture.json` (`project.frameworks` + `project.*_tools`).
 
 ## Smith CLI in this repo
 - Adapted skills live under `.claude/skills/` (5 angular-* skills + agent-status + mvn + npm).
 - Generation report : `.smith/GENERATION_REPORT.MD`.
-- Stack state : `.smith/project-config.json` ; Smith state : `.smith/smith-config.json`.
+- Stack state : `.smith/architecture.json` ; Smith state : `.smith/config.json`.
 - Visual overview : `.smith/dashboard.html` (re-render via `/smith-dashboard`).
 - For Smith-CLI commands (`/smith-*`), run `/smith-help` in Claude Code.
 
