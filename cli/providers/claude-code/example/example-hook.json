@@ -1,0 +1,55 @@
+{
+  "_comment": "Example fragment for .claude/settings.json — merge into your existing 'hooks' key. Demonstrates four common hook patterns: blocking a destructive Bash command (PreToolUse), auto-linting after a write (PostToolUse), logging every sub-agent stop to AGENT_STATUS.MD (SubagentStop), and showing a Mac notification when the assistant goes idle (Notification).",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(rm -rf *)",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/scripts/block-destructive.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/scripts/lint-after-write.sh",
+            "async": true,
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PROJECT_DIR}/.claude/scripts/append-agent-status.sh --event SubagentStop",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "idle_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/osascript",
+            "args": ["-e", "display notification \"Claude is waiting on you\" with title \"Claude Code\""],
+            "shell": "bash"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "_comment": "Example .vscode/tasks.json — three task patterns. (1) Auto-run on folder open ('runOn: folderOpen') to bootstrap a project sentinel. (2) Manual run via 'Run Task' command for a quick build. (3) A 'background: true' watcher task that produces a problem matcher Copilot can read via the read/terminalLastCommand tool. Copilot does not have in-process hooks ; tasks + git hooks + GitHub Actions are the host-driven substitutes.",
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "smith: on-folder-open",
+      "type": "shell",
+      "command": "python3",
+      "args": ["${workspaceFolder}/.smith/scripts/check-init.py"],
+      "presentation": {
+        "reveal": "silent",
+        "panel": "dedicated",
+        "showReuseMessage": false
+      },
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "build",
+      "type": "shell",
+      "command": "make build",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "watch tests",
+      "type": "shell",
+      "command": "npm run test -- --watch",
+      "options": {
+        "cwd": "${workspaceFolder}/frontend"
+      },
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": {
+        "owner": "vitest",
+        "fileLocation": ["relative", "${workspaceFolder}/frontend"],
+        "pattern": {
+          "regexp": "^\\s+at (.+):(\\d+):(\\d+)$",
+          "file": 1,
+          "line": 2,
+          "column": 3
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Test Files",
+          "endsPattern": "Tests:"
+        }
+      }
+    }
+  ]
+}

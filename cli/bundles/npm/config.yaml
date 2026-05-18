@@ -1,0 +1,38 @@
+name: npm
+description: |
+  npm offload — dispatches /npm <args> to a dedicated runner sub-agent so
+  multi-thousand-line Vitest / Vite / lint logs do not flood the parent
+  context. Returns a one-line verdict + Tests/lint/build counters +
+  failure cause.
+
+  Factorisation : skill bodies + agent bodies live ONCE under `common/`
+  (no frontmatter). Each provider folder ships REAL functional artefacts
+  whose body is a `<!-- @smith-include: ... -->` directive pointing at
+  the matching `common/` file. The install skill resolves the directive
+  and writes the assembled file (frontmatter + included body) to the
+  consumer project.
+version: 0.1.0
+tags: [build, nodejs, frontend]
+providers: [claude-code, github-copilot]
+files:
+  common:
+    - kind: skill-body
+      path: common/skills/npm.md
+      description: Shared body for the /npm slash command (no frontmatter).
+    - kind: agent-body
+      path: common/agents/npm-runner.md
+      description: Shared body for the npm-runner agent (no frontmatter).
+  claude-code:
+    - kind: skill
+      path: claude-code/skills/npm/SKILL.md
+      description: Real Claude Code skill — frontmatter + @smith-include to common/skills/npm.md.
+    - kind: agent
+      path: claude-code/agents/npm-runner.md
+      description: Real Claude Code sub-agent (Haiku) — frontmatter + @smith-include to common/agents/npm-runner.md.
+  github-copilot:
+    - kind: skill
+      path: github-copilot/skills/npm/SKILL.md
+      description: Real Copilot skill — frontmatter + @smith-include to common/skills/npm.md.
+    - kind: agent
+      path: github-copilot/agents/npm-runner.agent.md
+      description: Real Copilot chat-mode agent (`.agent.md`) — frontmatter + @smith-include to common/agents/npm-runner.md.

@@ -1,0 +1,19 @@
+framework: java-spring-boot
+version: "4"
+description: |
+  Skill templates for Java 24 + Spring Boot 4 services. Today the set
+  ships a single `bootstrap` skill — interactive scaffold of a runnable
+  service (pom.xml, application entry, optional REST controller,
+  optional Liquibase changelog, application.yaml, .gitignore, README).
+  More skills (coding standards, tests + coverage, JPA + transactions,
+  OpenAPI contract, observability) can be added with /smith-template-add.
+files:
+  - kind: skill
+    path: skills/bootstrap.md
+    description: Interactive scaffold of a Java 24 / Spring Boot 4 service — asks for coordinates + persistence + inbound interface, generates pom.xml + entry point + minimal endpoint, runs `mvn -B verify` smoke check.
+adapter_placeholders:
+  "{{language}}": Always "java" for this template set.
+  "{{runtime}}": "jvm"
+  "{{framework}}": "spring-boot"
+  "{{framework_version}}": "4"
+  "{{root_package}}": Maven groupId (e.g. com.example).

@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "templates": [
+    {
+      "framework": "angular",
+      "version": "21",
+      "directory": "angular/21",
+      "config": "angular/21/config.yaml",
+      "description": "Angular 21 (zoneless, signals, Tailwind v4) — 6 skill bodies : bootstrap, standards, tests-coverage, design-system, i18n-transloco, openapi-client. Each body becomes `smith-angular-<slug>` after smith-template-install."
+    },
+    {
+      "framework": "java-spring-boot",
+      "version": "4",
+      "directory": "java-spring-boot/4",
+      "config": "java-spring-boot/4/config.yaml",
+      "description": "Java 24 + Spring Boot 4 — bootstrap skill : interactive scaffold of a runnable service (pom.xml, application entry, optional REST controller, optional Liquibase changelog, application.yaml). `mvn -B verify` smoke check at the end."
+    }
+  ]
+}

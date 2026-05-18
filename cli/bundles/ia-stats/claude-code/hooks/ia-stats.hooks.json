@@ -1,0 +1,25 @@
+{
+  "_comment": "Merge this block into .claude/settings.json under the 'hooks' key. The script is Node.js (>= 16), zero-dependency, cross-platform (Windows + macOS + Linux). The same hook command works for every dev on a team regardless of their OS.",
+  "hooks": {
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/scripts/append-agent-status.js --event SubagentStop"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/scripts/append-agent-status.js --event PostToolUse"
+          }
+        ]
+      }
+    ]
+  }
+}

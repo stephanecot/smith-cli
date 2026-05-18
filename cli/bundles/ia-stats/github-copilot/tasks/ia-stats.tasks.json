@@ -1,0 +1,42 @@
+{
+  "_comment": "Merge this block into .vscode/tasks.json. Copilot has no in-process hooks ; this task is run by the user (or by an editor-side automation like Trigger Task on Save) to append a row to AGENT_STATUS.MD. The script is the same Node.js file as the Claude Code variant — it lives at .vscode/scripts/append-agent-status.js on install (shipped from cli/bundles/ia-stats/common/scripts/).",
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "ia-stats: append tool-use",
+      "type": "shell",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/.vscode/scripts/append-agent-status.js",
+        "--event",
+        "PostToolUse",
+        "--file",
+        "${workspaceFolder}/AGENT_STATUS.MD"
+      ],
+      "presentation": {
+        "reveal": "silent",
+        "panel": "dedicated",
+        "showReuseMessage": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "ia-stats: append agent-stop",
+      "type": "shell",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/.vscode/scripts/append-agent-status.js",
+        "--event",
+        "SubagentStop",
+        "--file",
+        "${workspaceFolder}/AGENT_STATUS.MD"
+      ],
+      "presentation": {
+        "reveal": "silent",
+        "panel": "dedicated",
+        "showReuseMessage": false
+      },
+      "problemMatcher": []
+    }
+  ]
+}

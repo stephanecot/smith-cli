@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/agent-stats-on-session-end.py\"",
+            "timeout": 30,
+            "statusMessage": "Refreshing AGENT_STATS.MD…"
+          }
+        ]
+      }
+    ]
+  }
+}

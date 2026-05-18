@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "generated_at": "2026-05-16T09:14:42Z",
+  "project": {
+    "name": "acme-todo",
+    "description": "Team-collaboration todo manager — ~30 engineers at Acme. Engineers create / share / group todos into projects ; replaces dispersion across personal note apps with one audited backlog.",
+    "summary": "Team-collaboration todo manager — Angular 21 frontend + Spring Boot 4 backend + PostgreSQL 17.",
+    "languages": [
+      { "name": "typescript", "version": "5.5.4", "tags": ["frontend"] },
+      { "name": "java",       "version": "24",    "tags": ["backend"]  }
+    ],
+    "runtimes": [
+      { "name": "nodejs", "version": "22.6.0", "tags": ["frontend"] },
+      { "name": "jvm",    "version": "24.0.1", "tags": ["backend"]  }
+    ],
+    "frameworks": [
+      { "name": "angular",      "version": "21.2.0", "tags": ["typescript", "frontend", "spa", "signals", "zoneless"] },
+      { "name": "tailwindcss",  "version": "4.1.5",  "tags": ["css", "frontend", "design-system"] },
+      { "name": "spring-boot",  "version": "4.0.0",  "tags": ["java", "backend", "rest", "jpa"] }
+    ],
+    "build_tools": [
+      { "name": "maven", "version": "3.9.6",  "tags": ["java", "backend"] },
+      { "name": "npm",   "version": "11.0.0", "tags": ["nodejs", "frontend"] },
+      { "name": "vite",  "version": "6.0.0",  "tags": ["nodejs", "frontend", "dev-server"] }
+    ],
+    "test_tools": [
+      { "name": "vitest",         "version": "3.0.6",  "tags": ["nodejs", "frontend", "unit"] },
+      { "name": "junit",          "version": "5.11.3", "tags": ["java", "backend", "unit"] },
+      { "name": "testcontainers", "version": "1.20.1", "tags": ["java", "backend", "integration", "docker"] },
+      { "name": "playwright",     "version": "1.46.0", "tags": ["nodejs", "e2e", "browser"] }
+    ],
+    "infra_tools": [
+      { "name": "docker",         "version": "27.3.1", "tags": ["container"] },
+      { "name": "docker-compose", "version": "2.29.7", "tags": ["container", "local-dev"] },
+      { "name": "terraform",      "version": "1.9.5",  "tags": ["infra-as-code", "aws"] },
+      { "name": "github-actions", "version": "*",       "tags": ["ci", "cd"] }
+    ],
+    "databases": [
+      { "name": "postgresql", "version": "17.0", "tags": ["relational"] },
+      { "name": "redis",      "version": "7.4",  "tags": ["cache", "kv"] }
+    ],
+    "git_sha": "a1e1e35"
+  }
+}
