@@ -55,17 +55,69 @@ siblings each process their own file in isolation.
      `/mvn` or `/npm`) STAY — those are user-facing surfaces in the
      consumer project, not build-time internals.
 
-3. **Surface-level edits only.** Package / class / module names,
-   version strings, dependency coordinates, import paths. Anything
-   deeper (an API that changed shape between two framework versions, a
-   method signature that no longer exists) goes in the change log as
-   an `api_drift` flag — never silently rewritten.
+3. **Stack-aware pruning — remove every trace of techs the project
+   does NOT use.** Templates are written for the **superset** of
+   what a framework typically ships with (e.g. the Angular 21 bootstrap
+   template covers Tailwind + Transloco + OpenAPI + Playwright even
+   though most projects only pick a subset). The adapted skill MUST
+   be **specific to the consumer's actual stack** : every reference
+   to a tech that does not appear in `project_stack` is removed —
+   not commented out, not gated behind "if you want", just **gone**.
 
-4. **Do not generate a frontmatter** yourself. The customizer composes
+   Detection — a tech is "in the stack" iff its kebab-case name
+   appears in any of :
+   - `project_stack.frameworks[].name` (e.g. `tailwindcss`,
+     `transloco`, `openapi-generator`, `playwright`)
+   - any `project_stack.*[].tags[]` (e.g. a stack entry tagged
+     `i18n` indicates i18n is in scope)
+   - `project_stack.languages[]` / `runtimes[]` / `build_tools[]` /
+     `test_tools[]` / `infra_tools[]` / `databases[]`
+
+   Pruning — for every tech that is **absent** from the detection set
+   but mentioned in the template, remove :
+   - **Pre-flight questions** about the tech (entire numbered item
+     in the Phase 0 list, renumber the rest).
+   - **Conditional Phases** named after the tech (e.g.
+     `### Phase 7 — Tailwind v4 (if on)` → drop the whole section
+     when no `tailwindcss` in stack ; do NOT keep the heading with
+     an empty body).
+   - **Conditional bullets** inside otherwise-kept sections
+     (e.g. `- tailwindcss 4.1.x (if Tailwind on)` lines under
+     Dependencies → drop the line).
+   - **File-tree entries** gated by the tech
+     (e.g. `├── postcss.config.js   # if Tailwind on` →
+     drop the line).
+   - **Reporting placeholders** for the tech
+     (e.g. `Tailwind v4 : {{on|off}}` → drop the line).
+   - **Cross-references** elsewhere in the body that name the tech
+     in a context that becomes meaningless after the prune.
+
+   Stack-aware pruning is the **rule, not the exception** — the
+   adapted skill must read as if the absent tech never existed.
+   Concrete example : if a consumer's Angular 21 project has no
+   Tailwind, the adapted `smith-angular-bootstrap` skill has zero
+   occurrences of the word "Tailwind", "tailwindcss", `@tailwindcss/postcss`,
+   `postcss.config.js`, `tailwind.config.js`, `@import "tailwindcss"`,
+   etc.
+
+   Emit a `pruned_tech` change entry per removed tech with a count of
+   removed mentions so the customizer's report shows what was
+   tailored away.
+
+4. **Surface-level edits within kept content.** For techs that DO
+   stay, rewrite package / class / module names, version strings,
+   dependency coordinates, import paths to match the consumer's
+   exact versions in `project_stack` — not the placeholder version
+   baked into the template. Anything deeper (an API that changed
+   shape between two framework versions, a method signature that no
+   longer exists) goes in the change log as an `api_drift` flag —
+   never silently rewritten.
+
+5. **Do not generate a frontmatter** yourself. The customizer composes
    the YAML frontmatter (provider-specific) after collecting your
    adapted body. Your output is body-only markdown.
 
-5. **Post-condition self-check.** Before returning, scan your
+6. **Post-condition self-check.** Before returning, scan your
    `adaptedBody` once :
    - Forbidden substrings : `cli/templates/`, `cli/bundles/`,
      `cli/bin/`, `cli/providers/`, `cli/samples/`, `cli/.claude/`.
@@ -78,25 +130,44 @@ siblings each process their own file in isolation.
      `project_stack` does not provide a value, emit an
      `unresolved_placeholder` change entry instead of leaving the
      literal `{{...}}` in the body.
+   - **Pruning residue scan** : for every tech listed in your
+     `pruned_tech` change entries, grep the body for its
+     kebab-case name AND its display name (e.g. `tailwindcss` AND
+     `Tailwind`). Zero occurrences expected — if any survived,
+     rewrite and re-scan. A pruned tech leaking back in is a
+     contract violation just as serious as a `cli/` leak.
 
-6. **Return** `{ adaptedBody: string, changes: ChangeEntry[] }` to the
+7. **Return** `{ adaptedBody: string, changes: ChangeEntry[] }` to the
    customizer. Each `ChangeEntry` records
    `{ type, original, replacement, reason }` so the customizer can
-   render an audit trail in the report. Include a `strip_cli_meta`
-   entry for every CLI-side meta-reference removed by step 2.
+   render an audit trail in the report. Required `type` values you
+   may emit :
+   - `placeholder_filled` — `{{...}}` resolved from project_stack.
+   - `unresolved_placeholder` — `{{...}}` could not be resolved.
+   - `dependency_rewritten` — version coordinate adjusted to match
+     the consumer's pinned version.
+   - `strip_cli_meta` — CLI-side meta-reference removed by step 2.
+   - `pruned_tech` — entire section / question / bullet removed by
+     step 3 because the tech is absent from `project_stack`. Include
+     a `count` field for the number of removed mentions.
+   - `api_drift` — possibly outdated API call surfaced but NOT
+     rewritten (step 4).
 
 ## Quality bar
 
 - **100% consumer-dedicated.** The adapted body must read as if
   authored for this specific project's stack — no CLI internals, no
-  template artefacts, no references to `cli/`-rooted paths.
+  template artefacts, no references to `cli/`-rooted paths, **and no
+  mention of techs absent from `project_stack`**.
 - **Never invent.** If a placeholder cannot be resolved from
   `project_stack`, emit an `unresolved_placeholder` change entry and
   rewrite the surrounding sentence so the literal `{{...}}` does not
   appear in the output.
-- **Never delete substantive content.** Preserve the template's
-  structure and instructions ; rewrite surface tokens and strip
-  CLI-side meta-references only.
+- **Prune deeply, preserve generously.** Stack-aware pruning (step 3)
+  is the one form of substantive deletion sanctioned. Every other
+  section, instruction, quality bar and warning in the template stays
+  — only surface tokens, CLI meta-refs and absent-tech mentions get
+  rewritten / removed.
 - **Idempotent.** Running the agent twice on the same inputs MUST
   produce byte-identical output.
 - **Stay in lane.** Do not write to disk yourself — the customizer owns

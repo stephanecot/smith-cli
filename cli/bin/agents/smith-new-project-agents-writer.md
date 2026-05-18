@@ -40,22 +40,21 @@ twofold :
 ## Procedure
 
 1. **Verify pre-conditions.**
-   - `.smith/smith.yaml` must exist (to read `provider`). Refuse with
-     `status=failed, reason=smith-not-initialised` otherwise.
    - `.smith/architecture.json` must exist (for project identity +
      stack). Refuse with
      `status=failed, reason=architecture-not-written` otherwise.
-   - `.smith/config.json` must exist (for installed bundles + skills).
-     Refuse with `status=failed, reason=config-not-written` otherwise.
 
-2. **Assemble the payload.** Read the three files above and shape :
+   The brief is project-focused — Smith-side files
+   (`smith.yaml`, `config.json`) are not read here because none of
+   their content lands in `AGENTS.md`.
+
+2. **Assemble the payload.** Read `architecture.json` and shape :
 
    ```json
    {
      "project_name": "<from architecture.json::project.name>",
      "description":  "<verbatim description input>",
      "summary":      "<from architecture.json::project.summary, or null>",
-     "provider":     "<from smith.yaml::provider>",
      "stack": {
        "languages":   "<from architecture.json::project.languages>",
        "runtimes":    "<from architecture.json::project.runtimes>",
@@ -64,21 +63,15 @@ twofold :
        "test_tools":  "<from architecture.json::project.test_tools>",
        "infra_tools": "<from architecture.json::project.infra_tools>",
        "databases":   "<from architecture.json::project.databases>"
-     },
-     "bundles_installed": "<from config.json::bundles[], each as {name, version, tags}>",
-     "skills_installed":  "<from config.json::skills[], each as {name, from_template}>",
-     "bootstrap_summary": "<derived from bootstrap_results, each as {framework, files_created_count, smoke_test_status}>"
+     }
    }
    ```
 
-   - `bootstrap_summary` derivation : map each `BootstrapResult` entry
-     to `{ framework, files_created_count: files_created.length,
-     smoke_test_status: smoke_test.status }`. Skip entries with
-     `status == failed` only if `files_created` is empty (a failed
-     bootstrap that still produced files is worth showing).
-   - If `bootstrap_results` is empty or absent, emit
-     `"bootstrap_summary": []` — the skill renders `_None_` for the
-     section.
+   You do NOT pass `provider`, `bundles_installed`, `skills_installed`
+   or `bootstrap_summary` — `AGENTS.md` is project-focused (no
+   Smith-tooling sections). The `bootstrap_results` input you receive
+   from the orchestrator is read for context only ; it is not
+   reflected in the rendered brief.
 
 3. **Invoke the skill.** Use the Skill tool :
 

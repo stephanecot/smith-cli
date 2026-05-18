@@ -36,10 +36,24 @@ write the resulting SKILL files, and emit a generation report.
 
 2. **Read the template `config.yaml`** in `template_dir`. Iterate over
    its `files[]` list. For each entry, decide one of :
-   - `KEPT` — the project uses this framework at the same major version.
+   - `KEPT` — the project uses this framework at the same major version,
+     AND the template's central tech (when single-purpose, e.g.
+     `i18n-transloco.md` requires Transloco, `design-system.md` requires
+     Tailwind, `openapi-client.md` requires an OpenAPI generator)
+     appears in `ProjectStack`.
    - `KEPT_WITH_FLAG` — close-but-not-exact match (e.g. project uses
      Angular 20, template targets 21). Flag the version drift.
-   - `REJECTED` — no overlap with the project stack.
+   - `REJECTED` — no overlap with the project stack OR the template's
+     central tech is absent from `ProjectStack` (e.g. the
+     `i18n-transloco` skill is REJECTED when the project does not list
+     `transloco` in any stack array). Record the reason in the report.
+
+   Templates that pass the rejection bar but contain **secondary**
+   tech mentions (e.g. the Angular `bootstrap.md` template covers
+   Angular core + optional Tailwind + optional Transloco + optional
+   OpenAPI) are still KEPT — the adapter (step 3 below) prunes the
+   absent-tech sections inside them, per its
+   `smith-single-template-adapter` contract.
 
 3. **Fan out the adaptation — one sub-agent per kept template.** For
    every `KEPT` / `KEPT_WITH_FLAG` entry, dispatch a
@@ -64,17 +78,24 @@ write the resulting SKILL files, and emit a generation report.
 5. **Write the report.** After all templates are processed (success or
    failure), write `.smith/GENERATION_REPORT.MD` :
    - Total templates considered, kept, kept-with-flag, rejected.
-   - For each kept template : output path, adapter changes, flags.
-   - For each rejected : reason.
+   - For each kept template : output path, adapter changes, flags,
+     **pruned techs** (the `pruned_tech` change entries returned by
+     the adapter — they tell the user which secondary techs were
+     tailored away because the project does not use them).
+   - For each rejected : reason (typically "central tech absent from
+     stack" — list which tech).
    - Any IO errors per template.
 
 ## Quality bar
 
-- **Never invent code or API calls.** Adaptation is *surface-level* —
-  package names, version strings, dependency coordinates. Anything deeper
-  goes in the report as an `api_drift` flag, not as a silent rewrite.
-- **Never delete a section** from a template. Keep the structure ;
-  rewrite surface tokens only.
+- **Never invent code or API calls.** Surface-level rewrites only for
+  techs that stay. Anything deeper goes in the report as an
+  `api_drift` flag, not as a silent rewrite.
+- **Sanctioned deletions only.** Templates may have sections,
+  questions, bullets and reporting placeholders **pruned** by the
+  adapter when their gating tech is absent from `ProjectStack` —
+  every prune surfaces in the report as a `pruned_tech` entry. No
+  other kind of section removal is allowed.
 - **One template = one independent operation.** A failure on template N
   must not interrupt template N+1 ; collect the error in the report.
 - **Stable filenames.** Two runs against the same project must produce

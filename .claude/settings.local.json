@@ -11,7 +11,8 @@
       "Bash(rm -rf cli/samples/angular-sample)",
       "Bash(mkdir -p cli/samples/angular-sample/.claude)",
       "Bash(cp -r cli/bin/skills cli/samples/angular-sample/.claude/)",
-      "Bash(cp -r cli/bin/agents cli/samples/angular-sample/.claude/)"
+      "Bash(cp -r cli/bin/agents cli/samples/angular-sample/.claude/)",
+      "Bash(rm -rf cli/samples/angular-sample/.claude/skills cli/samples/angular-sample/.claude/agents)"
     ]
   }
 }

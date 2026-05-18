@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/scripts/append-agent-status.js --event SubagentStop"
+            "command": "node .claude/scripts/append-ia-stats.js --event SubagentStop"
           }
         ]
       }
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/scripts/append-agent-status.js --event PostToolUse"
+            "command": "node .claude/scripts/append-ia-stats.js --event PostToolUse"
           }
         ]
       }

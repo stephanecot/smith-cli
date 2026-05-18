@@ -1,16 +1,16 @@
 name: ia-stats
 description: |
   Automatic per-agent / per-skill usage tracker. Every event appends a
-  row to AGENT_STATUS.MD at the consumer project's root via a Node.js
+  row to IA_STATS.MD at the consumer project's root via a Node.js
   script. Cross-platform (Windows + macOS + Linux), zero npm deps.
   Shipped for both Claude Code (real event hooks) and GitHub Copilot
   (VS Code tasks).
 
-  Factorisation : the `/agent-status` skill body lives ONCE under
-  `common/skills/agent-status.md` ; each provider's `SKILL.md` carries
+  Factorisation : the `/ia-stats` skill body lives ONCE under
+  `common/skills/ia-stats.md` ; each provider's `SKILL.md` carries
   its frontmatter + a `@smith-include` directive that the install
   skill resolves to the common body. The Node.js script
-  (`common/scripts/append-agent-status.js`) is byte-identical for both
+  (`common/scripts/append-ia-stats.js`) is byte-identical for both
   providers. Only the event-binding fragments (Claude Code hooks JSON
   vs VS Code tasks JSON) are provider-specific by nature.
 version: 0.1.0
@@ -19,22 +19,22 @@ providers: [claude-code, github-copilot]
 files:
   common:
     - kind: skill-body
-      path: common/skills/agent-status.md
-      description: Shared body for the /agent-status slash command (no frontmatter).
+      path: common/skills/ia-stats.md
+      description: Shared body for the /ia-stats slash command (no frontmatter).
     - kind: script
-      path: common/scripts/append-agent-status.js
-      description: Node.js script (stdlib only) — appends a row to AGENT_STATUS.MD. Byte-identical for both providers.
+      path: common/scripts/append-ia-stats.js
+      description: Node.js script (stdlib only) — appends a row to IA_STATS.MD. Byte-identical for both providers.
   claude-code:
     - kind: skill
-      path: claude-code/skills/agent-status/SKILL.md
-      description: Real Claude Code skill — frontmatter + @smith-include to common/skills/agent-status.md.
+      path: claude-code/skills/ia-stats/SKILL.md
+      description: Real Claude Code skill — frontmatter + @smith-include to common/skills/ia-stats.md.
     - kind: hook
       path: claude-code/hooks/ia-stats.hooks.json
       description: SubagentStop + PostToolUse hook fragment to merge into .claude/settings.json.
   github-copilot:
     - kind: skill
-      path: github-copilot/skills/agent-status/SKILL.md
-      description: Real Copilot skill — frontmatter + @smith-include to common/skills/agent-status.md.
+      path: github-copilot/skills/ia-stats/SKILL.md
+      description: Real Copilot skill — frontmatter + @smith-include to common/skills/ia-stats.md.
     - kind: task
       path: github-copilot/tasks/ia-stats.tasks.json
       description: VS Code tasks fragment to merge into .vscode/tasks.json (Copilot has no in-process hooks).

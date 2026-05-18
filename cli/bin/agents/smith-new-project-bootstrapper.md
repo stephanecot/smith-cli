@@ -77,14 +77,23 @@ and stay on `haiku`.
    Skill(skill="<bootstrap_skill_name>",
          args='description="<description>" '
               'project_config="<project_config_path>" '
-              'hints=<discovery_hints_as_json>')
+              'hints=<discovery_hints_as_json> '
+              'non_interactive=true')
    ```
 
-   If the skill asks an interactive question that wasn't pinned down
-   by `discovery_hints`, answer with the most idiomatic default for
-   that framework and record the choice in your return payload under
-   `assumed_defaults[]` so the orchestrator can surface it in the
-   final report.
+   **🚫 ZERO interactive questions during this invocation.** If the
+   bootstrap skill calls `AskUserQuestion`, **answer it yourself**
+   from this order of source :
+   1. `discovery_hints` if the question maps to a hint key.
+   2. The bootstrap skill's own documented default for that question
+      (Phase 0 of every framework bootstrap declares one).
+   3. As a last resort, the most idiomatic value for the framework.
+
+   Never forward an `AskUserQuestion` back to the user — the parent
+   workflow (`/smith-new-project`) is mid-flight ; the user has
+   already answered everything at Step 2. Record every answer you
+   chose in `assumed_defaults[]` so the orchestrator can surface them
+   in the final report.
 
 4. **Run the smoke test** declared by the bootstrap skill (Spring Boot
    templates declare `mvn -B verify`, Angular templates declare

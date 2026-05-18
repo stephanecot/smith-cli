@@ -84,7 +84,10 @@ newer template version replaces the existing entry, never duplicates.
   "tags": ["<from taxonomy>"],
   "provider": "<--ia value passed to install>",
   "files": [
-    { "kind": "skill|agent|hook|script|rules", "source": "<bundle-relative path>", "destination": "<consumer-relative path>" }
+    { "kind": "skill|agent|script|rules", "source": "<bundle-relative path>", "destination": "<consumer-relative path>" }
+  ],
+  "merged_into": [
+    "<consumer-relative path of a provider config file the install merged into>"
   ],
   "installed_at": "<ISO-8601 UTC>"
 }
@@ -92,6 +95,31 @@ newer template version replaces the existing entry, never duplicates.
 
 Upsert keyed by `name` — re-installing replaces the existing entry,
 never duplicates.
+
+### `merged_into[]` and the `_smith_source` marker
+
+Hook fragments (Claude Code `claude-code/hooks/<n>.hooks.json`) and
+task fragments (Copilot `github-copilot/tasks/<n>.tasks.json`) are
+**not** copied as standalone files — they are **merged** into the
+provider's live config (`.claude/settings.json` for Claude Code,
+`.vscode/tasks.json` for Copilot) by `/smith-bundle-install`. The
+merge is idempotent and reversible because every Smith-injected
+entry carries a marker :
+
+```json
+{ "matcher": "*",
+  "hooks": [{ "type": "command", "command": "node ..." }],
+  "_smith_source": "<bundle-slug>" }
+```
+
+- The marker is added by `/smith-bundle-install` step 4-bis.
+- `bundles[].merged_into[]` lists every consumer-side file the merge
+  touched (so the future `/smith-bundle-uninstall` knows where to
+  scrub entries with the matching `_smith_source`).
+- Empty array (`merged_into: []`) when the bundle ships no hooks /
+  tasks — most bundles fall in that category.
+- Entries WITHOUT a `_smith_source` field (hand-written or from
+  another tool) are always preserved untouched by Smith.
 
 ## Mutator contract
 

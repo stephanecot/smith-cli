@@ -31,7 +31,7 @@ dispersion of todo lists across personal note apps with a single, audited backlo
 - User asks which framework / version / build / test / infra tool → read `.smith/architecture.json` (`project.frameworks` + `project.*_tools`).
 
 ## Smith CLI in this repo
-- Adapted skills live under `.claude/skills/` (5 angular-* skills + agent-status + mvn + npm).
+- Adapted skills live under `.claude/skills/` (5 angular-* skills + ia-stats + mvn + npm).
 - Generation report : `.smith/GENERATION_REPORT.MD`.
 - Stack state : `.smith/architecture.json` ; Smith state : `.smith/config.json`.
 - Visual overview : `.smith/dashboard.html` (re-render via `/smith-dashboard`).
@@ -40,7 +40,7 @@ dispersion of todo lists across personal note apps with a single, audited backlo
 ## Tools to prefer
 - Maven : run via the `/mvn` skill (Haiku-offload) — keeps the build log out of the parent context.
 - npm : run via the `/npm` skill, same reason.
-- Sub-agent dispatch + tool calls are auto-tracked in `AGENT_STATUS.MD` (bundle ia-stats).
+- Sub-agent dispatch + tool calls are auto-tracked in `IA_STATS.MD` (bundle ia-stats).
 
 ## Tools to avoid
 - `mvn spring-boot:run` from this session — runs forever, blocks the turn. Use `make dev` in a separate terminal.

@@ -3,7 +3,7 @@
   "bundles": [
     {
       "name": "ia-stats",
-      "description": "Automatic per-agent / per-skill usage tracker. Appends a row to AGENT_STATUS.MD on every event via a cross-platform Node.js script (stdlib only, no package.json required). Ships for both Claude Code (real event hooks) and GitHub Copilot (VS Code tasks).",
+      "description": "Automatic per-agent / per-skill usage tracker. Appends a row to IA_STATS.MD on every event via a cross-platform Node.js script (stdlib only, no package.json required). Ships for both Claude Code (real event hooks) and GitHub Copilot (VS Code tasks).",
       "directory": "ia-stats",
       "version": "0.1.0",
       "tags": ["observability", "hooks", "claude-code", "github-copilot"],

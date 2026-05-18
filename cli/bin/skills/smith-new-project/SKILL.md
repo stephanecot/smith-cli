@@ -109,43 +109,141 @@ Write both files **before** dispatching any sub-agent, in this order :
 Steps 4 and 5 upsert into `config.json` ; it MUST exist before
 they run.
 
-### Step 4 — Bundle installs (parallel sub-agents)
+### Step 4 — Bundle installs (planner sub-agents + orchestrator-side writes)
 
 Read `cli/bundles/config.json` (CLI catalogue, read-only). Pick every
 bundle whose `tags[]` intersect with the project's stack tags (computed
 from `architecture.json`). At minimum, prefer the bundles that target
 the provider chosen in `.smith/smith.yaml`.
 
+**Two-phase design — planner + executor.** The bundle-installer
+sub-agents are dispatched in parallel **as planners** : each reads
+the bundle's source + assembles the `@smith-include` resolutions in
+its own context window (heavy reading work, kept off the
+orchestrator's context) and returns a structured `BundlePlan`. The
+orchestrator then executes every plan from its own persistent thread
+(lightweight write ops, immune to worktree-isolation cleanups that
+previously wiped sub-agent writes mid-flow).
+
+**Phase A — Plan (parallel sub-agents)**
+
 Dispatch **one `smith-new-project-bundle-installer` sub-agent per
-selected bundle**, in a single batch. Each sub-agent :
-- receives `bundle_name`, `provider`, `consumer_project_dir` ;
-- invokes `/smith-bundle-install --name <bundle> --ia <provider>` ;
-- returns `{ bundle, status: installed|skipped|failed, files_copied[], hooks_snippet? }`.
+selected bundle**, in a single batch. Each sub-agent receives :
+- `bundle_name`, `provider`, `consumer_project_dir`.
 
-Collect all reports. Surface any hooks snippets to the user as a single
-block at the end of the workflow (do not try to merge `settings.json`
-automatically — `/smith-bundle-install`'s contract).
+Each returns a `BundlePlan` :
+```json
+{
+  "bundle":       "<name>",
+  "status":       "ready | skipped | failed",
+  "reason":       "<token or null>",
+  "writes":       [{ "destination": "<abs>", "content": "<full>", "kind": "skill|agent" }, ...],
+  "copies":       [{ "source": "<abs>", "destination": "<abs>", "executable": <bool> }, ...],
+  "hook_merges":  [{ "target": "<abs>/.claude/settings.json",
+                     "source_tag": "<bundle>",
+                     "fragment": { "hooks": {...} } }, ...],
+  "bundle_entry": { ... }   // for config.json::bundles[]
+}
+```
 
-Bundle installs upsert into `config.json::bundles[]` as a side
-effect.
+Sub-agents do NOT write to the consumer disk — see the
+`smith-new-project-bundle-installer` agent doc for why.
 
-### Step 5 — Template installs (parallel sub-agents)
+**Phase B — Execute (orchestrator thread, serial)**
+
+After all plans are collected, the orchestrator executes them
+sequentially from its own thread :
+
+1. For each plan with `status: "ready"`, in deterministic
+   alphabetical bundle order :
+   - Create parent directories for every `writes[].destination` and
+     `copies[].destination`.
+   - For each `writes[]` entry : use the `Write` tool to write the
+     `content` to `destination`. Verify destination starts with
+     `<consumer_project_dir>` (path-escape guard).
+   - For each `copies[]` entry : use `Bash(cp source destination)`
+     atomically ; set executable bit on `.py` / `.sh` / `.js` when
+     `executable: true`.
+   - For each `hook_merges[]` entry : open the target settings file
+     (create empty `{}` if missing), drop entries where
+     `_smith_source == source_tag`, append fragment entries tagged
+     with `_smith_source: source_tag`, write back. Refuse if target
+     is `.claude/settings.local.json` (hooks are team-wide).
+
+2. After all bundle writes succeed, do **ONE serial upsert** of
+   `.smith/config.json` : read current file, upsert every
+   `bundle_entry` from collected plans into `bundles[]` (keyed by
+   `name`), bump `generated_at`, atomic-write.
+
+3. Per-plan failure (`status: failed`) : skip its writes, log
+   reason for the report, continue with remaining plans.
+
+### Step 5 — Template installs (planner sub-agents + orchestrator-side writes)
 
 Read `cli/templates/index.json`. Pick every template whose `framework`
 appears in `architecture.json::frameworks[].name` (Angular 21,
 java-spring-boot 4, etc.). Resolve version per the documented downward
 match rule (see `smith-template-install`).
 
-Dispatch **one `smith-new-project-template-installer` sub-agent per
-selected template**, in a single batch. Each sub-agent :
-- receives `framework`, `version` (or `null` to auto-resolve),
-  `provider`, `consumer_project_dir` ;
-- invokes
-  `/smith-template-install --framework <fw> [--version <v>] --ai <provider>` ;
-- returns `{ framework, version, status: built|failed, skills_built, kept, rejected, flagged, report_excerpt }`.
+**Same two-phase design as step 4 — planner sub-agents + serial
+orchestrator writes.** Template adaptation is significantly heavier
+than bundle reading (each framework has 5–6 SKILL bodies to adapt via
+the `smith-template-customizer` → `smith-single-template-adapter`
+chain), so context isolation via sub-agents is even more important
+here than for bundles.
 
-Template installs upsert into `config.json::skills[]` and emit
-`.smith/GENERATION_REPORT.MD` (owned by `/smith-template-install`).
+**Phase A — Plan (parallel sub-agents)**
+
+Dispatch **one `smith-new-project-template-installer` sub-agent per
+selected framework**, in a single batch. Each receives :
+- `framework`, `version` (or `null`), `provider`, `consumer_project_dir`.
+
+Each runs the customizer + adapter chain internally and returns a
+`TemplatePlan` :
+```json
+{
+  "framework":        "<name>",
+  "version_resolved": "<v>",
+  "status":           "ready | failed",
+  "writes":           [{ "destination": "<abs>",
+                         "content": "<full SKILL.md>",
+                         "kind": "skill",
+                         "from_template": "<source path>" }, ...],
+  "skill_entries":    [{ "name": "smith-<fw>-<slug>", ... }, ...],
+  "report_excerpt":   "...",
+  "kept":             <int>,
+  "rejected":         <int>,
+  "flagged":          <int>,
+  "pruned_tech_counts": { "<tech>": <count>, ... }
+}
+```
+
+Sub-agents do NOT write to the consumer disk.
+
+**Phase B — Execute (orchestrator thread, serial)**
+
+After all plans are collected, the orchestrator executes them
+sequentially :
+
+1. For each plan with `status: "ready"`, in alphabetical framework
+   order :
+   - Create parent directories for every `writes[].destination`.
+   - For each `writes[]` entry : `Write` the assembled SKILL content
+     to `destination`. Verify path stays inside `<consumer_project_dir>`.
+
+2. After all template writes succeed, do **ONE serial upsert** of
+   `.smith/config.json` : merge with the upsert from step 4 if both
+   happen in the same session — re-read the latest state, upsert
+   every `skill_entries[]` from collected plans into `skills[]`
+   (keyed by `name`), bump `generated_at`, atomic-write.
+
+3. Per-plan failure : skip its writes, log reason, continue.
+
+Template installs also emit `.smith/GENERATION_REPORT.MD` as a
+secondary artefact via the customizer ; this is written from the
+sub-agent context and is the one allowed exception to the no-write
+rule (it is non-load-bearing — a regenerated audit trail, safe to
+miss).
 
 ### Step 6 — Write `AGENTS.md` at the project root (sub-agent)
 
@@ -234,10 +332,43 @@ conflict guard, parallel fan-out, results aggregation) lives in the
 dedicated **`smith-new-project-scaffold-coordinator`** sub-agent — this
 step just dispatches it.
 
+**🚫 Never defer this step.** The orchestrator MUST execute Step 9 ;
+emitting a message like "scaffold deferred — run `/smith-<fw>-bootstrap`
+manually" is a contract violation. The whole point of Step 9 is to
+remove that manual step. If the coordinator returns
+`status=skipped` it is for one of two documented reasons only
+(see below) — neither is "the orchestrator decided not to run".
+
+**🚫 Zero interactive questions during the scaffold.** Bootstrap
+skills' Phase 0 questions MUST be pre-answered by the orchestrator
+before dispatch. Build a comprehensive `discovery_hints` object that
+pins every question the bootstrap will ask, in this order of source :
+1. Explicit signals already extracted from `<description>` (e.g.
+   project name from the directory base name when the description
+   doesn't pin it ; package coords from the description if mentioned).
+2. Answers collected at Step 2 discovery.
+3. **Framework defaults** for everything else — the bootstrap skill's
+   own Phase 0 documents the default per question (e.g.
+   `routing: on`, `tailwind: on`, `i18n: on (fr+en, fr default)`,
+   `openapi: off`, `test: vitest`, `auth_shell: off` for Angular ;
+   `liquibase: off`, `rest_controller: on` for Spring Boot).
+
+The bootstrapper sub-agent has standing instructions to answer any
+`AskUserQuestion` itself from these defaults (recording each in
+`assumed_defaults[]`) — never to forward the question to the user
+mid-workflow.
+
 Dispatch one `smith-new-project-scaffold-coordinator` with :
 - `consumer_project_dir` — absolute path of the project root ;
 - `description` — the original `<description>` argument, verbatim ;
-- `discovery_hints` — the structured answers collected in Step 2.
+- `discovery_hints` — the **complete** structured object built above
+  (description-derived + Step 2 + framework defaults). Every Phase 0
+  question of every bootstrap skill MUST have an answer here.
+
+Same **MANDATORY** isolation policy as steps 4 / 5 : dispatch the
+coordinator (and through it, the bootstrappers) WITHOUT
+`isolation: "worktree"`. Bootstrap writes go straight to the
+consumer project tree.
 
 The coordinator returns a `ScaffoldReport`
 (`{ status, reason, results[], warnings[], next_steps_hint[] }`).
@@ -261,9 +392,9 @@ become a warning block in the final report.
 ### Step 10 — Write the run report
 
 Dispatch the sibling skill **`smith-report-write`** with the full
-`TraceLog` collected across steps 1–9. It produces a markdown report
-at `.smith/report/<NNN>-new-project.md` (zero-padded, auto-incremented)
-covering :
+`TraceLog` collected across steps 1–9. It produces the project's
+**single** run report at the fixed path `.smith/report.md`
+(overwritten on every run) covering :
 
 - arguments used (description, provider) ;
 - per-step timings and outcomes ;
@@ -291,7 +422,7 @@ Templates installed : {{T_OK}} ok, {{T_FAIL}} failed.
 Bootstrap scaffold  : {{S_OK}} ok, {{S_FAIL}} failed, {{S_SKIP}} skipped.
 Verifier            : {{V_PASS}}/{{V_TOTAL}} checks passed.
 
-Full report : .smith/report/<NNN>-new-project.md
+Full report : .smith/report.md
 Next        : /smith-generate-docs · /smith-dashboard
 ```
 

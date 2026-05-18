@@ -81,7 +81,11 @@ per scaffolded framework, in parallel by default).
    can surface it in the report.
 
 4. **Dispatch the bootstrappers.** For each eligible skill, use the
-   Agent tool to dispatch one `smith-new-project-bootstrapper` :
+   Agent tool to dispatch one `smith-new-project-bootstrapper`.
+   **Do NOT pass `isolation: "worktree"`** — worktree isolation has
+   been observed to wipe `.claude/skills/` mid-flow, making the
+   adapted bootstrap skill the bootstrapper is about to invoke
+   disappear. Sub-agents must write into the consumer dir directly.
 
    ```
    Agent(
@@ -130,6 +134,20 @@ per scaffolded framework, in parallel by default).
 
 ## What you do NOT do
 
+- **Don't defer the scaffold.** The whole point of this step is to
+  actually scaffold. Returning `status=skipped, reason=deferred-to-user`
+  with a message like "run /smith-<fw>-bootstrap manually" is a
+  contract violation. The only legitimate `status=skipped` reasons
+  are the two documented in step 1 / 2 of the procedure
+  (`provider-not-skill-invocable` for Copilot ;
+  `no-bootstrap-skills-installed` when nothing qualifies).
+- **Don't allow interactive questions to escape.** The bootstrapper
+  sub-agents have standing instructions to answer every
+  `AskUserQuestion` themselves from `discovery_hints` + framework
+  defaults. If a bootstrapper somehow returns
+  `status=needs-user-input`, treat it as a sub-agent bug — fail the
+  scaffold for that framework with a clear `bootstrapper-asked-user`
+  reason rather than blocking the workflow on a user prompt.
 - **Don't** scaffold source files yourself. You only pick + dispatch.
 - **Don't** mutate `.smith/` files. The bootstrappers don't write to
   Smith metadata either ; the orchestrator's Step 7 (refresh) and

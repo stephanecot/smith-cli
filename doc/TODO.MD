@@ -3,12 +3,13 @@ MCP:
 
 => simplifier config => pas besoin de tous les details
 
+template-install
+=> bien expliquer et vérifier le fonctionnement
+
 
 On va développer le skill /smith-new-project <description>
-  edit:
-       décrire un peu plus le agent.MD
-       adapter le format du raport
-
+  - developper la partie question de facon plus complete
+  
   current:
   -> pour initier un nouveau projet
     Ce skill, va déclancher un worklow.

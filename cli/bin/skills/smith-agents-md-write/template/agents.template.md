@@ -1,7 +1,4 @@
-<!-- managed by smith — last touched by /smith-new-project. Keep this file
-     ≤100 lines. Longer guidance belongs in `.smith/FUNCTIONAL_SPECIFICATION.MD`
-     and `.smith/TECHNICAL_SPECIFICATION.MD` (generated on demand by
-     /smith-generate-docs). -->
+<!-- auto-generated brief for AI assistants. Manual edits may be overwritten when the project bootstrap re-runs. Keep changes minimal ; deeper guidance belongs in dedicated docs. -->
 
 # {{project_name}}
 
@@ -21,52 +18,21 @@
 - **Infra tools**  : {{infra_tools_inline}}
 - **Databases**    : {{databases_inline}}
 
-## Smith CLI in this repo
+## How to work in this repo
 
-This repository was bootstrapped via `/smith-new-project` and is now
-managed by Smith. The single source of truth for tooling and project
-state lives under `.smith/` :
-
-- `.smith/smith.yaml`           — init marker (provider + enabled flag).
-- `.smith/config.json`    — Smith state (installed bundles + adapted skills + spec paths).
-- `.smith/architecture.json`  — project identity + detected stack with tags.
-- `.smith/FUNCTIONAL_SPECIFICATION.MD` — functional spec (run `/smith-generate-docs` to produce).
-- `.smith/TECHNICAL_SPECIFICATION.MD`  — technical spec (run `/smith-generate-docs` to produce).
-- `.smith/report/`              — markdown reports written by `/smith-*` workflows.
-
-AI provider currently targeted : **{{provider}}**.
-
-## Bundles installed
-
-{{bundles_list_or_none}}
-
-## Templates installed
-
-{{templates_list_or_none}}
-
-## Source scaffold
-
-{{bootstrap_summary_or_none}}
-
-## Where to go next
-
-- `/smith-generate-docs` — write the functional + technical specs.
-- `/smith-dashboard`     — render a one-page HTML overview at `.smith/dashboard.html`.
-- `/smith-help`          — full Smith CLI command map.
+- Use the framework's idiomatic build / test / lint commands (see "Stack" above).
+- Run the test suite before submitting a change ; the test stack listed above is the source of truth for what "green" means.
+- Generated files (lock files, build artefacts, generated clients) are not edited by hand — re-run the producing tool instead.
 
 ## Coding conventions
 
-- Follow the conventions documented by each installed framework template
-  (`.claude/skills/smith-<framework>-<slug>/SKILL.md` for Claude Code,
-  `.github/prompts/smith-<framework>-<slug>.prompt.md` for Copilot).
-- For build / test / lint, prefer the runner bundles that were
-  installed in this repo (see "Bundles installed" above).
-- Keep `.smith/` files atomic — never partially-write JSON / YAML.
+- Follow each framework's idiomatic patterns (file layout, naming, change-detection / state model, dependency-injection style, etc.).
+- Use the strictest typing the language supports.
+- Keep modules small and single-purpose ; prefer composition over inheritance / inheritance-by-default.
+- Co-locate tests with source ; write the test before, or at least with, the change.
 
 ## Don't
 
-- Don't edit `.smith/config.json` or `.smith/architecture.json`
-  by hand. They are owned by Smith skills (`/smith-bundle-install`,
-  `/smith-template-install`, `/smith-new-project`).
-- Don't delete `AGENTS.md` — it's how Smith-aware AI tools find this
-  brief on every turn.
+- Don't commit secrets, credentials, or local-only configuration. Use environment variables or the project's secret store.
+- Don't bypass the linter / formatter. If a rule is wrong, change the rule, don't `// eslint-disable`.
+- Don't delete this file — AI assistants read it on every turn to understand the project.

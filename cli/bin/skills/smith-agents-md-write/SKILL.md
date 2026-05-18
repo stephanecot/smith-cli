@@ -32,10 +32,9 @@ payload + the template at
 
 ```json
 {
-  "project_name":      "<string>",
-  "description":       "<verbatim one-liner from the original project description>",
-  "summary":           "<optional tech one-liner, e.g. 'Angular 21 + Spring Boot 4'>",
-  "provider":          "claude-code | github-copilot",
+  "project_name": "<string>",
+  "description":  "<verbatim one-liner from the original project description>",
+  "summary":      "<optional tech one-liner, e.g. 'Angular 21 + Spring Boot 4'>",
   "stack": {
     "languages":   [{ "name": "<kebab>", "version": "<exact>" }, ...],
     "runtimes":    [...],
@@ -44,21 +43,22 @@ payload + the template at
     "test_tools":  [...],
     "infra_tools": [...],
     "databases":   [...]
-  },
-  "bundles_installed": [{ "name": "<slug>", "version": "<sem>", "tags": ["..."] }, ...],
-  "skills_installed":  [{ "name": "<slug>", "from_template": "<framework>/<version>/skills/<file>" }, ...],
-  "bootstrap_summary": [{ "framework": "<name>",
-                          "files_created_count": <int>,
-                          "smoke_test_status": "pass | fail | skipped" }, ...]
+  }
 }
 ```
 
-- All top-level keys are required ; arrays may be empty.
-- `bootstrap_summary` may be `[]` when no framework was scaffolded
-  (e.g. `provider == github-copilot` so step 9 of `/smith-new-project`
-  was skipped, or only utility templates were installed).
+- All top-level keys are required ; arrays inside `stack` may be empty.
 - The caller owns the payload — this skill does not re-detect or
   recompute anything from the consumer project.
+
+**`AGENTS.md` is project-focused, not framework-focused.** The
+template carries no mention of the tooling that bootstrapped the
+project (no `Smith CLI`, no `.smith/` paths, no `/smith-*` commands,
+no installed bundles / templates list). Those are infrastructure
+concerns that don't belong in the brief an AI assistant reads on
+every turn ; they live in the run report and in `.smith/` instead.
+For the same reason there is no `provider`, `bundles_installed` or
+`skills_installed` key in the payload.
 
 ## What you do
 
@@ -79,38 +79,25 @@ every `{{placeholder}}` from the payload :
 - `{{description_argument_verbatim}}` ← `payload.description`
 - `{{project_summary_one_line}}` ← `payload.summary` (or
   `_unspecified_` if absent)
-- `{{provider}}` ← `payload.provider`
 - `{{languages_inline}}`, `{{runtimes_inline}}`, `{{frameworks_inline}}`,
   `{{build_tools_inline}}`, `{{test_tools_inline}}`,
   `{{infra_tools_inline}}`, `{{databases_inline}}` ← comma-separated
   `name@version` from the corresponding `payload.stack.*` array, or
   `_none_` when empty.
-- `{{bundles_list_or_none}}` ← bullet list of
-  `payload.bundles_installed`, each line
-  `- <name>@<version> — tags: <comma-separated>` ; render `_None_` when
-  the array is empty.
-- `{{templates_list_or_none}}` ← bullet list of
-  `payload.skills_installed`, each line
-  `- <name> — from <from_template>` ; render `_None_` when empty.
-- `{{bootstrap_summary_or_none}}` ← bullet list of
-  `payload.bootstrap_summary`, each line
-  `- <framework> — <files_created_count> files scaffolded, smoke test <smoke_test_status>` ;
-  render `_None_` when empty (or when the array is absent).
 
 ### Step 3 — Enforce the 100-line cap
 
 The rendered file MUST be **≤100 lines**. If it overflows, **truncate
 optional sections in this exact order** until the file fits :
 
-1. `## Bundles installed` body → replace with `_(truncated — see .smith/config.json::bundles[])_`
-2. `## Templates installed` body → replace with `_(truncated — see .smith/config.json::skills[])_`
-3. `## Source scaffold` body → replace with `_(truncated — see .smith/report/)_`
-4. `- **Infra tools**` line → drop entirely
-5. `- **Test tools**` line → drop entirely
+1. `- **Infra tools**` line under `## Stack` → drop entirely
+2. `- **Test tools**` line under `## Stack` → drop entirely
+3. `## Coding conventions` body → keep heading, replace body with
+   `_(see framework-specific docs)_`
 
-Never truncate the mission, stack core (languages / runtimes /
-frameworks / databases / build tools), the "Smith CLI in this repo"
-section, the "Where to go next" pointers, or the "Don't" section.
+Never truncate the mission (project name + description), the stack
+core (languages / runtimes / frameworks / databases / build tools),
+the "How to work in this repo" section, or the "Don't" section.
 These are load-bearing for every AI-assisted turn.
 
 ### Step 4 — Atomic write

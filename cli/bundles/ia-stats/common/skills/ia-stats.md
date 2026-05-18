@@ -1,17 +1,17 @@
-# Skill — `/agent-status`
+# Skill — `/ia-stats`
 
 This skill is read-only. It does NOT compute anything ; the file
-`AGENT_STATUS.MD` is updated automatically by the events / tasks
+`IA_STATS.MD` is updated automatically by the events / tasks
 shipped by the `ia-stats` bundle (Claude Code hooks on the Claude
 Code side ; VS Code tasks on the Copilot side).
 
 ## How to invoke
 
-The user types `/agent-status` (no args).
+The user types `/ia-stats` (no args).
 
 ## What you do
 
-1. Read `AGENT_STATUS.MD` at the project root.
+1. Read `IA_STATS.MD` at the project root.
 2. If the file does not exist, tell the user the tracker has not
    recorded any event yet — that's expected on a fresh project until
    the first sub-agent dispatch or tool call.
@@ -19,7 +19,7 @@ The user types `/agent-status` (no args).
 
 ## What you do NOT do
 
-- Don't edit `AGENT_STATUS.MD` from the parent session. The hooks / tasks
+- Don't edit `IA_STATS.MD` from the parent session. The hooks / tasks
   own that file.
 - Don't dispatch any sub-agent ; this skill is observation-only.
 - Don't compute aggregates that aren't already in the file (no "tokens
@@ -28,6 +28,6 @@ The user types `/agent-status` (no args).
 
 ## Why this skill exists
 
-`AGENT_STATUS.MD` is verbose. Reading the raw markdown directly in chat
+`IA_STATS.MD` is verbose. Reading the raw markdown directly in chat
 is fine, but a slash command makes it discoverable from the slash-
 command dropdown without remembering the file name.

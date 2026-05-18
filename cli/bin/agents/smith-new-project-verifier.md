@@ -48,10 +48,7 @@ That's it. Everything else comes from files under that directory.
 7. **`agents-md-present`** — `AGENTS.md` at the project root exists.
 8. **`agents-md-size`** — `AGENTS.md` is ≤100 lines. **`warn`** (not
    fail) above the cap.
-9. **`agents-md-marker`** — `AGENTS.md` first non-empty line starts
-   with the `<!-- managed by smith` HTML-comment marker. Warn if
-   absent (the file may have been hand-edited).
-10. **`no-unresolved-smith-includes`** — grep every installed
+9. **`no-unresolved-smith-includes`** — grep every installed
     Smith artefact (the files listed in
     `config.json::bundles[].files[].destination` and in
     `config.json::skills[].path`) for the literal token
@@ -60,6 +57,17 @@ That's it. Everything else comes from files under that directory.
     failed to inline the common body. The contract is zero
     `@smith-include` traces in the consumer project ; only build-time
     files under `cli/bundles/` may carry the directive.
+10. **`hooks-merged`** — for every bundle in
+    `config.json::bundles[]` whose `merged_into[]` array is
+    non-empty, open each listed target file (`.claude/settings.json`,
+    `.vscode/tasks.json`, …) and confirm at least one entry carries
+    `"_smith_source": "<bundle-name>"`. **Fail per bundle** where the
+    marker is missing — it means `/smith-bundle-install` claimed it
+    merged but the destination file does not actually carry the
+    Smith-tagged entry. Conversely, **warn** when a bundle's
+    `merged_into[]` is empty but the bundle's source under
+    `cli/bundles/<bundle>/<provider>/{hooks,tasks}/` does ship a hook
+    or task fragment — the merge step was skipped or failed silently.
 
 ## Output
 

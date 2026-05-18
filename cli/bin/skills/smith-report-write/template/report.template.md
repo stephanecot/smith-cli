@@ -37,11 +37,3 @@
 Summary : {{verifier_summary}}
 
 {{verifier_table}}
-
-## Warnings
-
-{{warnings_list}}
-
-## Next steps
-
-{{next_steps_list}}

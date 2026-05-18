@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
- * append-agent-status — Claude Code hook script (Node.js, cross-platform).
+ * append-ia-stats — Claude Code hook script (Node.js, cross-platform).
  *
  * Invoked by the SubagentStop and PostToolUse hooks declared in
  * ia-stats.hooks.json. Reads the event payload from stdin (JSON) and
- * appends a row to AGENT_STATUS.MD at the consumer project's root.
+ * appends a row to IA_STATS.MD at the consumer project's root.
  *
  * Runs identically on Windows, macOS, and Linux — the only requirement
  * is Node.js >= 16 (built-in `fs`, `path`, `process`, no `npm install`).
@@ -16,7 +16,7 @@
  *   - Best-effort concurrency safety via O_EXCL lockfile rename.
  *   - Trims the activity log to the last 50 entries.
  *
- * Usage : node append-agent-status.js --event SubagentStop|PostToolUse [--file PATH]
+ * Usage : node append-ia-stats.js --event SubagentStop|PostToolUse [--file PATH]
  */
 
 'use strict';
@@ -24,7 +24,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const STATUS_FILE_DEFAULT = 'AGENT_STATUS.MD';
+const STATUS_FILE_DEFAULT = 'IA_STATS.MD';
 const MAX_RECENT = 50;
 const LOCK_RETRIES = 25;
 const LOCK_SLEEP_MS = 20;
@@ -82,7 +82,7 @@ function extractRow(event, payload) {
 function scaffold() {
   return [
     '<!-- managed by bundle ia-stats — do not edit by hand -->',
-    '# Agent status',
+    '# IA stats',
     '',
     '## Running totals',
     '',
@@ -134,7 +134,7 @@ function render(totals, activity) {
     .map(r => `| ${r.ts} | ${r.event} | ${r.name} | ${r.tokens} | ${r.durationMs} |`);
   return [
     '<!-- managed by bundle ia-stats — do not edit by hand -->',
-    '# Agent status',
+    '# IA stats',
     '',
     '## Running totals',
     '',

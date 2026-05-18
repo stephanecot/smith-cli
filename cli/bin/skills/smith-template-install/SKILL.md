@@ -20,8 +20,20 @@ consumer project's `.claude/skills/` (Claude Code) or `.github/prompts/`
 ## How to invoke
 
 ```
-/smith-template-install --framework <name> [--version <ver>] --ai <provider>
+/smith-template-install --framework <name> [--version <ver>] --ai <provider> [--consumer-dir <path>] [--no-config-write]
 ```
+
+- `--consumer-dir <path>` — absolute path of the consumer project
+  root (where `.smith/` lives). Defaults to the directory containing
+  `.smith/smith.yaml` walking up from CWD ; orchestrators MUST pass
+  it explicitly to avoid writing into a parent repo's `.claude/`.
+- `--no-config-write` — when set, the install adapts every template
+  and writes the resulting SKILL files as usual, but does **NOT**
+  mutate `<consumer>/.smith/config.json`. Instead it emits every
+  `skills[]` entry as a JSON object on stdout prefixed by
+  `SKILL_ENTRY:` so the calling orchestrator can collect them and
+  upsert serially in one final pass — used by `/smith-new-project`
+  to avoid the race when several template installers run in parallel.
 
 Examples :
 
@@ -57,7 +69,19 @@ compatible version from `cli/templates/index.json` (see below).
    - the resolved `--ai` provider.
 3. **Receive the customizer's report** — list of adapted SKILL files
    with their source template + output path + adaptation flags.
-4. **Update `.smith/config.json`** at the consumer project root :
+4. **Record the install in `.smith/config.json`** at the consumer
+   project root.
+
+   **Behaviour depends on the `--no-config-write` flag** :
+   - **Without `--no-config-write`** (default) : perform the
+     `skills[]` upsert in-place as described below.
+   - **With `--no-config-write`** : SKIP the file mutation. For each
+     adapted skill, emit a `skills[]` entry as a JSON object on
+     stdout prefixed by `SKILL_ENTRY:`. Do not touch the file at all.
+     This avoids parallel-write races when several template
+     installers run concurrently.
+
+   In default mode :
    - The canonical shape of the file + the `skills[]` entry shape are
      documented in the sibling skill **`smith-config-format`** ; consult
      its body and use the template at

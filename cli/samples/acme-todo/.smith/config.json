@@ -49,8 +49,8 @@
       "provider": "claude-code",
       "files": [
         { "kind": "hook",   "source": "claude-code/hooks/ia-stats.hooks.json",      "destination": ".claude/settings.json (merged)" },
-        { "kind": "script", "source": "claude-code/scripts/append-agent-status.js", "destination": ".claude/scripts/append-agent-status.js" },
-        { "kind": "skill",  "source": "claude-code/skills/agent-status/SKILL.md",   "destination": ".claude/skills/agent-status/SKILL.md" }
+        { "kind": "script", "source": "claude-code/scripts/append-ia-stats.js", "destination": ".claude/scripts/append-ia-stats.js" },
+        { "kind": "skill",  "source": "claude-code/skills/ia-stats/SKILL.md",   "destination": ".claude/skills/ia-stats/SKILL.md" }
       ],
       "installed_at": "2026-05-16T09:18:12Z"
     },
