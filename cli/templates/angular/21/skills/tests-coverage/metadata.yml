@@ -1,0 +1,2 @@
+name: smith-angular-tests-coverage
+description: Frontend testing standards — Vitest (Angular 21 default), Testing Library, signal store tests, 80% line+branch coverage gate.

@@ -1,0 +1,3 @@
+model: small
+allowed-tools: Read Glob Grep Bash(pip *) Bash(pip3 *) Bash(python -m pip *) Bash(python3 -m pip *)
+user-invocable: true

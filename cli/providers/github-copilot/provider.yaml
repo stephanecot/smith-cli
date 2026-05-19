@@ -1,0 +1,30 @@
+slug: github-copilot
+name: GitHub Copilot
+description: >
+  GitHub Copilot Chat in VS Code. Packages AI behaviour as prompt files
+  (slash-command skills), chat-mode agents, and host-driven hook-like
+  automation (VS Code tasks / git hooks / GitHub Actions). Smaller context
+  window than Claude Code; keep bodies short.
+
+docs:
+  response_customization: https://docs.github.com/en/copilot/concepts/response-customization
+  custom_instructions: https://code.visualstudio.com/docs/copilot/customization/custom-instructions
+  prompt_files: https://code.visualstudio.com/docs/copilot/customization/prompt-files
+  custom_chat_modes: https://code.visualstudio.com/docs/copilot/customization/custom-chat-modes
+
+kinds:
+  agent:
+    format: format-agent.yaml
+    consumer_path: .github/agents/<slug>.agent.md (also .claude/agents/ when target=vscode)
+    invocation: Picked from the agents dropdown in Copilot Chat OR dispatched as a sub-agent.
+    example: example/example-agent.agent.md
+  skill:
+    format: format-skill.yaml
+    consumer_path: .github/prompts/<slug>.prompt.md
+    invocation: /<slug> in Copilot Chat OR Chat&#58; Run Prompt command.
+    example: example/example-skill.prompt.md
+  hook:
+    format: format-hook.yaml
+    consumer_path: .vscode/tasks.json OR lefthook.yml OR .github/workflows/<n>.yml
+    invocation: Host-driven (VS Code task, git hook, CI). Copilot has no in-process event hooks.
+    example: example/example-hook-tasks.json

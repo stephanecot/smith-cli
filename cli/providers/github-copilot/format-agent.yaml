@@ -1,0 +1,93 @@
+kind: agent
+provider: github-copilot
+title: Chat-mode agent (.github/agents/<slug>.agent.md)
+consumer_path: .github/agents/<slug>.agent.md
+example: example/example-agent.agent.md
+
+frontmatter:
+  - field: name
+    required: false
+    default: filename (minus `.agent.md`)
+    allowed: string
+    meaning: Display name in the agents dropdown. Frontmatter wins over filename.
+
+  - field: description
+    required: false
+    default: null
+    allowed: one-line string
+    meaning: Placeholder text shown in the chat input field when this agent is active.
+
+  - field: argument-hint
+    required: false
+    default: null
+    allowed: string
+    meaning: Hint text shown in the chat input field to guide users.
+
+  - field: tools
+    required: false
+    default: all available
+    allowed: YAML list of tool / tool-set / MCP names (`<server>/*` wildcard)
+    meaning: Allowlist of tools this agent may use.
+
+  - field: agents
+    required: false
+    default: null
+    allowed: YAML list of agent slugs, `*` for all, `[]` for none
+    meaning: Sub-agents this agent may dispatch (via the `agent` tool).
+
+  - field: model
+    required: false
+    default: session model
+    allowed: model name or prioritized YAML list
+    meaning: Single model or fallback list (system tries each in order).
+
+  - field: user-invocable
+    required: false
+    default: true
+    allowed: boolean
+    meaning: Controls whether the agent appears in the dropdown. `false` = hidden but still dispatchable as sub-agent.
+
+  - field: disable-model-invocation
+    required: false
+    default: false
+    allowed: boolean
+    meaning: "`true` blocks the agent from being called as a sub-agent by others."
+
+  - field: target
+    required: false
+    default: vscode
+    allowed: [vscode, github-copilot]
+    meaning: Environment context. `github-copilot` enables Copilot-cloud features; `vscode` works in the IDE only.
+
+  - field: mcp-servers
+    required: false
+    default: null
+    allowed: YAML list of MCP server JSON configs
+    meaning: "Optional MCP servers (only honoured when `target: github-copilot`)."
+
+  - field: handoffs
+    required: false
+    default: null
+    allowed: YAML list of handoff entries (see handoff_entry_shape)
+    meaning: Suggested next actions — buttons offered at the end of the conversation.
+
+  - field: hooks
+    required: false
+    default: null
+    allowed: object
+    meaning: Optional hook commands scoped to this agent. Requires `chat.useCustomAgentHooks` enabled in settings.
+
+body_conventions:
+  - Markdown prose prepended to every user prompt while this mode is active.
+  - Reference tools inline with `#tool:<tool-name>`.
+  - Reference files inline with relative markdown links — `[link](../file.ts)`.
+  - Keep it tight — Copilot's context window is smaller than Claude Code's.
+
+builtin_tools:
+  - search/codebase — semantic search over the workspace.
+  - search/usages — find references.
+  - web/fetch — fetch a URL.
+  - read/terminalLastCommand — read the last terminal command.
+  - edit — file edits.
+  - agent — enables `handoffs:` and `agents:` semantics for sub-agents.
+  - MCP server tools — `<server>/*` for all, or `<server>/<tool>` for one.

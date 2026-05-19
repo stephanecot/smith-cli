@@ -1,0 +1,31 @@
+slug: opencode
+name: OpenCode
+description: >
+  OpenCode terminal-based AI coding agent. Packages AI behaviour as
+  custom commands (slash-command skills), sub-agents (specialised
+  assistants invoked via @mentions), and plugins (JS/TS lifecycle hooks).
+  Rules surface via `AGENTS.md` at the project / user root.
+
+docs:
+  agents: https://opencode.ai/docs/agents
+  commands: https://opencode.ai/docs/commands
+  rules: https://opencode.ai/docs/rules
+  plugins: https://opencode.ai/docs/plugins
+  config: https://opencode.ai/docs/config
+
+kinds:
+  agent:
+    format: format-agent.yaml
+    consumer_path: .opencode/agents/<slug>.md
+    invocation: "@<slug> in the TUI OR automatic delegation by a primary agent."
+    example: example/example-agent.md
+  skill:
+    format: format-skill.yaml
+    consumer_path: .opencode/commands/<slug>.md
+    invocation: /<slug> in the TUI (filename minus `.md` becomes the slash command).
+    example: example/example-skill.md
+  hook:
+    format: format-hook.yaml
+    consumer_path: .opencode/plugins/<slug>.ts (or .js)
+    invocation: Plugin function registered against a lifecycle event — fires automatically.
+    example: example/example-hook.ts

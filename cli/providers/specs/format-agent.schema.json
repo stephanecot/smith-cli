@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://smith-cli/providers/specs/format-agent.schema.json",
+  "title": "Smith provider — format-agent.yaml",
+  "description": "Per-kind YAML describing the sub-agent / chat-mode-agent artefact for a provider. Documents the artefact's frontmatter spec, body authoring conventions, and the built-in tools available to the agent.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kind",
+    "provider",
+    "title",
+    "consumer_path",
+    "example",
+    "frontmatter",
+    "body_conventions",
+    "builtin_tools"
+  ],
+  "properties": {
+    "kind":          { "const": "agent" },
+    "provider":      { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "title":         { "type": "string" },
+    "consumer_path": { "type": "string" },
+    "example": {
+      "type": "string",
+      "pattern": "^example/example-agent[^/]*\\.[^/]+$",
+      "description": "Relative path to the companion example file under example/. Filename MUST start with example-agent and may carry a provider-specific suffix before the extension (e.g. example-agent.agent.md)."
+    },
+    "frontmatter": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/frontmatterField" }
+    },
+    "body_conventions": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" }
+    },
+    "builtin_tools": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" },
+      "description": "Tools (or tool sets) available to the agent out of the box."
+    }
+  },
+  "$defs": {
+    "frontmatterField": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["field", "required", "default", "allowed", "meaning"],
+      "properties": {
+        "field":    { "type": "string" },
+        "required": {
+          "oneOf": [
+            { "type": "boolean" },
+            { "enum": ["recommended"] }
+          ]
+        },
+        "default":  { "description": "Default value (any type) — use null for none." },
+        "allowed":  { "description": "Allowed values — string description or array of literals." },
+        "meaning":  { "type": "string" }
+      }
+    }
+  }
+}

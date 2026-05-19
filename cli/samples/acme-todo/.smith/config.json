@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "smith_cli_version": "0.1.0",
-  "generated_at": "2026-05-16T09:14:42Z",
+  "smith_cli_version": "0.2.0",
+  "generated_at": "2026-05-19T22:30:00Z",
   "git_sha": "a1e1e35",
   "provider": "claude-code",
   "specifications": {
@@ -11,70 +11,95 @@
   "ai_memory_file": "AGENTS.md",
   "skills": [
     {
+      "name": "smith-angular-bootstrap",
+      "from_template": "angular/21/skills/bootstrap",
+      "version": "0.1.0",
+      "path": ".claude/skills/smith-angular-bootstrap/SKILL.md",
+      "adapted_at": "2026-05-19T22:30:00Z"
+    },
+    {
       "name": "smith-angular-standards",
-      "from_template": "angular/21/skills/standards.md",
+      "from_template": "angular/21/skills/standards",
+      "version": "0.1.0",
       "path": ".claude/skills/smith-angular-standards/SKILL.md",
-      "adapted_at": "2026-05-16T09:30:14Z"
+      "adapted_at": "2026-05-19T22:30:00Z"
     },
     {
       "name": "smith-angular-tests-coverage",
-      "from_template": "angular/21/skills/tests-coverage.md",
+      "from_template": "angular/21/skills/tests-coverage",
+      "version": "0.1.0",
       "path": ".claude/skills/smith-angular-tests-coverage/SKILL.md",
-      "adapted_at": "2026-05-16T09:30:14Z"
+      "adapted_at": "2026-05-19T22:30:00Z"
     },
     {
       "name": "smith-angular-design-system",
-      "from_template": "angular/21/skills/design-system.md",
+      "from_template": "angular/21/skills/design-system",
+      "version": "0.1.0",
       "path": ".claude/skills/smith-angular-design-system/SKILL.md",
-      "adapted_at": "2026-05-16T09:30:14Z"
+      "adapted_at": "2026-05-19T22:30:00Z"
     },
     {
       "name": "smith-angular-i18n-transloco",
-      "from_template": "angular/21/skills/i18n-transloco.md",
+      "from_template": "angular/21/skills/i18n-transloco",
+      "version": "0.1.0",
       "path": ".claude/skills/smith-angular-i18n-transloco/SKILL.md",
-      "adapted_at": "2026-05-16T09:30:14Z"
+      "adapted_at": "2026-05-19T22:30:00Z"
     },
     {
       "name": "smith-angular-openapi-client",
-      "from_template": "angular/21/skills/openapi-client.md",
+      "from_template": "angular/21/skills/openapi-client",
+      "version": "0.1.0",
       "path": ".claude/skills/smith-angular-openapi-client/SKILL.md",
-      "adapted_at": "2026-05-16T09:30:14Z"
+      "adapted_at": "2026-05-19T22:30:00Z"
+    },
+    {
+      "name": "smith-java-spring-boot-bootstrap",
+      "from_template": "java-spring-boot/4/skills/bootstrap",
+      "version": "0.1.0",
+      "path": ".claude/skills/smith-java-spring-boot-bootstrap/SKILL.md",
+      "adapted_at": "2026-05-19T22:30:00Z"
     }
   ],
   "bundles": [
     {
       "name": "ia-stats",
       "version": "0.1.0",
-      "tags": ["observability", "hooks", "claude-code"],
+      "tags": ["observability", "hooks"],
       "provider": "claude-code",
-      "files": [
-        { "kind": "hook",   "source": "claude-code/hooks/ia-stats.hooks.json",      "destination": ".claude/settings.json (merged)" },
-        { "kind": "script", "source": "claude-code/scripts/append-ia-stats.js", "destination": ".claude/scripts/append-ia-stats.js" },
-        { "kind": "skill",  "source": "claude-code/skills/ia-stats/SKILL.md",   "destination": ".claude/skills/ia-stats/SKILL.md" }
+      "skills": [
+        { "name": "ia-stats", "version": "0.1.0" }
       ],
-      "installed_at": "2026-05-16T09:18:12Z"
+      "hooks": [
+        { "name": "ia-stats", "version": "0.1.0" }
+      ],
+      "merged_into": [
+        ".claude/settings.json"
+      ],
+      "installed_at": "2026-05-19T22:30:00Z"
     },
     {
       "name": "mvn",
       "version": "0.1.0",
       "tags": ["build", "java", "backend"],
       "provider": "claude-code",
-      "files": [
-        { "kind": "skill", "source": "claude-code/skills/mvn/SKILL.md",   "destination": ".claude/skills/mvn/SKILL.md" },
-        { "kind": "agent", "source": "claude-code/agents/mvn-runner.md",  "destination": ".claude/agents/mvn-runner.md" }
+      "skills": [
+        { "name": "mvn", "version": "0.1.0" }
       ],
-      "installed_at": "2026-05-16T09:22:08Z"
+      "hooks": [],
+      "merged_into": [],
+      "installed_at": "2026-05-19T22:30:00Z"
     },
     {
       "name": "npm",
       "version": "0.1.0",
       "tags": ["build", "nodejs", "frontend"],
       "provider": "claude-code",
-      "files": [
-        { "kind": "skill", "source": "claude-code/skills/npm/SKILL.md",   "destination": ".claude/skills/npm/SKILL.md" },
-        { "kind": "agent", "source": "claude-code/agents/npm-runner.md",  "destination": ".claude/agents/npm-runner.md" }
+      "skills": [
+        { "name": "npm", "version": "0.1.0" }
       ],
-      "installed_at": "2026-05-16T09:22:31Z"
+      "hooks": [],
+      "merged_into": [],
+      "installed_at": "2026-05-19T22:30:00Z"
     }
   ]
 }

@@ -7,10 +7,16 @@ description: |
   optional Liquibase changelog, application.yaml, .gitignore, README).
   More skills (coding standards, tests + coverage, JPA + transactions,
   OpenAPI contract, observability) can be added with /smith-template-add.
-files:
-  - kind: skill
-    path: skills/bootstrap.md
-    description: Interactive scaffold of a Java 24 / Spring Boot 4 service — asks for coordinates + persistence + inbound interface, generates pom.xml + entry point + minimal endpoint, runs `mvn -B verify` smoke check.
+  Each skills/<slug>/ directory ships a body (template.md), common
+  metadata (metadata.yml), and per-provider frontmatter overrides
+  (<provider>.yml). smith-template-install composes the frontmatter at
+  install time and names the destination skill
+  `smith-java-spring-boot-<slug>` in the consumer project's
+  provider-native skill dir.
+providers: [claude-code, github-copilot, opencode]
+skills:
+  - name: bootstrap
+    version: 0.1.0
 adapter_placeholders:
   "{{language}}": Always "java" for this template set.
   "{{runtime}}": "jvm"

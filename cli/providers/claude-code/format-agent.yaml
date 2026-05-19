@@ -1,0 +1,128 @@
+kind: agent
+provider: claude-code
+title: Sub-agent (.claude/agents/<slug>.md)
+consumer_path: .claude/agents/<slug>.md
+example: example/example-agent.md
+
+frontmatter:
+  - field: name
+    required: true
+    default: null
+    allowed: kebab-case, lowercase + digits + hyphens
+    meaning: Unique slug. `Agent` tool uses it as `subagent_type`. Filename does NOT have to match.
+
+  - field: description
+    required: true
+    default: null
+    allowed: one-line natural-language string
+    meaning: When the dispatcher should delegate to this agent. Pack triggers (verbs, file types, paths).
+
+  - field: tools
+    required: false
+    default: inherit all
+    allowed: comma-separated tool names
+    meaning: Allowlist of tools the agent may use. To preload skills use `skills:` (not `Skill` here).
+
+  - field: disallowedTools
+    required: false
+    default: null
+    allowed: comma-separated tool names
+    meaning: Denylist applied first, then `tools` resolves against the remaining pool.
+
+  - field: model
+    required: false
+    default: inherit
+    allowed: [sonnet, opus, haiku, full model id (e.g. claude-opus-4-7), inherit]
+    meaning: Per-agent model override. `inherit` reuses the main conversation's model.
+
+  - field: permissionMode
+    required: false
+    default: inherit
+    allowed: [default, acceptEdits, auto, dontAsk, bypassPermissions, plan]
+    meaning: Permission behaviour for this agent's tool calls. Ignored for plugin agents.
+
+  - field: maxTurns
+    required: false
+    default: unlimited
+    allowed: positive integer
+    meaning: Hard cap on agentic turns before the agent must stop.
+
+  - field: skills
+    required: false
+    default: null
+    allowed: YAML list of skill slugs
+    meaning: Skills preloaded at startup — full body injected, not just the description.
+
+  - field: mcpServers
+    required: false
+    default: null
+    allowed: YAML list of inline defs OR strings referencing already-configured servers
+    meaning: MCP tool access scoped to this agent only. Ignored for plugin agents.
+
+  - field: hooks
+    required: false
+    default: null
+    allowed: object keyed by event name (see format-hook.yaml)
+    meaning: Lifecycle hooks scoped to this agent. Ignored for plugin agents.
+
+  - field: memory
+    required: false
+    default: none
+    allowed: [user, project, local]
+    meaning: Enables a persistent memory directory for cross-session learning.
+
+  - field: background
+    required: false
+    default: false
+    allowed: boolean
+    meaning: "`true` to always run as a background task (long-running, foreground if false)."
+
+  - field: effort
+    required: false
+    default: inherit
+    allowed: [low, medium, high, xhigh, max]
+    meaning: Effort tier when this agent runs. Available levels depend on the model.
+
+  - field: isolation
+    required: false
+    default: none
+    allowed: [worktree]
+    meaning: "`worktree` runs the agent in a temporary git worktree (isolated repo copy)."
+
+  - field: color
+    required: false
+    default: null
+    allowed: [red, blue, green, yellow, purple, orange, pink, cyan]
+    meaning: Display tint in the task list.
+
+  - field: initialPrompt
+    required: false
+    default: null
+    allowed: string
+    meaning: >
+      Auto-submitted as the first user turn when this agent runs as the main
+      session (`--agent` / `agent` setting). Prepended to any user prompt.
+
+body_conventions:
+  - The body is the agent's system prompt verbatim. It does NOT see the main conversation's history.
+  - Structure that works well — Mission → Inputs → Procedure → Outputs → Quality bar → Out of scope.
+  - Keep it tight — every line costs context tokens on every invocation.
+  - Don't reference "the parent session" or "the user" — the agent only knows what's in its prompt + the dispatcher's brief.
+
+builtin_tools:
+  - Bash
+  - BashOutput
+  - Read
+  - Write
+  - Edit
+  - NotebookEdit
+  - Glob
+  - Grep
+  - Agent
+  - WebFetch
+  - WebSearch
+  - AskUserQuestion
+  - ExitPlanMode
+  - TodoWrite
+  - MCP tools (when configured)
+  - All bundled Skills

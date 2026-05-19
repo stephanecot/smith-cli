@@ -2,30 +2,25 @@ framework: angular
 version: "21"
 description: |
   Skill templates for Angular 21 projects (zoneless, signals, Tailwind v4,
-  Vitest, Transloco i18n, OpenAPI-generated HTTP clients). Each file is
-  the BODY of a skill (no YAML frontmatter) ; smith-template-install
-  generates the final `SKILL.md` with frontmatter and names it
-  `smith-angular-<slug>` in the consumer project's `.claude/skills/`
-  (or `.github/skills/`).
-files:
-  - kind: skill
-    path: skills/bootstrap.md
-    description: Interactive scaffold of a new Angular 21 SPA — asks for package name + routing + Tailwind v4 + Transloco + OpenAPI client, generates the project tree, runs `npm run build` smoke check.
-  - kind: skill
-    path: skills/standards.md
-    description: Angular 21 coding standards — strict TypeScript, signals, signal stores, separation of .html/.ts, standalone components, zoneless.
-  - kind: skill
-    path: skills/tests-coverage.md
-    description: Frontend testing standards — Vitest (Angular 21 default), Testing Library, signal store tests, 80% line+branch coverage gate.
-  - kind: skill
-    path: skills/design-system.md
-    description: Unified design system — Tailwind v4, reusable UI primitives, no duplicate CSS, no custom CSS in feature components, centralised theme tokens.
-  - kind: skill
-    path: skills/i18n-transloco.md
-    description: i18n with @jsverse/transloco — French default + English fallback, key naming, template/component usage, missing-key detection.
-  - kind: skill
-    path: skills/openapi-client.md
-    description: HTTP layer architecture — three tiers (signal store → hand-written feature HTTP client → auto-generated OpenAPI service).
+  Vitest, Transloco i18n, OpenAPI-generated HTTP clients). Each skills/<slug>/
+  directory ships a body (template.md), common metadata (metadata.yml), and
+  per-provider frontmatter overrides (<provider>.yml). smith-template-install
+  composes the frontmatter at install time and names the destination skill
+  `smith-angular-<slug>` in the consumer project's provider-native skill dir.
+providers: [claude-code, github-copilot, opencode]
+skills:
+  - name: bootstrap
+    version: 0.1.0
+  - name: standards
+    version: 0.1.0
+  - name: tests-coverage
+    version: 0.1.0
+  - name: design-system
+    version: 0.1.0
+  - name: i18n-transloco
+    version: 0.1.0
+  - name: openapi-client
+    version: 0.1.0
 adapter_placeholders:
   "{{language}}": Always "typescript" for this template set.
   "{{runtime}}": "nodejs"

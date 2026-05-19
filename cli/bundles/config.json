@@ -3,27 +3,99 @@
   "bundles": [
     {
       "name": "ia-stats",
-      "description": "Automatic per-agent / per-skill usage tracker. Appends a row to IA_STATS.MD on every event via a cross-platform Node.js script (stdlib only, no package.json required). Ships for both Claude Code (real event hooks) and GitHub Copilot (VS Code tasks).",
+      "description": "Automatic per-agent / per-skill usage tracker. Every event appends a\nrow to IA_STATS.MD at the consumer project's root via a Node.js\nscript. Cross-platform (Windows + macOS + Linux), zero npm deps.\nShipped for Claude Code (real event hooks) and OpenCode (plugin\nlifecycle hooks). GitHub Copilot ships the read-only `/ia-stats`\nskill only \u2014 VS Code tasks cannot carry per-event payloads, so no\npopulating hook is provided.",
       "directory": "ia-stats",
       "version": "0.1.0",
-      "tags": ["observability", "hooks", "claude-code", "github-copilot"],
-      "providers": ["claude-code", "github-copilot"]
+      "tags": [
+        "observability",
+        "hooks"
+      ],
+      "providers": [
+        "claude-code",
+        "github-copilot",
+        "opencode"
+      ],
+      "skills": [
+        {
+          "name": "ia-stats",
+          "version": "0.1.0"
+        }
+      ],
+      "hooks": [
+        {
+          "name": "ia-stats",
+          "version": "0.1.0"
+        }
+      ]
     },
     {
       "name": "mvn",
-      "description": "Maven offload — /mvn <goals> dispatches a runner agent so build logs do not flood the parent context. Ships for both Claude Code (Haiku sub-agent) and GitHub Copilot (chat-mode agent).",
+      "description": "Maven offload \u2014 /mvn <goals> dispatches a Maven build off the\nparent context so multi-thousand-line build logs do not flood the\nconversation. Returns a one-line verdict + Tests counters + failure\ncause.",
       "directory": "mvn",
       "version": "0.1.0",
-      "tags": ["build", "java", "backend"],
-      "providers": ["claude-code", "github-copilot"]
+      "tags": [
+        "build",
+        "java",
+        "backend"
+      ],
+      "providers": [
+        "claude-code",
+        "github-copilot",
+        "opencode"
+      ],
+      "skills": [
+        {
+          "name": "mvn",
+          "version": "0.1.0"
+        }
+      ],
+      "hooks": []
     },
     {
       "name": "npm",
-      "description": "npm offload — /npm <args> dispatches a runner agent so Vitest / Vite / lint logs do not flood the parent context. Ships for both Claude Code (Haiku sub-agent) and GitHub Copilot (chat-mode agent).",
+      "description": "npm offload \u2014 /npm <args> dispatches an npm command off the parent\ncontext so multi-thousand-line Vitest / Vite / lint logs do not flood\nthe conversation. Returns a one-line verdict + Tests/lint/build\ncounters + failure cause.",
       "directory": "npm",
       "version": "0.1.0",
-      "tags": ["build", "nodejs", "frontend"],
-      "providers": ["claude-code", "github-copilot"]
+      "tags": [
+        "build",
+        "nodejs",
+        "frontend"
+      ],
+      "providers": [
+        "claude-code",
+        "github-copilot",
+        "opencode"
+      ],
+      "skills": [
+        {
+          "name": "npm",
+          "version": "0.1.0"
+        }
+      ],
+      "hooks": []
+    },
+    {
+      "name": "pip",
+      "description": "pip offload \u2014 /pip <args> dispatches a Python pip command off the\nparent context so multi-thousand-line resolver / install logs do not\nflood the conversation. Returns a one-line verdict + counters\n(installed / upgraded / removed / failed) + failure cause.",
+      "directory": "pip",
+      "version": "0.1.0",
+      "tags": [
+        "build",
+        "python",
+        "python3"
+      ],
+      "providers": [
+        "claude-code",
+        "github-copilot",
+        "opencode"
+      ],
+      "skills": [
+        {
+          "name": "pip",
+          "version": "0.1.0"
+        }
+      ],
+      "hooks": []
     }
   ]
 }

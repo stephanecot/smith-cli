@@ -1,20 +1,27 @@
 ---
 name: smith-init
-description: Bootstrap a project for Smith CLI — creates the `.smith/` directory with a single `smith.yaml` marker file (init datetime, AI provider, `enabled: true`). Idempotent — if `.smith/smith.yaml` already exists, it stays untouched. Required marker for every other `/smith-*` skill. Trigger with `/smith-init [--provider claude-code|github-copilot]`. Other Smith config files (architecture.json, config.json, AGENTS.md, …) are owned by other skills and NOT created here.
+description: Bootstrap a project for Smith CLI — creates the `.smith/` directory with a single `smith.yaml` marker file (init datetime, AI provider, model-tier mapping, `enabled: true`). Idempotent — if `.smith/smith.yaml` already exists, it stays untouched. Required marker for every other `/smith-*` skill. Trigger with `/smith-init [--provider claude-code|github-copilot|opencode]`. Other Smith config files (architecture.json, config.json, AGENTS.md, …) are owned by other skills and NOT created here.
 ---
 
 # Skill — `/smith-init`
 
 Bootstraps Smith on the consumer project. **One directory, one file** :
 
-- `.smith/smith.yaml` — minimal init marker. Three fields :
+- `.smith/smith.yaml` — minimal init marker. Four blocks :
   - `initialized_at` — ISO-8601 UTC timestamp of the init.
-  - `provider` — AI tool Smith targets (`claude-code` or `github-copilot`).
+  - `provider` — AI tool Smith targets (`claude-code` / `github-copilot`
+    / `opencode`).
   - `enabled` — always `true` at init time. Flip to `false` to disable
     Smith on this project without removing the directory.
+  - `model_tiers` — a `{small, medium, large}` map of model identifiers
+    in the provider's native format. Bundles and templates declare
+    `model: small|medium|large`; the install skills replace the tier
+    with the matching identifier from this block at write-time. Defaults
+    are picked from a built-in table keyed by `provider` (see "Model
+    tier defaults" below).
 
-That's it. **No architecture.json, no config.json, no AGENTS.md,
-no doc generation, no template adaptation.** Those artefacts are owned
+That's it. **No architecture.json, no config.json, no AGENTS.md, no
+doc generation, no template adaptation.** Those artefacts are owned
 by other skills and created on demand.
 
 The exact shape of `.smith/smith.yaml` comes from the template at
@@ -25,15 +32,35 @@ the template is the contract.
 ## How to invoke
 
 ```
-/smith-init [--provider claude-code|github-copilot]
+/smith-init [--provider claude-code|github-copilot|opencode]
 ```
 
 - `--provider` — optional, defaults to `claude-code`. Selects the AI
-  tool Smith targets. Recorded in `smith.yaml`.
+  tool Smith targets. Recorded in `smith.yaml` AND drives the default
+  `model_tiers` block (see table below).
 
 No description argument, no `--name` flag. This skill is intentionally
 minimal — project identity / stack detection / AI brief are handled by
 sibling skills.
+
+## Model tier defaults
+
+The `model_tiers` block is filled at init time with the **current
+best fit** per provider. The maintainer can edit `.smith/smith.yaml`
+later to pin a specific snapshot.
+
+| Tier   | claude-code | github-copilot         | opencode                            |
+|--------|-------------|------------------------|-------------------------------------|
+| small  | `haiku`     | `Claude Haiku 4.5`     | `anthropic/claude-haiku-4-5`        |
+| medium | `sonnet`    | `Claude Sonnet 4.5`    | `anthropic/claude-sonnet-4-6`       |
+| large  | `opus`      | `Claude Opus 4.7`      | `anthropic/claude-opus-4-7`         |
+
+These defaults intentionally lag behind release announcements until a
+new family proves stable — bump them in this skill when the next
+generation is ready. The same table is duplicated in
+`/smith-bundle-install` and `/smith-template-install` as a fallback
+when `.smith/smith.yaml` is missing the tier; both copies MUST stay
+in sync.
 
 ## What you do
 
@@ -51,6 +78,12 @@ report.
      `YYYY-MM-DDTHH:MM:SSZ`.
    - `{{provider}}` — `--provider` flag value, or `claude-code` by
      default.
+   - `{{model_small}}` / `{{model_medium}}` / `{{model_large}}` — pick
+     the row from the "Model tier defaults" table above that matches
+     `{{provider}}`. Always quote the value in the output YAML (the
+     template already wraps each placeholder in `"…"`) so identifiers
+     containing spaces or slashes (e.g. `Claude Haiku 4.5`,
+     `anthropic/claude-haiku-4-5`) round-trip cleanly.
 3. Read `${CLAUDE_SKILL_DIR}/template/smith.template.yaml`, substitute,
    and atomic-write (tempfile → fsync → rename) to `.smith/smith.yaml`.
 
@@ -59,7 +92,8 @@ report.
 ```
 ✅ Smith initialised in {{N}}ms.
 .smith/smith.yaml : <created|skipped>
-provider          : <claude-code|github-copilot>
+provider          : <claude-code|github-copilot|opencode>
+model_tiers       : small=<id> medium=<id> large=<id>
 ```
 
 ## What you do NOT do
@@ -70,7 +104,9 @@ provider          : <claude-code|github-copilot>
 - **Don't** generate any documentation. That's `/smith-generate-docs`.
 - **Don't** adapt any template into a skill.
 - **Don't** overwrite an existing `.smith/smith.yaml`. Re-running on a
-  project that's already initialised is a safe no-op.
+  project that's already initialised is a safe no-op — even if the
+  model defaults in this skill have moved on since the init. The
+  maintainer edits `model_tiers` by hand to update.
 - **Don't** dispatch any sub-agent. This skill is filesystem-only.
 
 ## Why this skill is minimal

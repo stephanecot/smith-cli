@@ -1,0 +1,142 @@
+kind: hook
+provider: opencode
+title: Plugin (.opencode/plugins/<slug>.ts)
+consumer_path: .opencode/plugins/<slug>.ts (or .js)
+example: example/example-hook.ts
+
+events:
+  - name: command.executed
+    fires: A slash command finishes executing.
+    can_block: false
+    matcher: command name
+  - name: file.edited
+    fires: A file in the workspace was edited.
+    can_block: false
+    matcher: file path
+  - name: file.watcher.updated
+    fires: The file watcher emitted a change notification.
+    can_block: false
+    matcher: file path
+  - name: installation.updated
+    fires: OpenCode itself was updated.
+    can_block: false
+    matcher: null
+  - name: lsp.client.diagnostics
+    fires: An LSP client emitted diagnostics.
+    can_block: false
+    matcher: language server name
+  - name: lsp.updated
+    fires: LSP servers reconfigured.
+    can_block: false
+    matcher: null
+  - name: message.part.removed
+    fires: A message part was removed from the active session.
+    can_block: false
+    matcher: null
+  - name: message.part.updated
+    fires: A message part was updated in the active session.
+    can_block: false
+    matcher: null
+  - name: message.removed
+    fires: A full message was removed from the active session.
+    can_block: false
+    matcher: null
+  - name: message.updated
+    fires: A message was updated in the active session.
+    can_block: false
+    matcher: null
+  - name: permission.asked
+    fires: The agent requested permission for a tool call.
+    can_block: true
+    matcher: tool name / pattern
+  - name: permission.replied
+    fires: The user replied to a permission prompt.
+    can_block: false
+    matcher: tool name / pattern
+  - name: server.connected
+    fires: OpenCode connected to its background server.
+    can_block: false
+    matcher: null
+  - name: session.created
+    fires: A new session was created.
+    can_block: false
+    matcher: null
+  - name: session.compacted
+    fires: A session was compacted to free context.
+    can_block: false
+    matcher: null
+  - name: session.deleted
+    fires: A session was deleted.
+    can_block: false
+    matcher: null
+  - name: session.diff
+    fires: A session diff was computed.
+    can_block: false
+    matcher: null
+  - name: session.error
+    fires: The session encountered an error.
+    can_block: false
+    matcher: error type
+  - name: session.idle
+    fires: The agent went idle within a session.
+    can_block: false
+    matcher: null
+  - name: session.status
+    fires: Session status changed.
+    can_block: false
+    matcher: null
+  - name: session.updated
+    fires: Session metadata updated.
+    can_block: false
+    matcher: null
+  - name: todo.updated
+    fires: A todo item changed.
+    can_block: false
+    matcher: null
+  - name: shell.env
+    fires: The shell environment was queried.
+    can_block: false
+    matcher: null
+  - name: tool.execute.before
+    fires: Before a tool executes.
+    can_block: true
+    matcher: tool name
+  - name: tool.execute.after
+    fires: After a tool executes.
+    can_block: false
+    matcher: tool name
+  - name: tui.prompt.append
+    fires: Text appended to the TUI prompt.
+    can_block: false
+    matcher: null
+  - name: tui.command.execute
+    fires: The TUI executed an internal command.
+    can_block: false
+    matcher: command name
+  - name: tui.toast.show
+    fires: A toast notification was shown.
+    can_block: false
+    matcher: toast type
+  - name: experimental.session.compacting
+    fires: "Experimental — fires while a session is being compacted (subject to change)."
+    can_block: false
+    matcher: null
+
+handler_types:
+  - type: plugin-function
+    fields:
+      - "module exports — async function (context) returning a hooks object"
+      - "context.project — project metadata"
+      - "context.client — OpenCode API client"
+      - "context.$ — shell helper"
+      - "context.directory — workspace directory"
+      - "context.worktree — git worktree path"
+      - "hooks[<event.name>] — async handler `(payload) => void | { decision, ... }`"
+    notes: "Default and only handler shape. Plugins are JavaScript or TypeScript modules under `.opencode/plugins/` (project) or `~/.config/opencode/plugins/` (global). NPM-packaged plugins are declared in `opencode.json` under `plugin: [...]`."
+
+conventions:
+  - Plugins are code, not config — every hook is a function in a JS/TS module.
+  - Idempotent + side-effect-aware — OpenCode may fire the same event repeatedly.
+  - Throwing from a hook surfaces an error toast; never let an exception bubble unintentionally.
+  - "Use `permission.asked` to implement custom approval flows; return a decision object to short-circuit the built-in prompt."
+  - "Use `tool.execute.before` to block or mutate tool calls; the handler can return `{ decision: 'block', reason }` to abort."

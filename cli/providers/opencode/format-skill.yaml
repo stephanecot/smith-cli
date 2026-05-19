@@ -1,0 +1,38 @@
+kind: skill
+provider: opencode
+title: Custom command (.opencode/commands/<slug>.md)
+consumer_path: .opencode/commands/<slug>.md
+example: example/example-skill.md
+
+frontmatter:
+  - field: description
+    required: false
+    default: null
+    allowed: string
+    meaning: Brief explanation of what the command does. Displayed in the TUI.
+
+  - field: agent
+    required: false
+    default: current agent
+    allowed: agent name (built-in or custom slug)
+    meaning: Which agent executes this command. If omitted, the active primary agent runs it.
+
+  - field: subtask
+    required: false
+    default: false
+    allowed: boolean
+    meaning: "`true` forces sub-agent invocation, preventing context pollution of the primary session."
+
+  - field: model
+    required: false
+    default: agent's default model
+    allowed: model identifier (e.g. `anthropic/claude-sonnet-4-6`)
+    meaning: Overrides the default LLM for this command.
+
+body_conventions:
+  - The markdown body becomes the prompt template sent to the LLM.
+  - "Supported substitutions: `$ARGUMENTS` (all positional args verbatim), `$1` / `$2` / ... (individual positional args)."
+  - "Inline bash via `` !`<command>` `` — the command runs on the host before the prompt is sent and its output replaces the placeholder."
+  - "File inclusion via `@<filename>` — the file content is inlined automatically."
+  - Filename (minus `.md`) becomes the slash command; there is no `name:` frontmatter field.
+  - Keep the body concise — every line costs context tokens on every invocation.

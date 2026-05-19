@@ -4,3 +4,15 @@
 initialized_at: "{{initialized_at_iso8601}}"
 provider: {{provider}}
 enabled: true
+
+# Model-tier mapping. Bundles and templates reference models by tier
+# (small / medium / large) so artefacts don't carry concrete identifiers
+# that drift as providers release new versions. /smith-bundle-install
+# and /smith-template-install resolve a tier to the matching identifier
+# below at write-time. Defaults are picked from the active provider's
+# current best fit — edit by hand to switch (e.g. force `medium` to
+# sonnet 4 if you want a specific snapshot).
+model_tiers:
+  small:  "{{model_small}}"
+  medium: "{{model_medium}}"
+  large:  "{{model_large}}"

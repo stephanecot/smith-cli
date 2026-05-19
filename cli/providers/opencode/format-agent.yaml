@@ -1,0 +1,71 @@
+kind: agent
+provider: opencode
+title: Sub-agent (.opencode/agents/<slug>.md)
+consumer_path: .opencode/agents/<slug>.md
+example: example/example-agent.md
+
+frontmatter:
+  - field: mode
+    required: true
+    default: null
+    allowed: [subagent]
+    meaning: "MUST be `subagent` for custom sub-agents. Identifies the artefact as a sub-agent (primary agents use `mode: primary`)."
+
+  - field: description
+    required: true
+    default: null
+    allowed: one-line natural-language string
+    meaning: Brief description of the agent's purpose. Used by primary agents to decide when to delegate.
+
+  - field: model
+    required: false
+    default: inherits from invoking primary agent
+    allowed: "`provider/model-id` (e.g. `anthropic/claude-sonnet-4-6`)"
+    meaning: Per-agent model override.
+
+  - field: temperature
+    required: false
+    default: model default
+    allowed: float between 0.0 and 1.0
+    meaning: Sampling temperature for this agent.
+
+  - field: permission
+    required: false
+    default: inherits from global config
+    allowed: object keyed by tool category (see builtin_tools); value is `allow` / `ask` / `deny` OR an object mapping patterns to those actions
+    meaning: "Tool access rules for this agent. Pattern form example — `bash: { \"git *\": \"ask\", \"*\": \"allow\" }`."
+
+  - field: hidden
+    required: false
+    default: false
+    allowed: boolean
+    meaning: "`true` hides the agent from the `@` autocomplete list (still dispatchable explicitly)."
+
+  - field: tools
+    required: false
+    default: null
+    allowed: boolean
+    meaning: "DEPRECATED — replaced by `permission`. `tools: true` ≡ `{ \"*\": \"allow\" }`, `tools: false` ≡ `{ \"*\": \"deny\" }`. Prefer `permission`."
+
+body_conventions:
+  - The body is the agent's system prompt — plain text instructions describing the agent's role and behavioural guidelines.
+  - Filename (minus `.md`) becomes the agent slug (used in `@<slug>` mentions); there is no `name:` frontmatter field.
+  - Structure that works well — Mission → Inputs → Procedure → Outputs → Quality bar → Out of scope.
+  - Keep it tight — every line costs context tokens on every invocation.
+
+builtin_tools:
+  - read — file reads
+  - edit — write / edit / apply_patch
+  - glob — pattern-based file lookup
+  - grep — content search
+  - list — directory listing
+  - bash — shell execution (often pattern-scoped via permission objects)
+  - task — task management
+  - external_directory — operations outside the project worktree
+  - todowrite — todowrite / todoread
+  - webfetch — fetch a URL
+  - websearch — search the web
+  - lsp — language server queries
+  - skill — invoke a Smith / built-in skill
+  - question — ask the user a clarifying question
+  - doom_loop — recovery prompts for stuck agents

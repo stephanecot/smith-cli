@@ -9,7 +9,7 @@ template-install
 
 On va développer le skill /smith-new-project <description>
   - developper la partie question de facon plus complete
-  
+ 
   current:
   -> pour initier un nouveau projet
     Ce skill, va déclancher un worklow.

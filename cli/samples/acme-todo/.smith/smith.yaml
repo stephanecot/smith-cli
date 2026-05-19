@@ -1,0 +1,18 @@
+# Smith CLI — minimal init marker.
+# Other config files (architecture.json, config.json, …) are
+# created by their own skills, not by /smith-init.
+initialized_at: "2026-05-16T09:14:42Z"
+provider: claude-code
+enabled: true
+
+# Model-tier mapping. Bundles and templates reference models by tier
+# (small / medium / large) so artefacts don't carry concrete identifiers
+# that drift as providers release new versions. /smith-bundle-install
+# and /smith-template-install resolve a tier to the matching identifier
+# below at write-time. Defaults are picked from the active provider's
+# current best fit — edit by hand to switch (e.g. force `medium` to
+# sonnet 4 if you want a specific snapshot).
+model_tiers:
+  small:  "haiku"
+  medium: "sonnet"
+  large:  "opus"

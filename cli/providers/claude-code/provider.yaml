@@ -1,0 +1,35 @@
+slug: claude-code
+name: Claude Code
+description: >
+  Anthropic's official CLI for Claude. Packages AI behaviour as sub-agents,
+  skills (slash commands + auto-invoked instruction sets), event hooks, and
+  always-on rules (CLAUDE.md).
+
+docs:
+  sub_agents: https://code.claude.com/docs/en/sub-agents
+  skills: https://code.claude.com/docs/en/skills
+  hooks: https://code.claude.com/docs/en/hooks
+  rules: https://code.claude.com/docs/en/memory
+  settings: https://code.claude.com/docs/en/settings
+  tools: https://code.claude.com/docs/en/tools-reference
+  permission_modes: https://code.claude.com/docs/en/permission-modes
+
+kinds:
+  agent:
+    format: format-agent.yaml
+    consumer_path: .claude/agents/<slug>.md
+    invocation: Agent tool (subagent_type=<slug>)
+    example: example/example-agent.md
+  skill:
+    format: format-skill.yaml
+    consumer_path: .claude/skills/<slug>/SKILL.md (+ supporting files)
+    invocation: /<slug> slash command OR auto by Claude on description match
+    example: example/example-skill.md
+  hook:
+    format: format-hook.yaml
+    consumer_path: .claude/settings.json (hooks key)
+    invocation: fires on a Claude Code lifecycle event (no user invocation)
+    example: example/example-hook.json
+  rules:
+    consumer_path: CLAUDE.md (repo root) OR .claude/rules/<n>.md
+    invocation: always-on in context (loaded into the system prompt every turn)

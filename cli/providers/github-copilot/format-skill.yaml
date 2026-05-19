@@ -1,0 +1,48 @@
+kind: skill
+provider: github-copilot
+title: Prompt file (.github/prompts/<slug>.prompt.md)
+consumer_path: .github/prompts/<slug>.prompt.md
+example: example/example-skill.prompt.md
+
+frontmatter:
+  - field: name
+    required: false
+    default: filename (minus `.prompt.md`)
+    allowed: string
+    meaning: Display name shown after `/` in chat.
+
+  - field: description
+    required: false
+    default: null
+    allowed: one-line string
+    meaning: Brief description of the prompt's purpose. Shown in the slash-command dropdown.
+
+  - field: argument-hint
+    required: false
+    default: null
+    allowed: string
+    meaning: Hint text shown in the chat input field.
+
+  - field: agent
+    required: false
+    default: current agent
+    allowed: [ask, agent, plan, edit, custom agent name]
+    meaning: Which agent (mode) executes this prompt.
+
+  - field: model
+    required: false
+    default: session model
+    allowed: any available model identifier
+    meaning: Language model for this prompt.
+
+  - field: tools
+    required: false
+    default: null
+    allowed: YAML list of tool names, tool-set names, MCP names (`<server>/*` for all server tools)
+    meaning: Tool allowlist while the prompt runs.
+
+body_conventions:
+  - Markdown. The body is the prompt content sent to the model.
+  - Reference workspace files inline with relative markdown links — `[link](../path/to/file.ts)`. Copilot inlines the file content.
+  - Reference tools with `#tool:<tool-name>` (e.g. `#tool:codebase`).
+  - Keep it tight — Copilot's context window is smaller than Claude Code's.

@@ -66,25 +66,36 @@ These paths point at files that may not exist yet — they are written by
 ```json
 {
   "name": "smith-<framework>-<slug>",
-  "from_template": "<framework>/<version>/skills/<file>.md",
+  "from_template": "<framework>/<version>/skills/<slug>",
+  "version": "<from template config.yaml skills[name=<slug>].version>",
   "path": "<consumer-relative path to the adapted SKILL.md>",
   "adapted_at": "<ISO-8601 UTC>"
 }
 ```
 
-Upsert keyed by `name` — re-running `/smith-template-install` with a
-newer template version replaces the existing entry, never duplicates.
+- `from_template` is the **directory** under the template that owns the
+  skill (`<framework>/<version>/skills/<slug>/`), not a file path. The
+  directory contains `template.md` (body), `metadata.yml`, and one
+  `<provider>.yml` per supported provider.
+- `version` comes from the template's `config.yaml` `skills[].version`
+  (never from `metadata.yml`, which no longer carries a version).
+- Upsert keyed by `name` — re-running `/smith-template-install` with a
+  newer template version replaces the existing entry, never
+  duplicates.
 
 ## `bundles[]` entry shape
 
 ```json
 {
   "name": "<bundle-slug>",
-  "version": "<from bundle config.yaml>",
+  "version": "<bundle-level version from config.yaml>",
   "tags": ["<from taxonomy>"],
   "provider": "<--ia value passed to install>",
-  "files": [
-    { "kind": "skill|agent|script|rules", "source": "<bundle-relative path>", "destination": "<consumer-relative path>" }
+  "skills": [
+    { "name": "<slug>", "version": "<from bundle config.yaml skills[].version>" }
+  ],
+  "hooks": [
+    { "name": "<hook-name>", "version": "<from bundle config.yaml hooks[].version>" }
   ],
   "merged_into": [
     "<consumer-relative path of a provider config file the install merged into>"
@@ -93,8 +104,22 @@ newer template version replaces the existing entry, never duplicates.
 }
 ```
 
-Upsert keyed by `name` — re-installing replaces the existing entry,
-never duplicates.
+- `skills[]` and `hooks[]` mirror the bundle's `config.yaml`
+  listings for the slice actually installed for this provider — every
+  entry the bundle ships gets recorded with its per-skill /
+  per-hook version.
+- `hooks[]` is empty (`[]`) for skill-only bundles.
+- `merged_into[]` lists every consumer-side file the install merged
+  hook / task fragments into (typically `.claude/settings.json` for
+  Claude Code, `.vscode/tasks.json` for Copilot). Empty when the
+  bundle ships no hooks.
+- **No more `files[]` array.** The v0.2 install records WHAT was
+  installed (`skills[]` + `hooks[]`) by name and version. Source ↔
+  destination path mapping is derivable from the provider's
+  `consumer_path` (in `cli/providers/<provider>/provider.yaml`) — the
+  catalogue does not duplicate it.
+- Upsert keyed by `name` — re-installing replaces the existing
+  entry, never duplicates.
 
 ### `merged_into[]` and the `_smith_source` marker
 

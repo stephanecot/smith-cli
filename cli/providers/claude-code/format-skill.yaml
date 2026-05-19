@@ -1,0 +1,108 @@
+kind: skill
+provider: claude-code
+title: Skill (.claude/skills/<slug>/SKILL.md)
+consumer_path: .claude/skills/<slug>/SKILL.md
+example: example/example-skill.md
+
+frontmatter:
+  - field: name
+    required: false
+    default: directory name
+    allowed: lowercase + digits + hyphens, max 64 chars
+    meaning: Display slug. Filename `SKILL.md` is fixed.
+
+  - field: description
+    required: recommended
+    default: first paragraph of the body
+    allowed: one-line string
+    meaning: >
+      Trigger description Claude uses to decide when to auto-load. Combined
+      with `when_to_use`, capped at 1,536 chars in the listing — front-load
+      the key use case.
+
+  - field: when_to_use
+    required: false
+    default: null
+    allowed: string
+    meaning: Extra triggers (phrases, example requests). Appended to `description` in the listing.
+
+  - field: argument-hint
+    required: false
+    default: null
+    allowed: string
+    meaning: "Hint shown during autocomplete, e.g. `[issue-number]`."
+
+  - field: arguments
+    required: false
+    default: null
+    allowed: YAML list or space-separated string
+    meaning: Named positional arguments for `$name` substitution.
+
+  - field: disable-model-invocation
+    required: false
+    default: false
+    allowed: boolean
+    meaning: "`true` blocks Claude from auto-loading; only user `/<slug>` works."
+
+  - field: user-invocable
+    required: false
+    default: true
+    allowed: boolean
+    meaning: "`false` hides the skill from the `/` menu (background knowledge only)."
+
+  - field: allowed-tools
+    required: false
+    default: null
+    allowed: YAML list or space-separated tool names
+    meaning: >
+      Pre-approves listed tools while the skill is active. Does NOT restrict —
+      denylists still apply via permissions. Syntax `Bash(git *)` for
+      pattern-scoped pre-approval.
+
+  - field: model
+    required: false
+    default: session model
+    allowed: same as agent's `model` field
+    meaning: Per-skill model override for the rest of the current turn. Resets on next prompt.
+
+  - field: effort
+    required: false
+    default: session effort
+    allowed: [low, medium, high, xhigh, max]
+    meaning: Per-skill effort override.
+
+  - field: context
+    required: false
+    default: inline
+    allowed: [fork]
+    meaning: "`fork` runs the skill in a forked sub-agent context (isolated, no conversation history)."
+
+  - field: agent
+    required: false
+    default: general-purpose
+    allowed: sub-agent type name
+    meaning: "Which sub-agent type to use when `context: fork`. Examples: `Explore`, `Plan`, or a custom slug."
+
+  - field: hooks
+    required: false
+    default: null
+    allowed: object keyed by event name (see format-hook.yaml)
+    meaning: Hooks scoped to this skill's lifetime.
+
+  - field: paths
+    required: false
+    default: null
+    allowed: YAML list of glob patterns
+    meaning: Auto-load this skill only when working with files matching the patterns. Same syntax as memory `paths:`.
+
+  - field: shell
+    required: false
+    default: bash
+    allowed: [bash, powershell]
+    meaning: "Shell for `` !`<command>` `` injection. PowerShell requires `CLAUDE_CODE_USE_POWERSHELL_TOOL=1`."
+
+body_conventions:
+  - Markdown prose. The body is injected into the active conversation when the skill is invoked, and stays in context for the rest of the session (auto-compaction keeps the most recent 5,000 tokens per skill, combined budget 25,000 tokens).
+  - Keep it concise — every line is a recurring token cost.
+  - Use standing instructions, not one-time steps — the skill body does not re-run on later turns.
+  - Reference supporting files explicitly so Claude knows when to load them, e.g. `See [reference.md](reference.md) for the full API.`

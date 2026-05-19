@@ -1,0 +1,2 @@
+name: smith-java-spring-boot-bootstrap
+description: Interactive scaffold of a runnable Java 24 + Spring Boot 4 service (pom.xml, application entry, optional REST controller, optional Liquibase changelog, application.yaml). `mvn -B verify` smoke check at the end.

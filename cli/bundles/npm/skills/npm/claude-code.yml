@@ -1,0 +1,3 @@
+model: small
+allowed-tools: Read Glob Grep Bash(npm *) Bash(npx *)
+user-invocable: true

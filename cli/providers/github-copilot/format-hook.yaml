@@ -1,0 +1,61 @@
+kind: hook
+provider: github-copilot
+title: Hook (host-driven — VS Code task / git hook / GitHub Actions)
+consumer_path: .vscode/tasks.json OR lefthook.yml OR .github/workflows/<n>.yml
+example: example/example-hook-tasks.json
+
+events:
+  - name: vscode-task
+    fires: save / open / build (via runOptions.runOn)
+    can_block: false
+    matcher: runOptions.runOn
+    file: .vscode/tasks.json
+  - name: git-hook
+    fires: pre-commit / pre-push / post-merge
+    can_block: true
+    matcher: hook name
+    file: lefthook.yml (or husky/)
+  - name: ci-action
+    fires: push / pull-request / schedule
+    can_block: false
+    matcher: workflow trigger
+    file: .github/workflows/<n>.yml
+
+handler_types:
+  - type: vscode-task
+    fields:
+      - version (`2.0.0`)
+      - tasks[].label
+      - "tasks[].type (`shell` / `process`)"
+      - tasks[].command
+      - tasks[].args
+      - "tasks[].presentation.reveal (`always` / `silent` / `never`)"
+      - "tasks[].presentation.panel (`shared` / `dedicated` / `new`)"
+      - "tasks[].runOptions.runOn (`default` / `folderOpen`)"
+      - tasks[].problemMatcher
+    notes: Declared in .vscode/tasks.json. VS Code has no built-in `onSave` trigger — use a watcher task or an extension like Trigger Task on Save.
+
+  - type: lefthook
+    fields:
+      - "<hook-name> (e.g. `pre-commit`, `pre-push`, `post-merge`)"
+      - commands.<n>.run
+      - commands.<n>.glob
+      - commands.<n>.files
+      - commands.<n>.exclude
+      - commands.<n>.tags
+      - commands.<n>.skip
+      - "commands.<n>.run placeholders — `{staged_files}`, `{files}`, `{push_files}`"
+    notes: Declared in lefthook.yml at the repo root. Pre-commit blocks the commit on non-zero exit.
+
+  - type: github-actions
+    fields:
+      - "`on:` triggers (push / pull_request / schedule / workflow_dispatch)"
+      - jobs.<id>.runs-on
+      - jobs.<id>.steps[]
+    notes: Standard GitHub Actions YAML. Out of scope for per-event hooks but listed for completeness.
+
+conventions:
+  - Hook scripts live under `.smith/scripts/` in the consumer repo to avoid colliding with non-Smith scripts.
+  - Idempotent + side-effect-only (same constraints as Claude Code hooks).
+  - Print to stderr on failure; let the host decide whether to abort (`pre-commit` blocks the commit on non-zero exit; VS Code tasks do not abort the editor).
+  - "Copilot has no in-process event hooks. The experimental `hooks:` field on a custom agent (`.agent.md`) is opt-in via `chat.useCustomAgentHooks: true` and scoped to that agent's lifetime."
