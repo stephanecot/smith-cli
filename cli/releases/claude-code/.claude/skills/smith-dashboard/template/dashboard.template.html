@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{project_name}} — Smith dashboard</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #161b22;
+      --surface-2: #1c232c;
+      --text: #e6edf3;
+      --text-dim: #8b949e;
+      --rule: #30363d;
+      --accent: #d97706;
+      --accent-soft: #422006;
+      --steel: #1f6feb;
+      --steel-soft: #0d2a4f;
+      --neutral: #6e7681;
+      --neutral-soft: #2d333b;
+      --green: #3fb950;
+      --green-soft: #053a18;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .container { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+    header { border-bottom: 1px solid var(--rule); padding-bottom: 24px; margin-bottom: 32px; }
+    .eyebrow { font-family: ui-monospace, SF Mono, monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-dim); }
+    h1 { font-size: 32px; margin: 4px 0 8px; font-weight: 600; }
+    .subtitle { color: var(--text-dim); font-size: 14px; margin: 0; }
+    .meta { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 16px; font-size: 13px; color: var(--text-dim); font-family: ui-monospace, SF Mono, monospace; }
+    .meta span strong { color: var(--text); font-weight: 500; }
+    section { margin-bottom: 32px; }
+    h2 { font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-dim); margin: 0 0 12px; font-weight: 600; }
+    .card { background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 20px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .kv { display: grid; grid-template-columns: 140px 1fr; gap: 8px 16px; font-size: 14px; }
+    .kv dt { color: var(--text-dim); font-family: ui-monospace, SF Mono, monospace; font-size: 12px; }
+    .kv dd { margin: 0; color: var(--text); }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--rule); color: var(--text-dim); font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; }
+    td { padding: 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    code { font-family: ui-monospace, SF Mono, monospace; font-size: 12px; background: var(--surface-2); padding: 1px 6px; border-radius: 3px; color: var(--text); }
+    .tag { display: inline-block; font-family: ui-monospace, SF Mono, monospace; font-size: 11px; padding: 2px 8px; border-radius: 3px; background: var(--neutral-soft); color: var(--text); margin-right: 4px; }
+    .tag-accent { background: var(--accent-soft); color: var(--accent); }
+    .tag-steel { background: var(--steel-soft); color: var(--steel); }
+    .tag-green { background: var(--green-soft); color: var(--green); }
+    .empty { color: var(--text-dim); font-style: italic; padding: 12px; }
+    a { color: var(--steel); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    footer { border-top: 1px solid var(--rule); padding-top: 16px; margin-top: 48px; font-size: 12px; color: var(--text-dim); font-family: ui-monospace, SF Mono, monospace; }
+    .bundle-card { background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 16px; margin-bottom: 12px; }
+    .bundle-card h3 { margin: 0 0 4px; font-size: 16px; font-weight: 600; }
+    .bundle-card .desc { color: var(--text-dim); font-size: 13px; margin: 0 0 12px; }
+    .bundle-card .files { font-size: 12px; font-family: ui-monospace, SF Mono, monospace; color: var(--text-dim); }
+    .bundle-card .files li { margin-bottom: 2px; }
+    ul.spec-links { list-style: none; padding: 0; margin: 0; font-family: ui-monospace, SF Mono, monospace; font-size: 13px; }
+    ul.spec-links li { padding: 6px 0; border-bottom: 1px solid var(--rule); }
+    ul.spec-links li:last-child { border-bottom: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <header>
+      <p class="eyebrow">Smith CLI · dashboard</p>
+      <h1>{{project_name}}</h1>
+      <p class="subtitle">{{project_summary}}</p>
+      <div class="meta">
+        <span>Provider: <strong>{{provider}}</strong></span>
+        <span>Smith CLI: <strong>{{smith_cli_version}}</strong></span>
+        <span>Last init: <strong>{{generated_at}}</strong></span>
+        <span>Git SHA: <strong>{{git_sha}}</strong></span>
+      </div>
+    </header>
+
+    <section>
+      <h2>Project</h2>
+      <div class="card">
+        <dl class="kv">
+          <dt>Languages</dt>    <dd>{{project_languages}}</dd>
+          <dt>Runtimes</dt>     <dd>{{project_runtimes}}</dd>
+          <dt>Frameworks</dt>   <dd>{{project_frameworks}}</dd>
+          <dt>Build tools</dt>  <dd>{{project_build_tools}}</dd>
+          <dt>Test tools</dt>   <dd>{{project_test_tools}}</dd>
+          <dt>Infra tools</dt>  <dd>{{project_infra_tools}}</dd>
+          <dt>Databases</dt>    <dd>{{project_databases}}</dd>
+        </dl>
+      </div>
+    </section>
+
+    <section>
+      <h2>Adapted skills ({{skills_count}})</h2>
+      <div class="card">
+        {{skills_table}}
+      </div>
+    </section>
+
+    <section>
+      <h2>Installed bundles ({{bundles_count}})</h2>
+      {{bundles_cards}}
+    </section>
+
+    <section>
+      <h2>Specifications</h2>
+      <div class="card">
+        <ul class="spec-links">
+          <li><a href="{{spec_functional}}">{{spec_functional}}</a> — functional spec</li>
+          <li><a href="{{spec_technical}}">{{spec_technical}}</a> — technical spec</li>
+          <li><a href="{{spec_generation_report}}">{{spec_generation_report}}</a> — generation report</li>
+          <li><a href="{{ai_memory_file}}">{{ai_memory_file}}</a> — always-on AI brief (≤100 lines)</li>
+        </ul>
+      </div>
+    </section>
+
+    <footer>
+      Generated by <code>/smith-dashboard</code> from
+      <code>.smith/architecture.json</code> + <code>.smith/config.json</code>.
+      Re-render after every <code>/smith-bundle-install</code> or
+      <code>/smith-generate-docs</code> to keep this view current.
+    </footer>
+
+  </div>
+</body>
+</html>

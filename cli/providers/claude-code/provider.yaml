@@ -33,3 +33,25 @@ kinds:
   rules:
     consumer_path: CLAUDE.md (repo root) OR .claude/rules/<n>.md
     invocation: always-on in context (loaded into the system prompt every turn)
+
+build:
+  consumer_paths:
+    skill:    ".claude/skills/{slug}/SKILL.md"
+    agent:    ".claude/agents/{slug}.md"
+    hook_dir: ".claude/hooks/{bundle}"
+    settings: ".claude/settings.json"
+  agent_frontmatter:
+    emit_name: true
+    extra: {}
+  tools_style: claude-string
+  capability_map:
+    read:      Read
+    glob:      Glob
+    grep:      Grep
+    bash:      Bash
+    edit:      Edit
+    write:     Write
+    skill:     Skill
+    agent:     Agent
+    ask-user:  AskUserQuestion
+    web-fetch: WebFetch

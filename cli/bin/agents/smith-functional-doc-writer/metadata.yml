@@ -1,0 +1,3 @@
+name: smith-functional-doc-writer
+description: Produces .smith/FUNCTIONAL_SPECIFICATION.MD by filling a macro template with content derived from the project. The template lives at the path passed in by the caller (`/smith-generate-docs`) and carries `{{placeholder}}` markers ; the agent walks the project tree, infers domain vocabulary, reverse-engineers user stories, computes substitutions, and writes the result atomically. Read by product owners / QA / onboarding stakeholders. Dispatched by /smith-generate-docs.
+capabilities: [read, glob, grep, write, bash]

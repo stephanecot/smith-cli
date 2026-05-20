@@ -66,6 +66,32 @@ If args are missing, ask via `AskUserQuestion`.
      `rules` entry (just `consumer_path` + `invocation`) when the
      provider has a rules / instructions surface (`CLAUDE.md`,
      `AGENTS.md`, etc.).
+   - `build:` — **REQUIRED build-side configuration consumed by
+     `/smith-build`.** Carries everything provider-specific the build
+     script needs ; no business logic lives in `build.py`. Emit all
+     of :
+     - `consumer_paths.skill` — install template using `{slug}`
+       (e.g. `.claude/skills/{slug}/SKILL.md` or
+       `.github/prompts/{slug}.prompt.md`).
+     - `consumer_paths.agent` — same shape for sub-agents.
+     - `consumer_paths.hook_dir` — directory template using
+       `{bundle}` (where bundle hook files land).
+     - `consumer_paths.settings` — consumer settings file used for
+       hook-fragment merges, OR `~` (null) when the provider has no
+       merge model (e.g. opencode).
+     - `agent_frontmatter.emit_name` — `true` to emit `name:` in
+       agent frontmatter, `false` when filename carries the slug.
+     - `agent_frontmatter.extra` — constant frontmatter keys to
+       inject (e.g. `{ mode: subagent }` for opencode ; `{}` when
+       nothing extra).
+     - `tools_style` — one of `claude-string` (comma-separated
+       `tools:`), `yaml-list` (`tools: [...]`), or
+       `opencode-permission` (`permission: { name: allow }`).
+     - `capability_map` — generic capability slug → native tool name
+       for every value in : `read, glob, grep, bash, edit, write,
+       skill, agent, ask-user, web-fetch`. Set the value to `~`
+       (null) when a capability has no equivalent on this provider —
+       the build silently drops it from the resolved list.
 
    Do NOT include optional sections (`discovery`,
    `cross_kind_interactions`, `naming_conventions`, `when_to_pick`,
@@ -149,6 +175,7 @@ Next steps :
   - Rewrite `<slug>/format-skill.yaml` to match its slash-command / skill format.
   - Rewrite `<slug>/format-hook.yaml` (or describe host-driven mechanisms if the provider has no in-process hooks).
   - Rewrite the 3 `<slug>/example/example-*` files with provider-idiomatic content.
+  - **Fill `<slug>/provider.yaml::build`** : real `consumer_paths`, `agent_frontmatter`, `tools_style`, and the per-capability native tool names in `capability_map`. `/smith-build` reads ONLY this section — no fallbacks in the build script.
   - Enrich `<slug>/provider.yaml` (docs URLs, discovery scopes, cross_kind_interactions, when_to_pick).
 ```
 

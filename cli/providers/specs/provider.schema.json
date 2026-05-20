@@ -97,6 +97,50 @@
     "smith_mapping": {
       "type": "array",
       "items": { "type": "string" }
+    },
+    "build": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "consumer_paths",
+        "agent_frontmatter",
+        "tools_style",
+        "capability_map"
+      ],
+      "description": "Configuration consumed by /smith-build — how to layout a release for this provider + how to map generic agent capabilities to native tool names. No business logic lives in the build script ; everything provider-specific is declared here.",
+      "properties": {
+        "consumer_paths": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["skill", "agent", "hook_dir", "settings"],
+          "description": "Consumer-side install path templates. Each value uses {slug} (skill / agent) or {bundle} (hook_dir) as the only placeholder.",
+          "properties": {
+            "skill":    { "type": "string" },
+            "agent":    { "type": "string" },
+            "hook_dir": { "type": "string" },
+            "settings": { "type": ["string", "null"], "description": "Consumer settings file for hook-fragment merges. null when the provider has no merge model." }
+          }
+        },
+        "agent_frontmatter": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["emit_name", "extra"],
+          "properties": {
+            "emit_name": { "type": "boolean", "description": "true → emit a `name:` field ; false → the filename carries the slug." },
+            "extra":     { "type": "object", "description": "Constant frontmatter keys to inject (e.g. `mode: subagent` for opencode)." }
+          }
+        },
+        "tools_style": {
+          "type": "string",
+          "enum": ["claude-string", "yaml-list", "opencode-permission"],
+          "description": "How the resolved tool allowlist is rendered into the agent frontmatter."
+        },
+        "capability_map": {
+          "type": "object",
+          "description": "Map of generic capability slug (read / glob / grep / bash / edit / write / skill / agent / ask-user / web-fetch) to the provider's native tool name. null when the capability has no equivalent on this provider — silently dropped from the resolved list.",
+          "additionalProperties": { "type": ["string", "null"] }
+        }
+      }
     }
   },
   "$defs": {

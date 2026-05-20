@@ -1,0 +1,3 @@
+name: smith-technical-doc-writer
+description: Produces .smith/TECHNICAL_SPECIFICATION.MD by filling a macro template with content derived from the project source. The template lives at the path passed in by the caller (`/smith-generate-docs`) and carries `{{placeholder}}` markers ; the agent walks the source tree, identifies modules + APIs + persistence + cross-cutting concerns, computes substitutions, and writes the result atomically. Read by senior engineers ramping up on the codebase. Dispatched by /smith-generate-docs.
+capabilities: [read, glob, grep, write, bash]

@@ -1,0 +1,36 @@
+framework: java-spring-boot
+version: '4'
+description: 'Skill templates for Java 24 + Spring Boot 4 services. Today the set
+
+  ships a single `bootstrap` skill — interactive scaffold of a runnable
+
+  service (pom.xml, application entry, optional REST controller,
+
+  optional Liquibase changelog, application.yaml, .gitignore, README).
+
+  More skills (coding standards, tests + coverage, JPA + transactions,
+
+  OpenAPI contract, observability) can be added with /smith-template-add.
+
+  Each skills/<slug>/ directory ships a body (template.md), common
+
+  metadata (metadata.yml), and per-provider frontmatter overrides
+
+  (<provider>.yml). smith-template-install composes the frontmatter at
+
+  install time and names the destination skill
+
+  `smith-java-spring-boot-<slug>` in the consumer project''s
+
+  provider-native skill dir.
+
+  '
+skills:
+- name: bootstrap
+  version: 0.1.0
+adapter_placeholders:
+  '{{language}}': Always "java" for this template set.
+  '{{runtime}}': jvm
+  '{{framework}}': spring-boot
+  '{{framework_version}}': '4'
+  '{{root_package}}': Maven groupId (e.g. com.example).

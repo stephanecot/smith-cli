@@ -28,3 +28,25 @@ kinds:
     consumer_path: .vscode/tasks.json OR lefthook.yml OR .github/workflows/<n>.yml
     invocation: Host-driven (VS Code task, git hook, CI). Copilot has no in-process event hooks.
     example: example/example-hook-tasks.json
+
+build:
+  consumer_paths:
+    skill:    ".github/prompts/{slug}.prompt.md"
+    agent:    ".github/agents/{slug}.agent.md"
+    hook_dir: ".github/workflows/{bundle}"
+    settings: ".vscode/tasks.json"
+  agent_frontmatter:
+    emit_name: true
+    extra: {}
+  tools_style: yaml-list
+  capability_map:
+    read:      search/codebase
+    glob:      search/codebase
+    grep:      search/usages
+    bash:      read/terminalLastCommand
+    edit:      edit
+    write:     edit
+    skill:     ~
+    agent:     agent
+    ask-user:  ~
+    web-fetch: web/fetch

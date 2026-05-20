@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "templates": [
+    {
+      "framework": "angular",
+      "version": "21",
+      "directory": "angular/21",
+      "config": "angular/21/config.yaml",
+      "description": "Skill templates for Angular 21 projects (zoneless, signals, Tailwind v4,\nVitest, Transloco i18n, OpenAPI-generated HTTP clients). Each skills/<slug>/\ndirectory ships a body (template.md), common metadata (metadata.yml), and\nper-provider frontmatter overrides (<provider>.yml). smith-template-install\ncomposes the frontmatter at install time and names the destination skill\n`smith-angular-<slug>` in the consumer project's provider-native skill dir.",
+      "skills": [
+        {
+          "name": "bootstrap",
+          "version": "0.1.0"
+        },
+        {
+          "name": "standards",
+          "version": "0.1.0"
+        },
+        {
+          "name": "tests-coverage",
+          "version": "0.1.0"
+        },
+        {
+          "name": "design-system",
+          "version": "0.1.0"
+        },
+        {
+          "name": "i18n-transloco",
+          "version": "0.1.0"
+        },
+        {
+          "name": "openapi-client",
+          "version": "0.1.0"
+        }
+      ]
+    },
+    {
+      "framework": "java-spring-boot",
+      "version": "4",
+      "directory": "java-spring-boot/4",
+      "config": "java-spring-boot/4/config.yaml",
+      "description": "Skill templates for Java 24 + Spring Boot 4 services. Today the set\nships a single `bootstrap` skill \u2014 interactive scaffold of a runnable\nservice (pom.xml, application entry, optional REST controller,\noptional Liquibase changelog, application.yaml, .gitignore, README).\nMore skills (coding standards, tests + coverage, JPA + transactions,\nOpenAPI contract, observability) can be added with /smith-template-add.\nEach skills/<slug>/ directory ships a body (template.md), common\nmetadata (metadata.yml), and per-provider frontmatter overrides\n(<provider>.yml). smith-template-install composes the frontmatter at\ninstall time and names the destination skill\n`smith-java-spring-boot-<slug>` in the consumer project's\nprovider-native skill dir.",
+      "skills": [
+        {
+          "name": "bootstrap",
+          "version": "0.1.0"
+        }
+      ]
+    }
+  ]
+}

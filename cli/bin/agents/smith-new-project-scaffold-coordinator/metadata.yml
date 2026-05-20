@@ -1,0 +1,3 @@
+name: smith-new-project-scaffold-coordinator
+description: Coordinates Step 9 of `/smith-new-project` — picks the framework `bootstrap` skills from `.smith/config.json::skills[]`, applies the provider gate, runs the conflict guard on declared output paths, dispatches one `smith-new-project-bootstrapper` sub-agent per eligible framework (parallel in a single batch ; serialised when paths collide), and collects `BootstrapResult[]`. Returns a structured `ScaffoldReport` to the orchestrator. Dispatched once by `/smith-new-project` at step 9 — never invoke directly.
+capabilities: [read, glob, grep, bash, agent, skill]

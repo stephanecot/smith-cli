@@ -1,0 +1,4 @@
+skill: .github/prompts/{slug}.prompt.md
+agent: .github/agents/{slug}.agent.md
+hook_dir: .github/workflows/{bundle}
+settings: .vscode/tasks.json

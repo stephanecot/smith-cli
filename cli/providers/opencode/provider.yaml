@@ -29,3 +29,26 @@ kinds:
     consumer_path: .opencode/plugins/<slug>.ts (or .js)
     invocation: Plugin function registered against a lifecycle event — fires automatically.
     example: example/example-hook.ts
+
+build:
+  consumer_paths:
+    skill:    ".opencode/commands/{slug}.md"
+    agent:    ".opencode/agents/{slug}.md"
+    hook_dir: ".opencode/plugins"
+    settings: ~
+  agent_frontmatter:
+    emit_name: false
+    extra:
+      mode: subagent
+  tools_style: opencode-permission
+  capability_map:
+    read:      read
+    glob:      glob
+    grep:      grep
+    bash:      bash
+    edit:      edit
+    write:     edit
+    skill:     skill
+    agent:     task
+    ask-user:  question
+    web-fetch: webfetch

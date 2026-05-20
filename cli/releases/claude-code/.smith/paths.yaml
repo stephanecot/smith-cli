@@ -1,0 +1,4 @@
+skill: .claude/skills/{slug}/SKILL.md
+agent: .claude/agents/{slug}.md
+hook_dir: .claude/hooks/{bundle}
+settings: .claude/settings.json

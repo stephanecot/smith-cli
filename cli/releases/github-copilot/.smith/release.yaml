@@ -1,0 +1,19 @@
+provider: github-copilot
+built_at: '2026-05-20T20:56:57Z'
+smith_cli_sha: ac5a7275bb2e3e3fcb03296ef22eb94c804068f4
+duration_ms: 19
+bin:
+  skills:
+    built: 12
+    skipped: 0
+    warnings: []
+  agents:
+    built: 8
+    skipped: 0
+    warnings: []
+bundles:
+  built: 4
+  skipped: []
+templates:
+  built: 2
+  skipped: []
