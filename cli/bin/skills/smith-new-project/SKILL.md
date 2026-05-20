@@ -1,6 +1,6 @@
 ---
 name: smith-new-project
-description: Bootstraps a brand-new project end-to-end. 10-step agentic workflow — `/smith-init` (if needed), interactive stack discovery, `.smith/architecture.json` + `.smith/config.json` shells, parallel bundle installs (one sub-agent per bundle via `/smith-bundle-install`), parallel template installs (one sub-agent per template via `/smith-template-install`), AGENTS.md generation (sub-agent `smith-new-project-agents-writer` → skill `/smith-agents-md-write`, ≤100 lines), smith-config refresh, verification sub-agent, **then scaffold the project source** via the `smith-new-project-scaffold-coordinator` sub-agent (which fans out one `smith-new-project-bootstrapper` per framework bootstrap skill ; tolerates missing or absent bootstraps), and finally a markdown report under `.smith/report/` capturing the full run including the scaffold. Trigger with `/smith-new-project "<description>" [--provider claude-code|github-copilot]`.
+description: Bootstraps a brand-new project end-to-end. 10-step agentic workflow — `/smith-init` (if needed), stack discovery (sub-agent `smith-stack-discoverer` ; ≤ 2 batched `AskUserQuestion` rounds, framework defaults applied), `.smith/architecture.json` + `.smith/config.json` shells, parallel bundle installs (one sub-agent per bundle via `/smith-bundle-install`), parallel template installs (one sub-agent per template via `/smith-template-install`), AGENTS.md generation (sub-agent `smith-new-project-agents-writer` → skill `/smith-agents-md-write`, ≤100 lines), smith-config refresh, verification sub-agent, **then scaffold the project source** via the `smith-new-project-scaffold-coordinator` sub-agent (which fans out one `smith-new-project-bootstrapper` per framework bootstrap skill ; tolerates missing or absent bootstraps), and finally a markdown report under `.smith/report/` capturing the full run including the scaffold. Trigger with `/smith-new-project "<description>" [--provider claude-code|github-copilot]`.
 ---
 
 # Skill — `/smith-new-project`
@@ -64,29 +64,59 @@ The provider Smith targets for the rest of the workflow comes from
 `.smith/smith.yaml` (single source of truth past this point) — even
 when the user passed `--provider` and the file already existed.
 
-### Step 2 — Stack discovery (interactive)
+### Step 2 — Stack discovery (sub-agent)
 
-Parse `<description>` for explicit signals : languages, frameworks,
-versions, databases, infra hints. Build a draft `ProjectStack` (same
-shape as `.smith/architecture.json` — see the sibling skill
-**`smith-architecture-format`** for the canonical schema).
+This step is **not inlined** — dispatch the dedicated sub-agent
+**`smith-stack-discoverer`** and wait for its structured
+return. The sub-agent owns the canonical question catalog, framework
+default table, batching policy (≤ 2 rounds of `AskUserQuestion`, ≤ 6
+questions total), and stop conditions ; the orchestrator stays a
+thin coordinator.
 
-For every **structuring** signal the description doesn't pin down, ask
-**one focused question** via `AskUserQuestion`. Stop asking as soon as
-the stack is implementable. Examples of structuring questions :
+**Why a sub-agent.** Parsing the description, ranking the gaps,
+shaping the `AskUserQuestion` calls, and re-parsing free-text briefs
+are heavy reading + reasoning work. Running them in a dedicated
+context keeps the orchestrator's thread tight and makes the
+question discipline (no nice-to-haves, no version invention, hard
+round cap) auditable in one place.
 
-- "Frontend framework + version ?" (Angular 21 / React 19 / Vue 3 / none)
-- "Backend framework + version ?" (Spring Boot 4 / Quarkus 3 / FastAPI / none)
-- "Primary database ?" (PostgreSQL / MySQL / MongoDB / none)
-- "Build tool ?" (only if ambiguous — defaults are deterministic)
-- "Test stack ?" (only if the framework has multiple idiomatic options)
+**Dispatch.** Use the `Agent` tool **without** `isolation: "worktree"`
+(the sub-agent is read-only, but staying in the consumer tree keeps
+git-sha resolution consistent later). Pass :
 
-Skip questions whose answer is obvious from the description or from
-framework defaults (e.g. "Spring Boot" → Maven by default, no need to
-ask unless the user mentioned Gradle).
+- `description`           — verbatim `<description>` argument ;
+- `consumer_project_dir`  — absolute path of the project root ;
+- `provider`              — `provider:` value read back from
+  `.smith/smith.yaml` after Step 1.
 
-The user may also paste a richer brief at this step — accept it and
-re-parse before re-asking.
+**Return shape.** The sub-agent returns :
+
+```json
+{
+  "status":           "ready | failed",
+  "reason":           "<token or null>",
+  "stack":            { ...same keys as architecture.json::project... },
+  "questions_asked":  <int>,
+  "assumed_defaults": [{ "field": "...", "value": "...", "reason": "..." }, ...]
+}
+```
+
+On `status=ready` the orchestrator stores `stack` for Step 3 and
+appends `questions_asked` + `assumed_defaults[]` to the trace log
+(Step 10 surfaces them as a "Discovery" section in the run report).
+
+On `status=failed`, branch by `reason` :
+
+- `description-too-vague` — surface the failure to the user with a
+  prompt to re-run `/smith-new-project` with a richer brief, then
+  exit cleanly (no partial writes).
+- `user-cancelled` — same exit path ; the user already declined to
+  answer.
+
+The discoverer is the **only** step in the workflow allowed to call
+`AskUserQuestion`. Steps 4 / 5 / 9 sub-agents must answer any gap
+from `discovery_hints` + framework defaults, never by pinging the
+user mid-workflow.
 
 ### Step 3 — Write `.smith/architecture.json` + empty `.smith/config.json` shell
 
