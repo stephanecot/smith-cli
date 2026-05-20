@@ -1,7 +1,0 @@
-model: small
-tools:
-  - codebase
-  - usages
-  - problems
-  - runCommands
-  - terminalLastCommand

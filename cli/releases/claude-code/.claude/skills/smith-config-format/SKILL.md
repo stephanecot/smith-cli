@@ -1,6 +1,6 @@
 ---
 name: smith-config-format
-description: Source of truth for the format of `.smith/config.json` — the Smith state file (provider + spec paths + AGENTS.md pointer + adapted skills + installed bundles). Documents every field, its type, allowed values, defaults, and who is allowed to write it. Ships the canonical macro template under `template/config.template.json`. Auto-load whenever the user asks how `config.json` is laid out, what a field means, or which skill upserts which list. Sister skill `smith-architecture-format` covers the OTHER file (`.smith/architecture.json`, the project identity file) — keep the scope separate.
+description: Source of truth for the format of `.smith/config.json` — the Smith state file (provider + spec paths + AGENTS.md pointer + adapted skills + installed bundles). Documents every field, its type, allowed values, defaults, and who is allowed to write it. Ships the canonical macro template under `templates/config.template.json`. Auto-load whenever the user asks how `config.json` is laid out, what a field means, or which skill upserts which list. Sister skill `smith-architecture-format` covers the OTHER file (`.smith/architecture.json`, the project identity file) — keep the scope separate.
 when_to_use: User asks about `.smith/config.json`, the Smith state file, the `skills[]` or `bundles[]` lists, the provider field, the `specifications.*` paths, or the mutator contract used by `/smith-bundle-install` / `/smith-template-install`. Also fires when a skill needs to compose or upsert into this JSON.
 user-invocable: false
 ---
@@ -13,7 +13,7 @@ project : which provider runs the show, where the narrative
 specifications live, which skills have been adapted from templates,
 which bundles have been installed. Every field, type, default and
 ownership rule is documented below. The macro template under
-`template/config.template.json` is the canonical fill-in-the-blank
+`templates/config.template.json` is the canonical fill-in-the-blank
 skeleton that `/smith-init` and the install mutators read.
 
 The sister skill `smith-architecture-format` covers the OTHER managed
@@ -30,7 +30,7 @@ by `/smith-init` and never re-written by other Smith skills.
 |---|---|
 | Path                  | `.smith/config.json` |
 | Purpose               | What Smith has DONE — provider, spec paths, AGENTS.md pointer, adapted skills, installed bundles. |
-| Template              | `template/config.template.json` |
+| Template              | `templates/config.template.json` |
 | Created by            | `/smith-init` (idempotent — if file exists, do not touch). |
 | Updated by            | `/smith-bundle-install` (upserts `bundles[]`), `/smith-template-install` (upserts `skills[]`). |
 | Read by               | `/smith-dashboard`, `/smith-bundle-install`, `/smith-template-install`, `/smith-generate-docs`. |
@@ -75,7 +75,7 @@ These paths point at files that may not exist yet — they are written by
 
 - `from_template` is the **directory** under the template that owns the
   skill (`<framework>/<version>/skills/<slug>/`), not a file path. The
-  directory contains `template.md` (body), `metadata.yml`, and one
+  directory contains `<slug>.md` (body), `metadata.yml`, and one
   `<provider>.yml` per supported provider.
 - `version` comes from the template's `config.yaml` `skills[].version`
   (never from `metadata.yml`, which no longer carries a version).
@@ -151,7 +151,7 @@ entry carries a marker :
 Any Smith skill that mutates `.smith/config.json` MUST :
 
 1. **Read the canonical template** from
-   `template/config.template.json` first to know the full shape —
+   `templates/config.template.json` first to know the full shape —
    even when only upserting one section. Missing keys must not be
    dropped.
 2. **Atomic write** : write to `<file>.tmp`, fsync, then `mv` over the
@@ -165,8 +165,8 @@ Any Smith skill that mutates `.smith/config.json` MUST :
 
 | Skill | What it does with `config.json` |
 |---|---|
-| `/smith-init`             | Reads `template/config.template.json`, fills the placeholders, atomic-writes the empty shell. |
+| `/smith-init`             | Reads `templates/config.template.json`, fills the placeholders, atomic-writes the empty shell. |
 | `/smith-bundle-install`   | Reads the bundle entry shape, upserts the `bundles[]` array keyed by `name`. |
 | `/smith-template-install` | Reads the skill entry shape, upserts the `skills[]` array keyed by `name`. |
 | `/smith-generate-docs`    | Reads `specifications.*` to know where to write the spec files. Read-only on this skill's shape. |
-| `/smith-dashboard`        | Reads the written JSON to render the dashboard. Doesn't read `template/` directly. |
+| `/smith-dashboard`        | Reads the written JSON to render the dashboard. Doesn't read `templates/` directly. |

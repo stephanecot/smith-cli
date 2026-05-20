@@ -139,6 +139,11 @@
           "type": "object",
           "description": "Map of generic capability slug (read / glob / grep / bash / edit / write / skill / agent / ask-user / web-fetch) to the provider's native tool name. null when the capability has no equivalent on this provider — silently dropped from the resolved list.",
           "additionalProperties": { "type": ["string", "null"] }
+        },
+        "skill_property_map": {
+          "type": "object",
+          "description": "Map of generic bundle-skill property slug (model / user-invocable / ...) to the provider's native frontmatter key. null when the property has no equivalent on this provider — silently dropped from the rendered frontmatter. Values are passed through verbatim (no normalisation).",
+          "additionalProperties": { "type": ["string", "null"] }
         }
       }
     }

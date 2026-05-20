@@ -1,6 +1,6 @@
 ---
 name: smith-generate-docs
-description: Generate the project's two narrative specs under .smith/ — FUNCTIONAL_SPECIFICATION.MD (what the system does) and TECHNICAL_SPECIFICATION.MD (architecture for a senior engineer). Dispatches the two doc-writer agents in parallel ; each fills a macro template from cli/.claude/skills/smith-generate-docs/template/. Idempotent — regenerates the docs on every run, even when they already exist. Does NOT touch architecture.json or config.json. Trigger with `/smith-generate-docs`. Requires /smith-init to have run.
+description: Generate the project's two narrative specs under .smith/ — FUNCTIONAL_SPECIFICATION.MD (what the system does) and TECHNICAL_SPECIFICATION.MD (architecture for a senior engineer). Dispatches the two doc-writer agents in parallel ; each fills a macro template from cli/.claude/skills/smith-generate-docs/templates/. Idempotent — regenerates the docs on every run, even when they already exist. Does NOT touch architecture.json or config.json. Trigger with `/smith-generate-docs`. Requires /smith-init to have run.
 ---
 
 # Skill — `/smith-generate-docs`
@@ -53,8 +53,8 @@ name + detected stack) and `.smith/config.json` (only consults
 
    | Agent | Macro template | Output file |
    |---|---|---|
-   | `smith-functional-doc-writer` | `${CLAUDE_SKILL_DIR}/template/functional-spec.template.md` | `.smith/FUNCTIONAL_SPECIFICATION.MD` |
-   | `smith-technical-doc-writer`  | `${CLAUDE_SKILL_DIR}/template/technical-spec.template.md`  | `.smith/TECHNICAL_SPECIFICATION.MD`  |
+   | `smith-functional-doc-writer` | `${CLAUDE_SKILL_DIR}/templates/functional-spec.template.md` | `.smith/FUNCTIONAL_SPECIFICATION.MD` |
+   | `smith-technical-doc-writer`  | `${CLAUDE_SKILL_DIR}/templates/technical-spec.template.md`  | `.smith/TECHNICAL_SPECIFICATION.MD`  |
 
    The **macro template** is a fill-in-the-blank skeleton with
    `{{placeholder}}` markers. Each agent reads its template, computes

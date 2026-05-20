@@ -14,7 +14,7 @@ skill file at install time — it never copies a `SKILL.md` byte-for-byte.
 - `<consumer>/.smith/smith.yaml` must exist (the `/smith-init` marker).
   `<consumer>` is the **consumer project directory** — see "Consumer
   directory resolution" below.
-- `--name <bundle>` must be a key listed in `cli/bundles/config.json`.
+- `--name <bundle>` must be a key listed in `cli/bundles/index.yaml`.
 - `--ia <provider>` must be in the bundle's `config.yaml` `providers:`
   list AND a known Smith provider (`cli/providers/<provider>/` exists).
 
@@ -58,7 +58,7 @@ and only this directory.**
 
 ## What you do
 
-1. **Look up the bundle** in `cli/bundles/config.json` (read-only). Bail
+1. **Look up the bundle** in `cli/bundles/index.yaml` (read-only). Bail
    if the name is unknown; suggest the closest match by string distance.
 
 2. **Read the bundle's `config.yaml`** and confirm `<provider>` is in
@@ -307,7 +307,7 @@ and only this directory.**
   only adds / replaces / removes entries tagged for this exact bundle.
 - **Don't merge into `settings.local.json`.** Hooks are team-wide
   behaviour; they belong in the committed `settings.json`.
-- **Don't modify `cli/bundles/config.json`** (that's
+- **Don't modify `cli/bundles/index.yaml`** (that's
   `/smith-bundle-add` / `/smith-bundle-edit`'s job — it lists the
   catalogue). This skill only writes the consumer-side
   `.smith/config.json` (what's installed in the consumer).

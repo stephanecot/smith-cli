@@ -11,7 +11,7 @@ frontmatter unchanged, and rewrite only the body.
 ## Inputs
 
 - `template_path` — absolute path of the source template under
-  `<release_root>/templates/<framework>/<version>/skills/<slug>/SKILL.md`.
+  `<release_root>/.smith/templates/framework/<framework>/<version>/skills/<slug>/SKILL.md`.
   The file carries YAML frontmatter (provider-correct) followed by a
   body. **Preserve the frontmatter verbatim** ; adapt only the body.
 - `project_stack` — JSON object with the consumer project's languages,

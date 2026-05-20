@@ -1,6 +1,6 @@
 ---
 name: smith-bundle-add
-description: Scaffolds a NEW bundle under cli/bundles/<name>/ following the canonical layout documented in the sibling skill `smith-bundle-format`. Defaults to scaffolding for **every supported provider** (claude-code + github-copilot) — pass `--ia` only to restrict. Validates every tag against the canonical taxonomy; regenerates cli/bundles/config.json. Trigger with `/smith-bundle-add <name> "<description>" --tag t1,t2,t3 [--ia claude-code|github-copilot|both]`. CLI-maintainer command (operates on cli/, not on a consumer project).
+description: Scaffolds a NEW bundle under cli/bundles/<name>/ following the canonical layout documented in the sibling skill `smith-bundle-format`. Defaults to scaffolding for **every supported provider** (claude-code + github-copilot) — pass `--ia` only to restrict. Validates every tag against the canonical taxonomy; regenerates cli/bundles/index.yaml. Trigger with `/smith-bundle-add <name> "<description>" --tag t1,t2,t3 [--ia claude-code|github-copilot|both]`. CLI-maintainer command (operates on cli/, not on a consumer project).
 ---
 
 # Skill — `/smith-bundle-add`
@@ -8,7 +8,7 @@ description: Scaffolds a NEW bundle under cli/bundles/<name>/ following the cano
 Scaffolds a **new** bundle. To modify an existing bundle, use
 `/smith-bundle-edit` instead.
 
-The canonical layout, the per-skill 4-file shape, the `config.yaml`
+The canonical layout, the per-skill 2-file shape, the `config.yaml`
 shape, and the tag taxonomy are documented in the sibling skill
 **`smith-bundle-format`** — read it first if you don't already have it
 in context. This skill only carries the scaffold-new-bundle procedure.
@@ -74,19 +74,21 @@ distance ≤ 2).
        ```yaml
        name: <slug>
        description: <one-line placeholder — maintainer rewrites>
+       # Optional generic properties (resolved per provider at build time
+       # via provider.yaml::build.skill_property_map) :
+       # model: small | medium | large
+       # user-invocable: true | false
        ```
        **No `version:`** — the per-skill version lives in
-       `config.yaml` `skills[].version`.
-     - `skills/<slug>/<provider>.yml` per provider in scope. **Empty
-       file** (0 bytes or a single comment-free blank document). The
-       maintainer adds provider-specific frontmatter overrides by hand
-       when needed.
-       **Reminder for the maintainer** : when setting `model:` in a
-       `<provider>.yml`, use the abstract tier (`small` / `medium` /
-       `large`) — NEVER a concrete model identifier like `haiku` or
-       `Claude Sonnet 4.5`. The installer resolves the tier at
-       write-time. See `smith-bundle-format`'s "Model tier
-       abstraction" section.
+       `config.yaml::skills[].version`. **No per-provider yml** :
+       provider-specific frontmatter is composed at build time from
+       these generic properties — when `user-invocable` is unsupported
+       on a provider (e.g. github-copilot / opencode), the build
+       silently drops it.
+       **Reminder** : when setting `model:`, use the abstract tier
+       (`small` / `medium` / `large`) — never a concrete model
+       identifier (`haiku`, `Claude Sonnet 4.5`, …). See
+       `smith-bundle-format`'s "Model tier abstraction" section.
    - For each declared hook `<n>` and each provider it targets :
      - `hooks/claude-code/<n>.hooks.json` (Claude Code) with a stub
        fragment for `.claude/settings.json`.
@@ -96,7 +98,7 @@ distance ≤ 2).
      - Optional sidecar scripts go next to the fragment in the same
        `hooks/<provider>/` folder.
 
-4. **Regenerate `cli/bundles/config.json`** :
+4. **Regenerate `cli/bundles/index.yaml`** :
    - Walk every `cli/bundles/*/config.yaml`.
    - Build the new `bundles[]` array : `{name, description,
      directory, version, tags, providers}`. Sort by `name` for
@@ -110,18 +112,17 @@ distance ≤ 2).
    Providers: <list>.
    Skills:    <slug1>, <slug2>, ...
    Hooks:     <list>, or "(none)".
-   cli/bundles/config.json regenerated ({{N}} bundles total).
+   cli/bundles/index.yaml regenerated ({{N}} bundles total).
 
    Next steps :
      - Fill the body of cli/bundles/<name>/skills/<slug>/<slug>.md.
-     - Refine cli/bundles/<name>/skills/<slug>/metadata.yml (name + description + version).
-     - Add provider-specific frontmatter overrides to cli/bundles/<name>/skills/<slug>/<provider>.yml when needed (valid keys = those declared in cli/providers/<provider>/format-skill.yaml).
+     - Refine cli/bundles/<name>/skills/<slug>/metadata.yml (name + description ; optional model / user-invocable).
      - Fill cli/bundles/<name>/README.MD (Why + Usage sections).
    ```
 
 ## What you do NOT do
 
-- Don't re-document the layout, the per-skill 4-file shape, the
+- Don't re-document the layout, the per-skill 2-file shape, the
   config.yaml shape, or the tag taxonomy here. Those live in
   `smith-bundle-format` — keep this skill focused on the
   scaffold-new-bundle procedure.
@@ -132,12 +133,12 @@ distance ≤ 2).
   them at the provider's built-in agents (Agent tool /
   general-purpose / Explore for Claude Code; chat-mode agents for
   Copilot).
-- Don't pre-fill `<provider>.yml` with placeholder frontmatter — the
-  file MUST start empty so the maintainer's intent (no override) is
-  clear. Adding values is a deliberate manual step.
-- Don't install the new bundle anywhere; that's
-  `/smith-bundle-install`'s job.
+- Don't scaffold any `skills/<slug>/<provider>.yml` files — those are
+  gone in this layout. Provider-specific frontmatter is composed at
+  build time from generic properties in `metadata.yml`.
+- Don't install the new bundle anywhere; that's the release-build's
+  job.
 - Don't modify an EXISTING bundle — that's `/smith-bundle-edit`'s job.
 - Don't touch `cli/.claude/` or `cli/templates/`.
-- Don't patch `cli/bundles/config.json` line-by-line — always
+- Don't patch `cli/bundles/index.yaml` line-by-line — always
   regenerate from disk to avoid drift.

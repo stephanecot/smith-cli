@@ -50,3 +50,6 @@ build:
     agent:     agent
     ask-user:  ~
     web-fetch: web/fetch
+  skill_property_map:
+    model:          model
+    user-invocable: ~

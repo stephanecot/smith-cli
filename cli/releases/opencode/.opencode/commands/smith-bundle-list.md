@@ -1,6 +1,6 @@
 ---
 name: smith-bundle-list
-description: Lists every bundle declared in cli/bundles/config.json, optionally filtered by one or more tags. Read-only — does NOT modify any file. Trigger with `/smith-bundle-list [--tag X[,Y,...]]`. Requires /smith-init to have run.
+description: Lists every bundle declared in cli/bundles/index.yaml, optionally filtered by one or more tags. Read-only — does NOT modify any file. Trigger with `/smith-bundle-list [--tag X[,Y,...]]`. Requires /smith-init to have run.
 ---
 
 # Skill — `/smith-bundle-list`
@@ -26,7 +26,7 @@ Multiple tags are an **intersection** (AND), not a union.
 
 ## What you do
 
-1. Read `cli/bundles/config.json`. Parse the `bundles[]` array.
+1. Read `cli/bundles/index.yaml`. Parse the `bundles[]` array.
 2. If `--tag` is given, filter to bundles whose `tags[]` contains EVERY
    requested tag.
 3. Render a markdown table :

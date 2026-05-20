@@ -1,0 +1,53 @@
+version: 1
+templates:
+- framework: angular
+  version: '21'
+  directory: angular/21
+  config: angular/21/config.yaml
+  description: Skill templates for Angular 21 projects (zoneless, signals, Tailwind v4, Vitest, Transloco i18n, OpenAPI-generated HTTP clients). Each skills/<slug>/ directory ships a body (template.md), common metadata (metadata.yml), and per-provider frontmatter overrides (<provider>.yml). smith-template-install composes the frontmatter at install time and names the destination skill `smith-angular-<slug>` in the consumer project's provider-native skill dir.
+  skills:
+  - name: standards
+    version: 0.1.0
+    tags:
+    - angular
+    - typescript
+    - frontend
+  - name: tests-coverage
+    version: 0.1.0
+    tags:
+    - angular
+    - vitest
+    - test
+    - frontend
+  - name: design-system
+    version: 0.1.0
+    tags:
+    - tailwindcss
+    - design-system
+    - frontend
+  - name: i18n-transloco
+    version: 0.1.0
+    tags:
+    - transloco
+    - i18n
+    - frontend
+  - name: openapi-client
+    version: 0.1.0
+    tags:
+    - openapi-generator
+    - rest
+    - frontend
+- framework: java-spring-boot
+  version: '4'
+  directory: java-spring-boot/4
+  config: java-spring-boot/4/config.yaml
+  description: Skill templates for Java 24 + Spring Boot 4 services. Today the set ships a single `bootstrap` skill — interactive scaffold of a runnable service (pom.xml, application entry, optional REST controller, optional Liquibase changelog, application.yaml, .gitignore, README). More skills (coding standards, tests + coverage, JPA + transactions, OpenAPI contract, observability) can be added with /smith-template-add. Each skills/<slug>/ directory ships a body (template.md), common metadata (metadata.yml), and per-provider frontmatter overrides (<provider>.yml). smith-template-install composes the frontmatter at install time and names the destination skill `smith-java-spring-boot-<slug>` in the consumer project's provider-native skill dir.
+  skills:
+  - name: bootstrap
+    version: 0.1.0
+    tags:
+    - spring-boot
+    - java
+    - jvm
+    - backend
+    - maven

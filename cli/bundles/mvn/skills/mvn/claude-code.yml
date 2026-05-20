@@ -1,3 +1,0 @@
-model: small
-allowed-tools: Read Glob Grep Bash(mvn *)
-user-invocable: true

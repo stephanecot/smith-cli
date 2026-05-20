@@ -1,6 +1,6 @@
 ---
 name: smith-bundle-edit
-description: Modify an EXISTING bundle under cli/bundles/<name>/ — add or remove a skill, add or remove a hook, add or remove a sidecar script, bump the bundle / per-skill / per-hook version, edit description or tags. Respects the canonical layout documented in `smith-bundle-format`. Regenerates cli/bundles/config.json after the change. Trigger with `/smith-bundle-edit <name> [--add-skill <slug>] [--rm-skill <slug>] [--add-hook <n> --ia <provider>] [--rm-hook <n> --ia <provider>] [--add-script <file> --ia <provider>] [--rm-script <file> --ia <provider>] [--add-tag <t>] [--rm-tag <t>] [--add-provider <p>] [--rm-provider <p>] [--bump-version major|minor|patch] [--bump-skill <slug> major|minor|patch] [--bump-hook <n> major|minor|patch] [--description "<new>"]`. CLI-maintainer command.
+description: Modify an EXISTING bundle under cli/bundles/<name>/ — add or remove a skill, add or remove a hook, add or remove a sidecar script, bump the bundle / per-skill / per-hook version, edit description or tags. Respects the canonical layout documented in `smith-bundle-format`. Regenerates cli/bundles/index.yaml after the change. Trigger with `/smith-bundle-edit <name> [--add-skill <slug>] [--rm-skill <slug>] [--add-hook <n> --ia <provider>] [--rm-hook <n> --ia <provider>] [--add-script <file> --ia <provider>] [--rm-script <file> --ia <provider>] [--add-tag <t>] [--rm-tag <t>] [--add-provider <p>] [--rm-provider <p>] [--bump-version major|minor|patch] [--bump-skill <slug> major|minor|patch] [--bump-hook <n> major|minor|patch] [--description "<new>"]`. CLI-maintainer command.
 ---
 
 # Skill — `/smith-bundle-edit`
@@ -9,7 +9,7 @@ Modify an **existing** bundle while preserving the canonical layout
 documented in `smith-bundle-format`. To create a new bundle, use
 `/smith-bundle-add` instead.
 
-The layout, the per-skill 4-file shape, the `config.yaml` shape, and
+The layout, the per-skill 2-file shape, the `config.yaml` shape, and
 the tag taxonomy are documented in the sibling skill
 **`smith-bundle-format`** — read it first if not already in context.
 
@@ -29,8 +29,8 @@ Supported flags (combinable in a single invocation) :
 
 | Flag | Effect |
 |---|---|
-| `--add-skill <slug>`                | Create `skills/<slug>/` with the 4 canonical files (`<slug>.md` body stub + `metadata.yml` + one `<provider>.yml` per provider in `config.yaml`). |
-| `--rm-skill <slug>`                 | Delete `skills/<slug>/` entirely (body + metadata + every `<provider>.yml`). |
+| `--add-skill <slug>`                | Create `skills/<slug>/` with the 2 canonical files (`<slug>.md` body stub + `metadata.yml`). |
+| `--rm-skill <slug>`                 | Delete `skills/<slug>/` entirely (body + metadata). |
 | `--add-hook <n> --ia <provider>`    | Create `hooks/<provider>/<n>.<ext>` with a stub fragment. `<ext>` = `hooks.json` for `claude-code`, `tasks.json` for `github-copilot`. `--ia` is REQUIRED — hooks are always provider-specific. |
 | `--rm-hook <n> --ia <provider>`     | Delete `hooks/<provider>/<n>.<ext>`. |
 | `--add-script <file> --ia <provider>` | Create `hooks/<provider>/<file>` with an empty stub + executable bit if its extension suggests it (`.sh`, `.js`, `.py`). |
@@ -139,7 +139,7 @@ options exist.
      corresponds to a real `hooks/<provider>/<name>.<ext>` file (and
      vice-versa).
 
-4. **Regenerate `cli/bundles/config.json`** :
+4. **Regenerate `cli/bundles/index.yaml`** :
    - Walk every `cli/bundles/*/config.yaml`.
    - Build the `bundles[]` array : `{name, description, directory,
      version, tags, providers}`. Sort by `name`.
@@ -153,12 +153,12 @@ options exist.
    Tags :    <new tag list>
    Providers: <new provider list>
    Version : <new version>
-   cli/bundles/config.json regenerated.
+   cli/bundles/index.yaml regenerated.
    ```
 
 ## What you do NOT do
 
-- Don't re-document the layout, the per-skill 4-file shape, the
+- Don't re-document the layout, the per-skill 2-file shape, the
   config.yaml shape, or the tag taxonomy — they live in
   `smith-bundle-format`.
 - Don't add an `agents/` folder or any agent artefact — bundles do
@@ -173,7 +173,7 @@ options exist.
   `/smith-bundle-add` if `<name>` does not exist.
 - Don't install the bundle anywhere ; `/smith-bundle-install` does
   that.
-- Don't patch `cli/bundles/config.json` line-by-line — always
+- Don't patch `cli/bundles/index.yaml` line-by-line — always
   regenerate from disk.
 - Don't bump version automatically when changing files. The maintainer
   decides when to bump via `--bump-version`.

@@ -1,6 +1,6 @@
 ---
 name: smith-new-project
-description: Bootstraps a brand-new Smith-managed project end-to-end from a pre-built release tree. 10-step agentic workflow — `/smith-init`, stack discovery, `.smith/architecture.json` + `.smith/config.json`, bundle installs (filter + copy from `<release>/.smith/bundles/`), template installs (filter + adapt skill bodies for the project stack), AGENTS.md, smith-config refresh, verifier, framework scaffold, run report. Reads consumer-side install paths from `<release>/.smith/paths.yaml` so the skill body is identical across providers (claude-code / github-copilot / opencode). No `@smith-include` resolution, no frontmatter composition at install time. Trigger with `/smith-new-project "<description>"`.
+description: Bootstraps a brand-new Smith-managed project end-to-end from a pre-built release tree. 9-step agentic workflow — `/smith-init`, stack discovery, `.smith/architecture.json` + `.smith/config.json`, bundle installs (filter + copy from `<release>/.smith/bundles/`), **framework** template installs (`<release>/.smith/templates/framework/` — N skills per framework, adapted to project stack), AGENTS.md, verifier, **bootstrap** template install + scaffold (`<release>/.smith/templates/bootstrap/` — singleton skill + assets/templates/scripts sidecars, dispatched to scaffold the source tree), run report. Reads consumer-side install paths from `<release>/.smith/paths.yaml` so the skill body is identical across providers (claude-code / github-copilot / opencode). No `@smith-include` resolution, no frontmatter composition at install time. Trigger with `/smith-new-project "<description>"`.
 ---
 
 # Skill — `/smith-new-project`
@@ -27,11 +27,20 @@ with `paths.yaml` + `bundles/` + `templates/` inside. The tree :
     │       ├── skills/<slug>/SKILL.md   ← real skill, frontmatter included
     │       └── hooks/...                ← flat hook files for this release
     └── templates/
-        ├── index.json           ← catalogue : frameworks + versions
-        └── <framework>/<version>/
-            ├── config.yaml
-            └── skills/<slug>/SKILL.md   ← real skill ; body still has
-                                           {{placeholder}} + stack-gated sections
+        ├── framework/                            ← category : N skills per (name, version)
+        │   ├── index.json
+        │   └── <name>/<version>/
+        │       ├── config.yaml
+        │       └── skills/<slug>/SKILL.md        ← real skill ; body still has
+        │                                           {{placeholder}} + stack-gated sections
+        └── bootstrap/                            ← category : exactly 1 skill + sidecars
+            ├── index.json
+            └── <name>/<version>/
+                ├── config.yaml
+                ├── skill/SKILL.md                ← real skill (the orchestrator)
+                ├── assets/...                    ← optional, copied verbatim
+                ├── templates/...                 ← optional, real templates (HTML, …)
+                └── scripts/...                   ← optional, helper scripts
 ```
 
 Plus the provider's runtime root (`.claude/skills/` + `.claude/agents/`,
@@ -74,9 +83,11 @@ release was built ; this skill is provider-agnostic.
 ## Workflow
 
 Strictly sequential at the orchestrator level. Parallelism happens
-inside Step 5 (one adapter sub-agent per template skill) and Step 8
-(one bootstrapper per framework). Each step appends timing + outcomes
-to a `TraceLog` that Step 9 dumps into `.smith/report.md`.
+inside Step 5 (one adapter sub-agent per framework-template skill),
+Step 8.a (one adapter per bootstrap-template skill), and Step 8.b
+(one bootstrapper per installed bootstrap skill). Each step appends
+timing + outcomes to a `TraceLog` that Step 9 dumps into
+`.smith/report.md`.
 
 ### Step 1 — `/smith-init` (conditional)
 
@@ -124,7 +135,7 @@ an empty shell ; Steps 4 + 5 upsert into it.
 
 Pure filter + copy ; no sub-agent.
 
-1. Read `<release_root>/.smith/bundles/config.json`.
+1. Read `<release_root>/.smith/bundles/index.yaml`.
 2. Pick bundles whose `tags[]` intersect the project's stack tags
    (union of `tags[]` across every entry in `architecture.json`).
 3. For each picked bundle, in deterministic alphabetical order :
@@ -145,22 +156,37 @@ Pure filter + copy ; no sub-agent.
 Per-bundle failure is logged in the trace and skipped — never roll
 back the others.
 
-### Step 5 — Template installs (filter + adapter)
+### Step 5 — Framework template installs (filter + adapter)
 
-Release template skills are already real `SKILL.md` files (frontmatter
-composed at build time). Step 5 filters them against the stack and
-adapts the body to resolve `{{placeholder}}` markers + prune
-sections gated by absent techs.
+The release ships two template **categories** :
 
-1. Read `<release_root>/.smith/templates/index.json`.
+- `framework/` — N skills per (name, version), used to teach the AI
+  the project's conventions (standards, tests-coverage, design-system,
+  i18n, …). Installed here at Step 5. **Not executed** — they enrich
+  the consumer's skill set for later use.
+- `bootstrap/` — exactly 1 skill per (name, version) + optional
+  `assets/` + `templates/` + `scripts/` buckets. Installed AND
+  executed at Step 8 to scaffold the actual source tree.
+
+Step 5 handles `framework/` only.
+
+1. Read `<release_root>/.smith/templates/framework/index.yaml`.
 2. Pick (framework, version) pairs matching the project's stack
    (`framework` ∈ `architecture.json::frameworks[].name` ; version
    per the downward-match rule — highest template version `≤` the
    project's framework version, fall back to lowest available).
-3. For each picked framework, walk
-   `<release_root>/.smith/templates/<fw>/<ver>/skills/` and drop skills whose
-   central tech is absent from the project stack (e.g. drop
-   `i18n-transloco` when `transloco` isn't in the stack).
+3. For each picked framework, walk the entry's `skills[]` in
+   `framework/index.json` (each carries `name`, `version`, `tags`)
+   and **keep only skills whose `tags[]` intersect the project's
+   stack tags** (union of `tags[]` across every entry in
+   `architecture.json`). The corresponding skill directory in the
+   release lives at
+   `<release_root>/.smith/templates/framework/<fw>/<ver>/skills/<installed-name>/`
+   — already named after the installed slug (`smith-<fw>-<localslug>`),
+   iso-name rule applied at build time.
+   Example : drop `smith-angular-i18n-transloco` (tags
+   `[transloco, i18n, frontend]`) when `transloco` isn't in the
+   stack tags.
 4. For each kept skill, dispatch **`smith-single-template-adapter`**
    in parallel (single `Agent` batch). The adapter reads the release
    `SKILL.md`, leaves the frontmatter untouched, rewrites the body
@@ -169,9 +195,9 @@ sections gated by absent techs.
    ```json
    {
      "from_template":   "<release-relative source path>",
-     "destination":     "<consumer abs path = paths.skill.format(slug=smith-<fw>-<slug>)>",
+     "destination":     "<consumer abs path = paths.skill.format(slug=<installed-name>)>",
      "content":         "<full adapted SKILL.md>",
-     "skill_entry":     { "name": "smith-<fw>-<slug>", "path": "...", "adapted_at": "..." },
+     "skill_entry":     { "name": "<installed-name>", "path": "...", "adapted_at": "..." },
      "changes":         [{ "type": "...", "...": "..." }, ...]
    }
    ```
@@ -201,15 +227,58 @@ exists ; `AGENTS.md` is ≤100 lines. Returns a structured
 `VerifyReport`. Failures **do not roll back** — surfaced in the
 final report.
 
-### Step 8 — Scaffold project source (coordinator sub-agent)
+### Step 8 — Bootstrap templates : install + scaffold
+
+Step 8 runs the `bootstrap/` template category in two phases :
+**8.a install** (filter + adapter + sidecar copy) and **8.b dispatch**
+(coordinator → bootstrapper sub-agents). The bootstrap skills only
+exist as installed skills after Step 8.a — Step 8.b dispatches them
+to actually scaffold the project source.
+
+#### Step 8.a — Install bootstrap templates
+
+1. Read `<release_root>/.smith/templates/bootstrap/index.yaml`. Each
+   entry carries top-level `tags[]` (the bootstrap is a singleton
+   skill — tags live at the bootstrap level, not under a `skills[]`
+   array).
+2. Pick `(name, version)` entries whose `tags[]` intersect the
+   project's stack tags. Same downward-match rule as Step 5 for the
+   version. Typically the bootstrap's `name` will also match a
+   `architecture.json::frameworks[].name` (e.g. `angular`), but the
+   filter is tag-driven, not name-driven.
+3. For each picked bootstrap, do :
+   - **Adapt the singleton skill.** Dispatch
+     `smith-single-template-adapter` with the path
+     `<release_root>/.smith/templates/bootstrap/<name>/<ver>/skill/<installed-name>/SKILL.md`.
+     The adapter rewrites the body (placeholders + pruning) and
+     returns the adapted content. Orchestrator writes to
+     `<consumer>/<paths.skill.format(slug=<installed-name>)>`.
+     Upsert into `.smith/config.json::skills[]`.
+   - **Copy sidecar buckets** verbatim from the release to a
+     Smith-managed staging area under the consumer :
+     - `<release>/.smith/templates/bootstrap/<name>/<ver>/assets/...`
+       → `<consumer>/.smith/bootstraps/<name>/assets/...`
+     - `<release>/.smith/templates/bootstrap/<name>/<ver>/templates/...`
+       → `<consumer>/.smith/bootstraps/<name>/templates/...`
+     - `<release>/.smith/templates/bootstrap/<name>/<ver>/scripts/...`
+       → `<consumer>/.smith/bootstraps/<name>/scripts/...`
+     The bootstrap skill body references these paths when it needs
+     to drop an HTML template, run a helper script, etc.
+
+After Step 8.a, every matching bootstrap skill is installed in the
+consumer's provider-native skill path and its sidecar buckets are
+laid out under `<consumer>/.smith/bootstraps/<name>/`.
+
+#### Step 8.b — Dispatch the scaffold coordinator
 
 Dispatch **`smith-new-project-scaffold-coordinator`** with
 `consumer_project_dir`, `description`, and `discovery_hints` (built
 from Step 2 answers + `assumed_defaults[]` + framework defaults).
-The coordinator picks every `smith-<fw>-bootstrap` skill installed
-at Step 5, runs the conflict guard on declared output paths, fans
-out one `smith-new-project-bootstrapper` per framework in parallel,
-and returns a `ScaffoldReport`.
+The coordinator picks every `smith-<name>-bootstrap` skill the
+orchestrator just installed in Step 8.a, runs the conflict guard on
+declared output paths, fans out one
+`smith-new-project-bootstrapper` per bootstrap in parallel, and
+returns a `ScaffoldReport`.
 
 🚫 Zero interactive questions. Every bootstrap Phase 0 answer is
 pre-resolved in `discovery_hints` ; bootstrapper sub-agents have
@@ -219,6 +288,13 @@ user.
 If `discovery_hints` lacks an answer for a question, the bootstrapper
 falls back to that framework's documented default — never to a user
 prompt.
+
+Two legitimate `status=skipped` reasons :
+- `no-bootstrap-templates-matched` — none of the project's frameworks
+  has a matching `bootstrap/` template in the release. Normal when
+  the user is wiring an existing stack with no scaffolder available.
+- `no-bootstrap-skills-installed` — Step 8.a ran but no skill made
+  it to the consumer (every dispatch failed). Look at the trace log.
 
 ### Step 9 — Write the run report
 

@@ -1,0 +1,15 @@
+name: angular
+version: '21'
+description: |-
+  Bootstrap for a new Angular 21 SPA. Asks for package name, routing,
+  Tailwind v4, Transloco, OpenAPI client ; generates the project tree ;
+  runs `npm run build` as a smoke check. Pairs with the `framework/angular/21`
+  skill set for post-scaffold quality + standards.
+tags:
+- angular
+- typescript
+- nodejs
+- frontend
+assets: []
+templates: []
+scripts: []

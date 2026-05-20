@@ -20,7 +20,6 @@ the build.
 from __future__ import annotations
 
 import argparse
-import json
 import shutil
 import subprocess
 import sys
@@ -86,6 +85,21 @@ def render_tools(caps: list[str], rules: dict) -> dict:
     raise ValueError(f"unknown tools_style: {style}")
 
 
+def render_skill_properties(metadata: dict, rules: dict) -> dict:
+    """Map generic bundle-skill properties (declared in metadata.yml — e.g.
+    `model`, `user-invocable`) to provider-native frontmatter keys via
+    `provider.yaml::build.skill_property_map`. Properties absent from the
+    map OR mapped to null are silently dropped from the rendered
+    frontmatter. Values are passed through verbatim."""
+    out: dict = {}
+    mapping = rules.get("skill_property_map") or {}
+    for generic_key, native_key in mapping.items():
+        if native_key is None or generic_key not in metadata:
+            continue
+        out[native_key] = metadata[generic_key]
+    return out
+
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -98,6 +112,48 @@ def read_yaml(path: Path) -> dict:
         return {}
     data = yaml.safe_load(text)
     return data if isinstance(data, dict) else {}
+
+
+def _normalise_strings(obj):
+    """Collapse paragraph-style blank lines (`\\n\\s*\\n+`) to a single
+    `\\n` inside every string value. Single line breaks are preserved.
+    Used at release-emission time so multi-line block scalars in source
+    `config.yaml` files render cleanly (no big empty paragraphs between
+    every sentence). Trailing whitespace per line is stripped too."""
+    import re
+    if isinstance(obj, dict):
+        return {k: _normalise_strings(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_normalise_strings(v) for v in obj]
+    if isinstance(obj, str):
+        # Strip trailing whitespace on every line + collapse paragraph
+        # breaks (≥2 consecutive line breaks) into a single newline.
+        lines = [line.rstrip() for line in obj.splitlines()]
+        joined = "\n".join(lines).strip()
+        return re.sub(r"\n{2,}", "\n", joined)
+    return obj
+
+
+def _str_representer(dumper, data):
+    """Use literal block style for any string with embedded newlines so
+    multi-line descriptions stay readable in the dumped YAML."""
+    if "\n" in data:
+        return dumper.represent_scalar("tag:yaml.org,2002:str", data, style="|")
+    return dumper.represent_scalar("tag:yaml.org,2002:str", data)
+
+
+yaml.SafeDumper.add_representer(str, _str_representer)
+
+
+def dump_yaml(data: dict) -> str:
+    """One-stop YAML dump with the conventions we use across the build."""
+    return yaml.safe_dump(
+        _normalise_strings(data),
+        sort_keys=False,
+        default_flow_style=False,
+        allow_unicode=True,
+        width=10_000,
+    )
 
 
 def dump_frontmatter(data: dict) -> str:
@@ -221,7 +277,7 @@ def build_bin_agents(repo_root: Path, release_root: Path, rules: dict) -> dict:
     return stats
 
 
-def build_bundles(repo_root: Path, release_root: Path, provider: str) -> dict:
+def build_bundles(repo_root: Path, release_root: Path, provider: str, rules: dict) -> dict:
     """For each bundle whose `providers:` list includes the current provider :
     compose per-skill frontmatter, copy hooks (flattened), strip the
     `providers:` field from config.yaml. Regenerate the catalogue with the
@@ -252,23 +308,28 @@ def build_bundles(repo_root: Path, release_root: Path, provider: str) -> dict:
         cfg_clean = {k: v for k, v in cfg.items() if k != "providers"}
         atomic_write(
             bundle_dst / "config.yaml",
-            yaml.safe_dump(cfg_clean, sort_keys=False, default_flow_style=False, allow_unicode=True, width=10_000),
+            dump_yaml(cfg_clean),
         )
 
-        # skills
+        # skills — frontmatter is composed from metadata.yml ONLY ; provider-
+        # native keys (e.g. claude-code `user-invocable`) are resolved from
+        # generic property slugs declared in metadata.yml via
+        # provider.yaml::build.skill_property_map.
         for skill in cfg.get("skills", []) or []:
             slug = skill["name"] if isinstance(skill, dict) else str(skill)
             skill_dir = bundle_dir / "skills" / slug
             body_path = skill_dir / f"{slug}.md"
             metadata = read_yaml(skill_dir / "metadata.yml")
-            provider_fm = read_yaml(skill_dir / f"{provider}.yml")
 
             if not body_path.is_file():
                 continue
 
             fm: dict = {}
-            fm.update(metadata)
-            fm.update(provider_fm)
+            if "name" in metadata:
+                fm["name"] = metadata["name"]
+            if "description" in metadata:
+                fm["description"] = metadata["description"]
+            fm.update(render_skill_properties(metadata, rules))
 
             content = dump_frontmatter(fm) + "\n" + body_path.read_text(encoding="utf-8")
             atomic_write(bundle_dst / "skills" / slug / "SKILL.md", content)
@@ -288,9 +349,9 @@ def build_bundles(repo_root: Path, release_root: Path, provider: str) -> dict:
         stats["built"] += 1
 
     # catalog — filter to built bundles, drop `providers` field.
-    catalog_src = src_root / "config.json"
+    catalog_src = src_root / "index.yaml"
     if catalog_src.is_file():
-        catalog = json.loads(catalog_src.read_text(encoding="utf-8"))
+        catalog = read_yaml(catalog_src)
         built_names = {
             p.name for p in (release_root / ".smith" / "bundles").iterdir()
             if p.is_dir()
@@ -300,80 +361,150 @@ def build_bundles(repo_root: Path, release_root: Path, provider: str) -> dict:
             for entry in catalog.get("bundles", [])
             if entry.get("name") in built_names
         ]
-        atomic_write(release_root / ".smith" / "bundles" / "config.json", json.dumps(catalog, indent=2) + "\n")
+        atomic_write(
+            release_root / ".smith" / "bundles" / "index.yaml",
+            dump_yaml(catalog),
+        )
 
     return stats
 
 
-def build_templates(repo_root: Path, release_root: Path, provider: str) -> dict:
-    """Same shape as build_bundles, for framework templates."""
+def _compose_skill_md(body_path: Path, metadata: dict, rules: dict) -> str:
+    """Frontmatter (name + description + provider-mapped properties) + body."""
+    fm: dict = {}
+    if "name" in metadata:
+        fm["name"] = metadata["name"]
+    if "description" in metadata:
+        fm["description"] = metadata["description"]
+    fm.update(render_skill_properties(metadata, rules))
+    return dump_frontmatter(fm) + "\n" + body_path.read_text(encoding="utf-8")
+
+
+def _copy_tree_verbatim(src: Path, dst: Path) -> None:
+    """Recursive verbatim copy. Skips silently if src is absent."""
+    if not src.is_dir():
+        return
+    dst.mkdir(parents=True, exist_ok=True)
+    for child in sorted(src.rglob("*")):
+        if child.is_file():
+            rel = child.relative_to(src)
+            target = dst / rel
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(child, target)
+
+
+def _build_framework_template(ver_dir: Path, ver_dst: Path, cfg: dict, rules: dict) -> None:
+    """framework/<name>/<version>/ — many skills under skills/<source-slug>/.
+    Release dir is renamed to `metadata.yml::name` so it matches what the
+    consumer-installed skill will be called."""
+    cfg_clean = {k: v for k, v in cfg.items() if k != "providers"}
+    atomic_write(
+        ver_dst / "config.yaml",
+        dump_yaml(cfg_clean),
+    )
+    for skill in cfg.get("skills", []) or []:
+        source_slug = skill["name"] if isinstance(skill, dict) else str(skill)
+        skill_dir = ver_dir / "skills" / source_slug
+        body_path = skill_dir / f"{source_slug}.md"
+        if not body_path.is_file():
+            continue
+        metadata = read_yaml(skill_dir / "metadata.yml")
+        installed_name = metadata.get("name") or source_slug
+        atomic_write(
+            ver_dst / "skills" / installed_name / "SKILL.md",
+            _compose_skill_md(body_path, metadata, rules),
+        )
+
+
+def _build_bootstrap_template(ver_dir: Path, ver_dst: Path, cfg: dict, rules: dict) -> None:
+    """bootstrap/<name>/<version>/ — exactly one skill under skill/. Release
+    dir is renamed to `metadata.yml::name` (same iso rule as framework). Plus
+    optional sidecar trees (assets/, templates/, scripts/) copied verbatim."""
+    cfg_clean = {k: v for k, v in cfg.items() if k != "providers"}
+    atomic_write(
+        ver_dst / "config.yaml",
+        dump_yaml(cfg_clean),
+    )
+    skill_dir = ver_dir / "skill"
+    if skill_dir.is_dir():
+        metadata = read_yaml(skill_dir / "metadata.yml")
+        installed_name = metadata.get("name") or skill_dir.name
+        body_candidates = list(skill_dir.glob("*.md"))
+        body_path = body_candidates[0] if body_candidates else None
+        if body_path and body_path.is_file():
+            atomic_write(
+                ver_dst / "skill" / installed_name / "SKILL.md",
+                _compose_skill_md(body_path, metadata, rules),
+            )
+    # Sidecar buckets — copied verbatim to release.
+    for bucket in ("assets", "templates", "scripts"):
+        _copy_tree_verbatim(ver_dir / bucket, ver_dst / bucket)
+
+
+CATEGORY_BUILDERS = {
+    "framework": _build_framework_template,
+    "bootstrap": _build_bootstrap_template,
+}
+
+
+def _filter_catalog_yaml(catalog_src: Path, built_keys: set, key_fields: tuple, list_field: str) -> dict:
+    """Filter a YAML catalogue (bundles/config.yaml,
+    templates/<cat>/index.yaml) to built entries only, drop `providers`."""
+    catalog = read_yaml(catalog_src)
+    catalog[list_field] = [
+        {k: v for k, v in entry.items() if k != "providers"}
+        for entry in catalog.get(list_field, [])
+        if tuple(entry.get(f) for f in key_fields) in built_keys
+    ]
+    return catalog
+
+
+def build_templates(repo_root: Path, release_root: Path, provider: str, rules: dict) -> dict:
+    """Walks every template category (framework / bootstrap / …) under
+    cli/templates/<category>/ and applies the matching builder. Each category
+    is self-contained : its own builder + its own index.yaml."""
     stats = {"built": 0, "skipped": []}
 
     src_root = repo_root / "cli" / "templates"
     if not src_root.is_dir():
         return stats
 
-    dst_root = release_root / ".smith" / "templates"
+    for category, builder in CATEGORY_BUILDERS.items():
+        cat_src = src_root / category
+        if not cat_src.is_dir():
+            continue
+        cat_dst = release_root / ".smith" / "templates" / category
 
-    for fw_dir in sorted(p for p in src_root.iterdir() if p.is_dir()):
-        for ver_dir in sorted(p for p in fw_dir.iterdir() if p.is_dir()):
-            framework = fw_dir.name
-            version = ver_dir.name
-            cfg_src = ver_dir / "config.yaml"
-            if not cfg_src.is_file():
-                stats["skipped"].append(
-                    {"framework": framework, "version": version, "reason": "no-config-yaml"}
-                )
-                continue
-            cfg = read_yaml(cfg_src)
-            providers = cfg.get("providers", []) or []
-            if provider not in providers:
-                stats["skipped"].append(
-                    {"framework": framework, "version": version, "reason": "provider-not-supported"}
-                )
-                continue
-
-            ver_dst = dst_root / framework / version
-            cfg_clean = {k: v for k, v in cfg.items() if k != "providers"}
-            atomic_write(
-                ver_dst / "config.yaml",
-                yaml.safe_dump(cfg_clean, sort_keys=False, default_flow_style=False, allow_unicode=True, width=10_000),
-            )
-
-            for skill in cfg.get("skills", []) or []:
-                slug = skill["name"] if isinstance(skill, dict) else str(skill)
-                skill_dir = ver_dir / "skills" / slug
-                body_path = skill_dir / "template.md"
-                metadata = read_yaml(skill_dir / "metadata.yml")
-                provider_fm = read_yaml(skill_dir / f"{provider}.yml")
-
-                if not body_path.is_file():
+        built_keys: set = set()
+        for name_dir in sorted(p for p in cat_src.iterdir() if p.is_dir()):
+            for ver_dir in sorted(p for p in name_dir.iterdir() if p.is_dir()):
+                name = name_dir.name
+                version = ver_dir.name
+                cfg_src = ver_dir / "config.yaml"
+                if not cfg_src.is_file():
+                    stats["skipped"].append(
+                        {"category": category, "name": name, "version": version, "reason": "no-config-yaml"}
+                    )
                     continue
+                cfg = read_yaml(cfg_src)
+                # Templates apply to every provider — no per-provider filter
+                # at this layer. (Bundles still gate on `providers:` because
+                # some bundles ship platform-specific hooks.)
+                builder(ver_dir, cat_dst / name / version, cfg, rules)
+                built_keys.add((name, version))
+                stats["built"] += 1
 
-                fm: dict = {}
-                fm.update(metadata)
-                fm.update(provider_fm)
-
-                content = dump_frontmatter(fm) + "\n" + body_path.read_text(encoding="utf-8")
-                atomic_write(ver_dst / "skills" / slug / "SKILL.md", content)
-
-            stats["built"] += 1
-
-    # catalog — filter to built frameworks, drop `providers` field.
-    catalog_src = src_root / "index.json"
-    if catalog_src.is_file():
-        catalog = json.loads(catalog_src.read_text(encoding="utf-8"))
-        built = {
-            (fw_dir.name, ver_dir.name)
-            for fw_dir in (release_root / ".smith" / "templates").iterdir() if fw_dir.is_dir()
-            for ver_dir in fw_dir.iterdir() if ver_dir.is_dir()
-        }
-        catalog["templates"] = [
-            {k: v for k, v in entry.items() if k != "providers"}
-            for entry in catalog.get("templates", [])
-            if (entry.get("framework"), entry.get("version")) in built
-        ]
-        atomic_write(release_root / ".smith" / "templates" / "index.json", json.dumps(catalog, indent=2) + "\n")
+        # Per-category index — filter to built entries, drop `providers`.
+        cat_index = cat_src / "index.yaml"
+        if cat_index.is_file():
+            if category == "framework":
+                filtered = _filter_catalog_yaml(cat_index, built_keys, ("framework", "version"), "templates")
+            else:  # bootstrap
+                filtered = _filter_catalog_yaml(cat_index, built_keys, ("name", "version"), "bootstraps")
+            atomic_write(
+                cat_dst / "index.yaml",
+                dump_yaml(filtered),
+            )
 
     return stats
 
@@ -394,13 +525,13 @@ def build_provider(repo_root: Path, provider: str, rules: dict) -> dict:
     # verbatim from provider.yaml::build.consumer_paths.
     atomic_write(
         release_root / ".smith" / "paths.yaml",
-        yaml.safe_dump(rules["consumer_paths"], sort_keys=False, default_flow_style=False, allow_unicode=True, width=10_000),
+        dump_yaml(rules["consumer_paths"]),
     )
 
     bin_skills_stats = build_bin_skills(repo_root, release_root, rules)
     bin_agents_stats = build_bin_agents(repo_root, release_root, rules)
-    bundles_stats = build_bundles(repo_root, release_root, provider)
-    templates_stats = build_templates(repo_root, release_root, provider)
+    bundles_stats = build_bundles(repo_root, release_root, provider, rules)
+    templates_stats = build_templates(repo_root, release_root, provider, rules)
 
     elapsed_ms = int((time.time() - t0) * 1000)
 

@@ -1,0 +1,45 @@
+framework: angular
+version: '21'
+description: |-
+  Skill templates for Angular 21 projects (zoneless, signals, Tailwind v4,
+  Vitest, Transloco i18n, OpenAPI-generated HTTP clients). Each skills/<slug>/
+  directory ships a body and metadata.yml. The consumer-side adapter resolves
+  placeholders + prunes absent-tech sections against the project stack.
+skills:
+- name: standards
+  version: 0.1.0
+  tags:
+  - angular
+  - typescript
+  - frontend
+- name: tests-coverage
+  version: 0.1.0
+  tags:
+  - angular
+  - vitest
+  - test
+  - frontend
+- name: design-system
+  version: 0.1.0
+  tags:
+  - tailwindcss
+  - design-system
+  - frontend
+- name: i18n-transloco
+  version: 0.1.0
+  tags:
+  - transloco
+  - i18n
+  - frontend
+- name: openapi-client
+  version: 0.1.0
+  tags:
+  - openapi-generator
+  - rest
+  - frontend
+adapter_placeholders:
+  '{{language}}': Always "typescript" for this template set.
+  '{{runtime}}': nodejs
+  '{{framework}}': angular
+  '{{framework_version}}': '21'
+  '{{root_package}}': Project's npm package name (from package.json).

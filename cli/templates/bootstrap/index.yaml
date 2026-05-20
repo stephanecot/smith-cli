@@ -1,0 +1,12 @@
+version: 1
+bootstraps:
+- name: angular
+  version: '21'
+  directory: angular/21
+  config: angular/21/config.yaml
+  description: Interactive scaffold of a new Angular 21 SPA (package, routing, optional Tailwind v4 / Transloco / OpenAPI). Runs npm run build as a smoke check.
+  tags:
+  - angular
+  - typescript
+  - nodejs
+  - frontend

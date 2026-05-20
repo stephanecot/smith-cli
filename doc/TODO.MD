@@ -3,11 +3,15 @@ MCP:
 
 RULES / Instruction
 
+rajouter des scripts python pour optimiser le contexte ?
+
 release:
 - compléter cette partie ensuite
 
 - configurer les agents du bundle comme pour le cli
 
+templates
+- ajout de tags au skills pour faire correcter le filtage
 
 On va développer le skill /smith-new-project <description>
   - developper la partie question de facon plus complete
@@ -20,16 +24,11 @@ On va développer le skill /smith-new-project <description>
     recupération des bon templates / bundle
 
 
-
 Smith skills:
 - skill pour te proposer les bon bundles
 
 bootrap:
-- les gérer à part entier
-
-bundle:
-- spring bootrap
---> utilise les templates
+  - ajouter spring / python
 
 sdlc:
 - /plan

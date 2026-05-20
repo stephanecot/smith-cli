@@ -1,13 +1,9 @@
 name: mvn
-description: 'Maven offload — /mvn <goals> dispatches a Maven build off the
-
+description: |-
+  Maven offload — /mvn <goals> dispatches a Maven build off the
   parent context so multi-thousand-line build logs do not flood the
-
   conversation. Returns a one-line verdict + Tests counters + failure
-
   cause.
-
-  '
 version: 0.1.0
 tags:
 - build

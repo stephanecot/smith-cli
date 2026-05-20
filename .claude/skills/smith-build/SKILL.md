@@ -54,13 +54,13 @@ cli/releases/claude-code/
 │   ├── skills/<slug>/SKILL.md       (verbatim copy from cli/bin/skills/)
 │   └── agents/<slug>.md             (frontmatter composed from metadata.yml + body)
 ├── bundles/
-│   ├── config.json                  (verbatim copy of cli/bundles/config.json)
+│   ├── config.json                  (verbatim copy of cli/bundles/index.yaml)
 │   └── <bundle>/
 │       ├── config.yaml              (verbatim from cli/bundles/<bundle>/config.yaml)
 │       ├── skills/<slug>/SKILL.md   (metadata.yml + claude-code.yml + body)
 │       └── hooks/<provider>/...     (verbatim copy when present)
 ├── templates/
-│   ├── index.json                   (verbatim copy of cli/templates/index.json)
+│   ├── index.json                   (verbatim copy of cli/templates/index.yaml)
 │   └── <fw>/<ver>/
 │       ├── config.yaml              (verbatim)
 │       └── skills/<slug>/SKILL.md   (metadata.yml + claude-code.yml + template.md)

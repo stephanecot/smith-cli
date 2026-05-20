@@ -55,3 +55,6 @@ build:
     agent:     Agent
     ask-user:  AskUserQuestion
     web-fetch: WebFetch
+  skill_property_map:
+    model:          model
+    user-invocable: user-invocable

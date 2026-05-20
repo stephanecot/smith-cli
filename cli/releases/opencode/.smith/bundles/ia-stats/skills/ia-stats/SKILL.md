@@ -1,6 +1,7 @@
 ---
 name: ia-stats
 description: Print the current contents of IA_STATS.MD (running totals per agent / tool + last 50 events). Read-only — the file is maintained automatically by the ia-stats hooks (Claude Code) or VS Code tasks (Copilot). Trigger with `/ia-stats`.
+model: small
 ---
 
 # Skill — `/ia-stats`

@@ -2,12 +2,6 @@
 name: pip
 description: Run a pip command (install, freeze, list, show, uninstall, ...) inside the project's Python workspace — keeps multi-thousand-line resolver / install logs out of the parent context. Trigger with `/pip <args>` (e.g. `/pip install -r requirements.txt`, `/pip freeze`, `/pip list --outdated`).
 model: small
-tools:
-- codebase
-- usages
-- problems
-- runCommands
-- terminalLastCommand
 ---
 
 # Skill — `/pip`

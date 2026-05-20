@@ -25,7 +25,7 @@ doc generation, no template adaptation.** Those artefacts are owned
 by other skills and created on demand.
 
 The exact shape of `.smith/smith.yaml` comes from the template at
-`${CLAUDE_SKILL_DIR}/template/smith.template.yaml`. Substitute every
+`${CLAUDE_SKILL_DIR}/templates/smith.template.yaml`. Substitute every
 `{{placeholder}}` before writing. Do NOT add or remove top-level keys —
 the template is the contract.
 
@@ -84,7 +84,7 @@ report.
      template already wraps each placeholder in `"…"`) so identifiers
      containing spaces or slashes (e.g. `Claude Haiku 4.5`,
      `anthropic/claude-haiku-4-5`) round-trip cleanly.
-3. Read `${CLAUDE_SKILL_DIR}/template/smith.template.yaml`, substitute,
+3. Read `${CLAUDE_SKILL_DIR}/templates/smith.template.yaml`, substitute,
    and atomic-write (tempfile → fsync → rename) to `.smith/smith.yaml`.
 
 ### Step 3 — Report back

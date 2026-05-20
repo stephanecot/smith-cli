@@ -37,14 +37,24 @@ cd <your-project>                       # where you want Smith to land
 4. Bundle installs — filter the release catalogue by stack tags + copy
    pre-built bundle artefacts into the consumer's provider-native
    skill / hook paths.
-5. Template installs — filter the release catalogue by stack frameworks
-   + dispatch one `smith-single-template-adapter` per kept template
+5. **Framework template installs** — read
+   `<release>/.smith/templates/framework/index.yaml`, filter by stack
+   frameworks, dispatch one `smith-single-template-adapter` per kept
    skill (placeholder resolution + stack-aware pruning, parallel).
+   Adds N quality / convention skills to the consumer (standards,
+   tests-coverage, design-system, i18n, …) — no execution.
 6. Writes `AGENTS.md` at the project root (project-focused, ≤100 lines).
 7. Verifier sub-agent (structural checks).
-8. **Scaffold the source tree** — runs each framework's `bootstrap`
-   skill via a coordinator sub-agent (zero interactive questions —
-   defaults + hints from Step 2 cover every Phase 0 prompt).
+8. **Bootstrap templates : install + scaffold the source tree.**
+   - 8.a — Read `<release>/.smith/templates/bootstrap/index.yaml`,
+     pick `(name, version)` matching the project's frameworks. For
+     each, adapt + install the singleton skill, copy `assets/` +
+     `templates/` + `scripts/` sidecars under
+     `<consumer>/.smith/bootstraps/<name>/`.
+   - 8.b — Dispatch `smith-new-project-scaffold-coordinator` which
+     runs every installed `smith-<name>-bootstrap` skill (zero
+     interactive questions — defaults + hints from Step 2 cover every
+     Phase 0 prompt).
 9. Writes the single run report at `.smith/report.md`.
 
 For a minimal init (marker only, no workflow) :
@@ -72,18 +82,27 @@ across providers.
 │   ├── paths.yaml               ← consumer-side install paths (resolved)
 │   ├── release.yaml             ← build manifest
 │   ├── bundles/
-│   │   ├── config.json          ← catalogue (filtered for this provider, no `providers` field)
+│   │   ├── index.yaml           ← catalogue (filtered for this provider, no `providers` field)
 │   │   └── <bundle>/
 │   │       ├── config.yaml      ← bundle metadata (no `providers` field)
 │   │       ├── skills/<slug>/SKILL.md   ← real skill, frontmatter included
 │   │       └── hooks/...                ← flat hook files for this release
 │   └── templates/
-│       ├── index.json           ← catalogue
-│       └── <framework>/<version>/
-│           ├── config.yaml
-│           └── skills/<slug>/SKILL.md   ← real skill ; body still has {{placeholder}} +
-│                                          stack-gated sections (consumer-side adapter
-│                                          resolves them at Step 5)
+│       ├── framework/                          ← category : N skills per (name, version)
+│       │   ├── index.yaml
+│       │   └── <name>/<version>/
+│       │       ├── config.yaml
+│       │       └── skills/<installed-name>/SKILL.md   ← dir = metadata.yml::name
+│       │                                              ; body still has {{placeholder}} +
+│       │                                              stack-gated sections
+│       └── bootstrap/                          ← category : exactly 1 skill + sidecars
+│           ├── index.json
+│           └── <name>/<version>/
+│               ├── config.yaml
+│               ├── skill/<installed-name>/SKILL.md    ← dir = metadata.yml::name
+│               ├── assets/...                         ← optional, copied verbatim
+│               ├── templates/...                      ← optional, real templates (HTML, …)
+│               └── scripts/...                        ← optional, helper scripts
 └── .claude/                     ← provider runtime root (claude-code release)
     ├── skills/                  ← 12 Smith skills (smith-init, smith-new-project, …)
     └── agents/                  ← 8 Smith sub-agents
@@ -167,11 +186,11 @@ Under the provider runtime root (`.claude/` / `.github/` /
 | Command | What it does |
 |---|---|
 | `/smith-build [--provider <slug>] [--clean]` | **Deterministic Python script** (`build.py` sibling). Walks `cli/bin/`, `cli/bundles/`, `cli/templates/`, `cli/providers/` and produces one runnable release per provider under `cli/releases/<provider>/`. Resolves frontmatter + inlines `@smith-include` directives at build time. Writes `<release>/.smith/paths.yaml` + `<release>/.smith/release.yaml`. |
-| `/smith-bundle-add <name> "<desc>" --tag t1,t2 [--ia provider]` | Scaffold a new bundle. Validates tags against the canonical taxonomy. Regenerates `bundles/config.json`. |
+| `/smith-bundle-add <name> "<desc>" --tag t1,t2 [--ia provider]` | Scaffold a new bundle. Validates tags against the canonical taxonomy. Regenerates `bundles/index.yaml`. |
 | `/smith-bundle-edit <name> [--add-skill ...] [...]` | Modify an existing bundle. |
 | `/smith-provider-add <slug> "<desc>"` | Scaffold a new AI provider format set under `cli/providers/<slug>/`. |
 | `/smith-provider-edit <slug> [...]` | Modify an existing provider format set. |
-| `/smith-template-add --framework <name> --version <ver> "<desc>"` | Scaffold a new framework/version template set. Regenerates `cli/templates/index.json`. |
+| `/smith-template-add --framework <name> --version <ver> "<desc>"` | Scaffold a new framework/version template set. Regenerates `cli/templates/index.yaml`. |
 | `smith-bundle-format` / `smith-provider-format` | Auto-loaded format specs for maintainer skills. |
 
 All `/smith-*` commands except `/smith-init`, `/smith-new-project` and
@@ -218,13 +237,24 @@ smith-cli/                        # workspace root
     │   ├── ia-stats/ | mvn/ | npm/ | pip/
     │   └── <bundle>/
     │       ├── config.yaml
-    │       ├── skills/<slug>/    # body + metadata.yml + <provider>.yml
+    │       ├── skills/<slug>/    # body + metadata.yml (generic props ; mapped at build time)
     │       └── hooks/<provider>/...
-    ├── templates/                # per framework/version skill template sets
-    │   ├── index.json            # catalogue, written by /smith-template-add
-    │   └── <framework>/<version>/
-    │       ├── config.yaml
-    │       └── skills/<slug>/    # template.md + metadata.yml + <provider>.yml
+    ├── templates/                # skill template sets, split by category
+    │   ├── framework/            # N skills per (name, version) — quality / conventions
+    │   │   ├── index.json        # per-category catalogue, written by /smith-template-add
+    │   │   └── <name>/<version>/
+    │   │       ├── config.yaml
+    │   │       ├── README.md + CHANGELOG.md
+    │   │       └── skills/<slug>/    # <slug>.md body + metadata.yml (generic props)
+    │   └── bootstrap/            # exactly 1 skill per (name, version) — scaffolders
+    │       ├── index.json
+    │       └── <name>/<version>/
+    │           ├── config.yaml
+    │           ├── README.md + CHANGELOG.md
+    │           ├── skill/<slug>.md + metadata.yml
+    │           ├── assets/...    # optional, verbatim files for the scaffold
+    │           ├── templates/... # optional, real templates with placeholders
+    │           └── scripts/...   # optional, helper scripts
     ├── providers/                # per-AI-tool format reference
     │   ├── claude-code/          # format-{skill,agent,hook}.yaml + provider.yaml + example/
     │   ├── github-copilot/
@@ -248,10 +278,25 @@ smith-cli/                        # workspace root
 
 ## Templates shipped (v0.1)
 
-| Framework | Version | What it gives you |
+### `framework/` category — quality + conventions
+
+Installed at Step 5 of `/smith-new-project` ; not executed. Each
+(name, version) ships N skills the AI uses later.
+
+| Framework | Version | Skills |
 |---|---|---|
-| `angular`          | `21` | 6 skill bodies — bootstrap (interactive scaffold), coding standards, tests + coverage (Vitest), design system (Tailwind v4), i18n (Transloco), HTTP client layer from OpenAPI. Adapter prunes optional techs (Tailwind, Transloco, OpenAPI) when absent from the project stack. |
-| `java-spring-boot` | `4`  | 1 bootstrap skill — interactive scaffold (`pom.xml`, application entry, optional REST controller, optional Liquibase changelog, `application.yaml`). `mvn -B verify` smoke check at the end. |
+| `angular`          | `21` | 5 skills — coding standards, tests + coverage (Vitest), design system (Tailwind v4), i18n (Transloco), HTTP client layer from OpenAPI. Adapter prunes optional techs (Tailwind, Transloco, OpenAPI) when absent from the project stack. |
+| `java-spring-boot` | `4`  | 1 skill — bootstrap (interactive scaffold). To migrate to the `bootstrap/` category in a follow-up. |
+
+### `bootstrap/` category — scaffolders
+
+Installed AND executed at Step 8 of `/smith-new-project`. Each
+(name, version) ships **exactly 1 skill** + optional `assets/` +
+`templates/` + `scripts/` sidecars.
+
+| Name      | Version | What it does |
+|---|---|---|
+| `angular` | `21`    | Interactive scaffold of a new Angular 21 SPA — package, routing, optional Tailwind v4 / Transloco / OpenAPI ; runs `npm run build` as a smoke check. |
 
 Templates ship as real skills (frontmatter composed at build time).
 The release-side body still carries `{{placeholder}}` markers and
@@ -278,11 +323,15 @@ Each `cli/providers/<slug>/` ships 4 format YAMLs (`provider.yaml` +
   the provider it ends up running on. Provider-specific knowledge is
   baked into the release tree by `/smith-build`.
 - **Split-folder layout.** Agents and bundle / template skills follow
-  a canonical 3-file shape : `<slug>.md` body + `metadata.yml` (common
-  name + description) + `<provider>.yml` (per-provider frontmatter
-  overrides ; may be empty). `/smith-build` composes the final
-  frontmatter from those files.
-- **Indexes.** `bundles/config.json` and `templates/index.json` are
+  a canonical 2-file shape : `<slug>.md` body + `metadata.yml`
+  (generic, provider-agnostic). For agents, generic capabilities
+  (`read`, `glob`, `ask-user`, …) are mapped to provider-native tools
+  via `provider.yaml::build.capability_map`. For bundle / template
+  skills, generic properties (`model`, `user-invocable`) are mapped
+  to provider-native frontmatter keys via
+  `provider.yaml::build.skill_property_map`. Properties unsupported
+  by a given provider are silently dropped at build time.
+- **Indexes.** `bundles/index.yaml` and `templates/index.yaml` are
   regenerated from disk by `/smith-bundle-add` / `/smith-template-add`.
   Never patched by hand. The release-side copies are filtered to
   whatever was built for the target provider, with the `providers:`
@@ -314,6 +363,18 @@ Each `cli/providers/<slug>/` ships 4 format YAMLs (`provider.yaml` +
 - **Deterministic `/smith-build`** — Python script (`build.py`) walks
   the source tree and writes provider releases in milliseconds. No
   LLM reasoning at build time.
+- **Two template categories** — `framework/` (N skills per (name,
+  version), installed but not executed) and `bootstrap/` (exactly 1
+  skill + optional assets / templates / scripts buckets, installed
+  AND executed by Step 8 to scaffold the source tree). Per-category
+  index.json under `cli/templates/<category>/`. Iso-name rule applied
+  at build time : every skill directory in the release matches the
+  installed slug declared in `metadata.yml::name`.
+- **Generic skill properties.** Bundle + template metadata.yml carry
+  the provider-agnostic `model` and `user-invocable` properties. The
+  build maps them to the provider's native frontmatter keys via
+  `provider.yaml::build.skill_property_map` — unsupported on a
+  provider → silently dropped.
 
 ## Detailed reference
 

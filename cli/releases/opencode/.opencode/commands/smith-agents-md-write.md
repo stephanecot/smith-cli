@@ -1,6 +1,6 @@
 ---
 name: smith-agents-md-write
-description: Writes (or skips when present) the consumer project's `AGENTS.md` brief from a structured payload — project name, description, stack, provider, installed bundles + skills, optional bootstrap summary. Renders from `template/agents.template.md`, enforces the 100-line cap by truncating optional sections in a documented order, atomic write. Idempotent : if `AGENTS.md` already exists, the skill skips (no overwrite). Trigger with `/smith-agents-md-write --payload <json-or-path>` ; consumed by orchestrators (e.g. `/smith-new-project` via its dedicated sub-agent) rather than end users directly.
+description: Writes (or skips when present) the consumer project's `AGENTS.md` brief from a structured payload — project name, description, stack, provider, installed bundles + skills, optional bootstrap summary. Renders from `templates/agents.template.md`, enforces the 100-line cap by truncating optional sections in a documented order, atomic write. Idempotent : if `AGENTS.md` already exists, the skill skips (no overwrite). Trigger with `/smith-agents-md-write --payload <json-or-path>` ; consumed by orchestrators (e.g. `/smith-new-project` via its dedicated sub-agent) rather than end users directly.
 ---
 
 # Skill — `/smith-agents-md-write`
@@ -26,7 +26,7 @@ this skill.
 
 The skill takes no other flags. Behaviour is fully driven by the
 payload + the template at
-`${CLAUDE_SKILL_DIR}/template/agents.template.md`.
+`${CLAUDE_SKILL_DIR}/templates/agents.template.md`.
 
 ## Payload contract
 
@@ -72,7 +72,7 @@ a warning.
 
 ### Step 2 — Materialise the template
 
-Read `${CLAUDE_SKILL_DIR}/template/agents.template.md` and substitute
+Read `${CLAUDE_SKILL_DIR}/templates/agents.template.md` and substitute
 every `{{placeholder}}` from the payload :
 
 - `{{project_name}}` ← `payload.project_name`

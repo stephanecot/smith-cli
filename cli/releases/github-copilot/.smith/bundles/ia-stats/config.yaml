@@ -1,19 +1,12 @@
 name: ia-stats
-description: 'Automatic per-agent / per-skill usage tracker. Every event appends a
-
-  row to IA_STATS.MD at the consumer project''s root via a Node.js
-
+description: |-
+  Automatic per-agent / per-skill usage tracker. Every event appends a
+  row to IA_STATS.MD at the consumer project's root via a Node.js
   script. Cross-platform (Windows + macOS + Linux), zero npm deps.
-
   Shipped for Claude Code (real event hooks) and OpenCode (plugin
-
   lifecycle hooks). GitHub Copilot ships the read-only `/ia-stats`
-
   skill only — VS Code tasks cannot carry per-event payloads, so no
-
   populating hook is provided.
-
-  '
 version: 0.1.0
 tags:
 - observability

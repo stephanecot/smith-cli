@@ -1,6 +1,6 @@
 ---
 name: smith-template-install
-description: Builds adapted SKILL artefacts for a consumer project from a framework template set under cli/templates/<framework>/<version>/. For each skills/<slug>/ directory in the template, assembles the destination file by composing frontmatter from metadata.yml + <provider>.yml (validated against cli/providers/<provider>/format-skill.yaml), substitutes adapter_placeholders, and prepends to template.md. Writes the result to the provider's consumer_path. Upserts into .smith/config.json `skills[]`. Trigger with `/smith-template-install --framework <name> [--version <ver>] --ai <provider>`. Requires /smith-init.
+description: Builds adapted SKILL artefacts for a consumer project from a framework template set under cli/templates/framework/<framework>/<version>/. For each skills/<slug>/ directory in the template, assembles the destination file by composing frontmatter from metadata.yml + <provider>.yml (validated against cli/providers/<provider>/format-skill.yaml), substitutes adapter_placeholders, and prepends to the body. Writes the result to the provider's consumer_path. Upserts into .smith/config.json `skills[]`. Trigger with `/smith-template-install --framework <name> [--version <ver>] --ai <provider>`. Requires /smith-init.
 ---
 
 # Skill — `/smith-template-install`
@@ -14,10 +14,10 @@ consumer project at the per-provider `consumer_path` declared by
 
 - `<consumer>/.smith/architecture.json` AND
   `<consumer>/.smith/config.json` must exist (`/smith-init` markers).
-- `cli/templates/index.json` must list at least one entry for the
+- `cli/templates/index.yaml` must list at least one entry for the
   requested `<framework>`.
 - The resolved `<provider>` MUST appear in
-  `cli/templates/<framework>/<version>/config.yaml` `providers:`.
+  `cli/templates/framework/<framework>/<version>/config.yaml` `providers:`.
 
 ## How to invoke
 
@@ -47,7 +47,7 @@ If `--framework` or `--ai` is missing, ask via `AskUserQuestion`.
 
 ## Version resolution (when `--version` is omitted)
 
-1. Read `cli/templates/index.json`. Filter entries with the requested
+1. Read `cli/templates/index.yaml`. Filter entries with the requested
    `framework`.
 2. If only one version exists for that framework → use it.
 3. If multiple versions exist :
@@ -63,7 +63,7 @@ If `--framework` or `--ai` is missing, ask via `AskUserQuestion`.
 1. **Validate inputs** and resolve the version as described above.
 
 2. **Load the template config** at
-   `cli/templates/<framework>/<version>/config.yaml`. Confirm
+   `cli/templates/framework/<framework>/<version>/config.yaml`. Confirm
    `<provider>` is in `providers:`. Bail if not. Load the
    `adapter_placeholders` map and the `skills[]` listing (the version
    index).
@@ -80,7 +80,7 @@ If `--framework` or `--ai` is missing, ask via `AskUserQuestion`.
 
    ### Skill assembly — MANDATORY procedure
 
-   1. **`Read`** `skills/<slug>/template.md` → `body` (body-only, no
+   1. **`Read`** `skills/<slug>/<slug>.md` → `body` (body-only, no
       frontmatter to strip).
    2. **Substitute `adapter_placeholders`** in `body`. Each key in
       the map is a literal token (e.g. `{{root_package}}`) and the
@@ -161,7 +161,7 @@ If `--framework` or `--ai` is missing, ask via `AskUserQuestion`.
    }
    ```
 
-   - `version` comes from `cli/templates/<framework>/<version>/config.yaml`
+   - `version` comes from `cli/templates/framework/<framework>/<version>/config.yaml`
      `skills[name=<slug>].version` (NEVER from `metadata.yml`, which
      no longer carries a version).
    - Re-running with a newer template version replaces entries with
@@ -179,7 +179,7 @@ If `--framework` or `--ai` is missing, ask via `AskUserQuestion`.
 
 ## What you do NOT do
 
-- Don't author or modify any `template.md` body yourself. The
+- Don't author or modify any template skill body yourself. The
   template maintainer is the author ; this skill only assembles.
 - Don't write to `cli/templates/` — read-only on the catalogue.
 - Don't run `/smith-init` automatically. If `.smith/*-config.json` is

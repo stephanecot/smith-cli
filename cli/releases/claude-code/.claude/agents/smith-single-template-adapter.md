@@ -1,6 +1,6 @@
 ---
 name: smith-single-template-adapter
-description: Adapts ONE body-only SKILL template from cli/templates/<framework>/<version>/skills/ to a single consumer project's stack. Receives the template path + ProjectStack + target provider, returns the adapted body + a change log. Dispatched in parallel by smith-template-customizer — never invoke directly.
+description: Adapts ONE body-only SKILL template from cli/templates/framework/<framework>/<version>/skills/ to a single consumer project's stack. Receives the template path + ProjectStack + target provider, returns the adapted body + a change log. Dispatched in parallel by smith-template-customizer — never invoke directly.
 tools: Read, Glob, Grep
 ---
 
@@ -17,7 +17,7 @@ frontmatter unchanged, and rewrite only the body.
 ## Inputs
 
 - `template_path` — absolute path of the source template under
-  `<release_root>/templates/<framework>/<version>/skills/<slug>/SKILL.md`.
+  `<release_root>/.smith/templates/framework/<framework>/<version>/skills/<slug>/SKILL.md`.
   The file carries YAML frontmatter (provider-correct) followed by a
   body. **Preserve the frontmatter verbatim** ; adapt only the body.
 - `project_stack` — JSON object with the consumer project's languages,

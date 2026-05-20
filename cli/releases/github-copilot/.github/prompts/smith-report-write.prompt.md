@@ -28,7 +28,7 @@ preserved ; check git history if you need to compare runs.
   (not in the filename — the filename is always `.smith/report.md`).
 
 The report contents come entirely from the payload + the template at
-`${CLAUDE_SKILL_DIR}/template/report.template.md` — this skill does not
+`${CLAUDE_SKILL_DIR}/templates/report.template.md` — this skill does not
 re-detect or recompute anything.
 
 ## Payload contract
@@ -86,7 +86,7 @@ is the explicit contract.
 
 ### Step 2 — Materialise the template
 
-Read `${CLAUDE_SKILL_DIR}/template/report.template.md` and substitute
+Read `${CLAUDE_SKILL_DIR}/templates/report.template.md` and substitute
 every `{{placeholder}}` from the payload :
 
 - `{{workflow}}` ← `payload.workflow`

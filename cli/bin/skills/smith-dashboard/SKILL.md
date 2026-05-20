@@ -10,7 +10,7 @@ knows about the consumer project. Read-only on
 `.smith/architecture.json` + `.smith/config.json` ;
 write-only on `.smith/dashboard.html`. **No script, no dependencies.**
 You do the rendering inline by string-substituting the template at
-`${CLAUDE_SKILL_DIR}/template/dashboard.template.html`.
+`${CLAUDE_SKILL_DIR}/templates/dashboard.template.html`.
 
 ## Pre-conditions
 
@@ -32,7 +32,7 @@ No arguments. Re-running overwrites the previous `dashboard.html`.
 1. **Read both JSON files** from the consumer project's root —
    `.smith/architecture.json` (call it `pc`) and `.smith/config.json`
    (call it `sc`).
-2. **Read the template** at `${CLAUDE_SKILL_DIR}/template/dashboard.template.html`.
+2. **Read the template** at `${CLAUDE_SKILL_DIR}/templates/dashboard.template.html`.
 3. **Build the substitution map** — for each placeholder below, compute
    the value from the right file ; default to `"—"` (em-dash) when missing.
    HTML-escape every value (`&` → `&amp;`, `<` → `&lt;`, `>` → `&gt;`,

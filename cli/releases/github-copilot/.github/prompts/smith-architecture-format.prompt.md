@@ -1,6 +1,6 @@
 ---
 name: smith-architecture-format
-description: Source of truth for the format of `.smith/architecture.json` — the project identity file (name + description + summary + detected stack with kebab-case tags). Documents every field, its type, allowed values, defaults, and who is allowed to write it. Ships the canonical macro template under `template/architecture.template.json`. Auto-load whenever the user asks how `architecture.json` is laid out, what a stack field means, what the tag taxonomy is, or who writes / re-writes it. Sister skill `smith-config-format` covers the OTHER file (`.smith/config.json`, the Smith state file) — keep the scope separate.
+description: Source of truth for the format of `.smith/architecture.json` — the project identity file (name + description + summary + detected stack with kebab-case tags). Documents every field, its type, allowed values, defaults, and who is allowed to write it. Ships the canonical macro template under `templates/architecture.template.json`. Auto-load whenever the user asks how `architecture.json` is laid out, what a stack field means, what the tag taxonomy is, or who writes / re-writes it. Sister skill `smith-config-format` covers the OTHER file (`.smith/config.json`, the Smith state file) — keep the scope separate.
 when_to_use: User asks about `.smith/architecture.json`, the project identity file, the detected stack arrays (`languages` / `runtimes` / `frameworks` / `build_tools` / `test_tools` / `infra_tools` / `databases`), or the kebab-case tag taxonomy. Also fires when a skill needs to compose or re-detect the project descriptor.
 user-invocable: false
 ---
@@ -10,7 +10,7 @@ user-invocable: false
 This skill is the **single source of truth** for `.smith/architecture.json`,
 the project identity file Smith writes once per consumer project. Every
 field, type, default and ownership rule is documented below. The macro
-template under `template/architecture.template.json` is the canonical
+template under `templates/architecture.template.json` is the canonical
 fill-in-the-blank skeleton that `/smith-init` reads to produce the file.
 
 The sister skill `smith-config-format` covers the OTHER managed file
@@ -27,7 +27,7 @@ by `/smith-init` and never re-written by other Smith skills.
 |---|---|
 | Path                  | `.smith/architecture.json` |
 | Purpose               | What the project IS — name + description + detected stack with `tags[]`. |
-| Template              | `template/architecture.template.json` |
+| Template              | `templates/architecture.template.json` |
 | Created by            | `/smith-init` (idempotent — if file exists, do not touch). |
 | Re-written by         | Nobody. To re-detect the stack, delete the file and re-run `/smith-init`. |
 | Read by               | `/smith-dashboard`, `/smith-template-install`, `/smith-generate-docs`. |
@@ -72,7 +72,7 @@ provider / integration). Example : Spring Boot →
 Any Smith skill that writes `.smith/architecture.json` MUST :
 
 1. **Read the canonical template** from
-   `template/architecture.template.json` first to know the full shape
+   `templates/architecture.template.json` first to know the full shape
    — even when re-detecting one section. Missing keys must not be
    dropped.
 2. **Atomic write** : write to `<file>.tmp`, fsync, then `mv` over the
@@ -89,7 +89,7 @@ Today the only writer is `/smith-init`. Every other Smith skill treats
 
 | Skill | What it does with `architecture.json` |
 |---|---|
-| `/smith-init`             | Reads `template/architecture.template.json`, fills the placeholders from stack detection, atomic-writes the file. The ONLY writer. |
+| `/smith-init`             | Reads `templates/architecture.template.json`, fills the placeholders from stack detection, atomic-writes the file. The ONLY writer. |
 | `/smith-template-install` | Reads `project.frameworks[]` to pick the right framework template set (`angular/21`, `java-spring-boot/4`, …). Read-only. |
 | `/smith-generate-docs`    | Reads the descriptor to seed the technical / functional specifications. Read-only. |
 | `/smith-dashboard`        | Reads it to render the «Project» card of the HTML dashboard. Read-only. |

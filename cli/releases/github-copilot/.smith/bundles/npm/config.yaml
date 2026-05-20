@@ -1,13 +1,9 @@
 name: npm
-description: 'npm offload — /npm <args> dispatches an npm command off the parent
-
+description: |-
+  npm offload — /npm <args> dispatches an npm command off the parent
   context so multi-thousand-line Vitest / Vite / lint logs do not flood
-
   the conversation. Returns a one-line verdict + Tests/lint/build
-
   counters + failure cause.
-
-  '
 version: 0.1.0
 tags:
 - build

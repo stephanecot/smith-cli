@@ -1,3 +1,3 @@
 name: smith-single-template-adapter
-description: Adapts ONE body-only SKILL template from cli/templates/<framework>/<version>/skills/ to a single consumer project's stack. Receives the template path + ProjectStack + target provider, returns the adapted body + a change log. Dispatched in parallel by smith-template-customizer — never invoke directly.
+description: Adapts ONE body-only SKILL template from cli/templates/framework/<framework>/<version>/skills/ to a single consumer project's stack. Receives the template path + ProjectStack + target provider, returns the adapted body + a change log. Dispatched in parallel by smith-template-customizer — never invoke directly.
 capabilities: [read, glob, grep]

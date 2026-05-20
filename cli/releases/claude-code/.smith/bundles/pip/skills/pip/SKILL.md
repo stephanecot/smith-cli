@@ -2,7 +2,6 @@
 name: pip
 description: Run a pip command (install, freeze, list, show, uninstall, ...) inside the project's Python workspace — keeps multi-thousand-line resolver / install logs out of the parent context. Trigger with `/pip <args>` (e.g. `/pip install -r requirements.txt`, `/pip freeze`, `/pip list --outdated`).
 model: small
-allowed-tools: Read Glob Grep Bash(pip *) Bash(pip3 *) Bash(python -m pip *) Bash(python3 -m pip *)
 user-invocable: true
 ---
 
