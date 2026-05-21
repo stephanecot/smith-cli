@@ -1,0 +1,44 @@
+framework: fastapi
+version: '0'
+description: |-
+  Skill templates for FastAPI 0.115+ services. Covers conventions
+  specific to FastAPI : router structure, dependency injection,
+  Pydantic schema patterns, async patterns with SQLAlchemy ext.asyncio,
+  and JWT-based authentication. Pairs with the `framework/python/3`
+  skill set for language-level conventions.
+skills:
+- name: standards
+  version: 0.1.0
+  tags:
+  - fastapi
+  - python
+  - backend
+  - rest
+  - async
+- name: pydantic-models
+  version: 0.1.0
+  tags:
+  - fastapi
+  - pydantic
+  - schema
+  - validation
+- name: async-patterns
+  version: 0.1.0
+  tags:
+  - fastapi
+  - async
+  - sqlalchemy
+  - backend
+- name: auth-jwt
+  version: 0.1.0
+  tags:
+  - fastapi
+  - auth
+  - jwt
+  - security
+adapter_placeholders:
+  '{{language}}': Always "python" for this template set.
+  '{{runtime}}': python3
+  '{{framework}}': fastapi
+  '{{framework_version}}': '0'
+  '{{root_package}}': Project's top-level Python package (e.g. "my_api").

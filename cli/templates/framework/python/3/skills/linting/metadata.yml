@@ -1,0 +1,2 @@
+name: smith-python-linting
+description: ruff config (formatter + linter unified) + pre-commit hooks for Python {{framework_version}}. Replaces black + isort + flake8 + pyupgrade. Apply when adding lint config or fixing lint errors.

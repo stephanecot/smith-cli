@@ -1,0 +1,2 @@
+name: smith-python-tests-coverage
+description: pytest patterns for Python {{framework_version}} — fixture scoping, parametrize idioms, assertion style, coverage targets, pytest-cov config. Apply when writing tests or reviewing test coverage.

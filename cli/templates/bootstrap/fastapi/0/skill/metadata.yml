@@ -1,0 +1,3 @@
+name: smith-fastapi-bootstrap
+description: Interactive scaffold of a new FastAPI 0.115+ service — package name, optional DB (sqlite/postgres) + JWT auth + Docker + GitHub Actions CI. Generates pyproject.toml + src tree + tests + .env, runs `uv sync && uv run pytest` as a smoke check.
+model: medium

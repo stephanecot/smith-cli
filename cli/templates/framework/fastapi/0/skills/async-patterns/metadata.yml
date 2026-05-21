@@ -1,0 +1,2 @@
+name: smith-fastapi-async-patterns
+description: async/await idioms for FastAPI {{framework_version}} — SQLAlchemy ext.asyncio sessions, transaction scoping, background tasks vs Celery, anyio TaskGroup. Apply when writing async code or wiring the DB layer.

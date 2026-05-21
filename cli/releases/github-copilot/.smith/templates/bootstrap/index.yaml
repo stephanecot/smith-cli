@@ -4,9 +4,46 @@ bootstraps:
   version: '21'
   directory: angular/21
   config: angular/21/config.yaml
-  description: Interactive scaffold of a new Angular 21 SPA (package, routing, optional Tailwind v4 / Transloco / OpenAPI). Runs npm run build as a smoke check.
+  description: |-
+    Bootstrap for a new Angular 21 SPA. Asks for package name, routing,
+    Tailwind v4, Transloco, OpenAPI client ; generates the project tree ;
+    runs `npm run build` as a smoke check. Pairs with the `framework/angular/21`
+    skill set for post-scaffold quality + standards.
   tags:
   - angular
   - typescript
   - nodejs
   - frontend
+- name: fastapi
+  version: '0'
+  directory: fastapi/0
+  config: fastapi/0/config.yaml
+  description: |-
+    Bootstrap for a new FastAPI 0.115+ service. Asks for package name,
+    database (none / sqlite / postgres), auth flow (none / JWT), Docker,
+    test setup ; generates pyproject.toml + src/<pkg>/main.py + routers
+    + tests + .env + optional Dockerfile + GitHub Actions CI. Runs
+    `uv sync` + `uv run pytest` as a smoke check.
+  tags:
+  - fastapi
+  - python
+  - python3
+  - backend
+  - rest
+  - async
+- name: python-lib
+  version: '1'
+  directory: python-lib/1
+  config: python-lib/1/config.yaml
+  description: |-
+    Bootstrap for a new pip-installable Python library. Asks for package
+    name, license, py.typed (PEP 561 typed-library marker), CI provider ;
+    generates pyproject.toml (PEP 621 + hatchling) + src/ layout + tests
+    + CHANGELOG + LICENSE + GitHub Actions CI. Runs `uv sync` +
+    `uv run pytest` as a smoke check.
+  tags:
+  - python
+  - python3
+  - library
+  - packaging
+  - pyproject

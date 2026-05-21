@@ -1,0 +1,2 @@
+name: smith-fastapi-pydantic-models
+description: Pydantic v2 schema patterns for FastAPI {{framework_version}} — Input vs Output models, ConfigDict, field validators, settings management via pydantic-settings. Apply when defining request/response schemas or settings.

@@ -11,6 +11,7 @@ bundles:
   - claude-code
   - github-copilot
   - opencode
+  - gemini-cli
   skills:
   - name: ia-stats
     version: 0.1.0
@@ -29,6 +30,7 @@ bundles:
   - claude-code
   - github-copilot
   - opencode
+  - gemini-cli
   skills:
   - name: mvn
     version: 0.1.0
@@ -45,6 +47,7 @@ bundles:
   - claude-code
   - github-copilot
   - opencode
+  - gemini-cli
   skills:
   - name: npm
     version: 0.1.0
@@ -61,6 +64,7 @@ bundles:
   - claude-code
   - github-copilot
   - opencode
+  - gemini-cli
   skills:
   - name: pip
     version: 0.1.0

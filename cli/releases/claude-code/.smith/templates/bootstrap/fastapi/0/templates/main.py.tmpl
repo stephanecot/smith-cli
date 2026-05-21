@@ -1,0 +1,40 @@
+"""{{package_name}} — FastAPI entry point."""
+
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+
+from {{package_name}}.config import get_settings
+from {{package_name}}.routers import health
+# @stack-gated:has_jwt
+from {{package_name}}.routers import users
+# @stack-gated:has_db
+from {{package_name}}.db import engine
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # startup
+    settings = get_settings()
+    app.state.settings = settings
+    # @stack-gated:has_db
+    # DB engine is created in db.py at module import — nothing to start here.
+    yield
+    # shutdown
+    # @stack-gated:has_db
+    await engine.dispose()
+
+
+settings = get_settings()
+app = FastAPI(
+    title="{{package_name}}",
+    description="{{description}}",
+    version="0.1.0",
+    lifespan=lifespan,
+    docs_url="/docs",
+    redoc_url=None,
+)
+
+app.include_router(health.router)
+# @stack-gated:has_jwt
+app.include_router(users.router)

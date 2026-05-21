@@ -1,0 +1,15 @@
+{
+  "_comment": "MACRO TEMPLATE — Smith state file. Created by `/smith-init`. Updated by `/smith-bundle-install` (upserts `bundles[]`) and `/smith-template-install` (upserts `skills[]`). `specifications.*` paths point at files that may not exist yet — they are created by `/smith-generate-docs`. Both `skills[]` and `bundles[]` start empty.",
+  "version": 1,
+  "smith_cli_version": "{{smith_cli_version}}",
+  "generated_at": "{{ISO_8601_UTC}}",
+  "git_sha": "{{HEAD_sha_or_null}}",
+  "provider": "{{provider}}",
+  "specifications": {
+    "functional": ".smith/FUNCTIONAL_SPECIFICATION.MD",
+    "technical":  ".smith/TECHNICAL_SPECIFICATION.MD"
+  },
+  "ai_memory_file": "AGENTS.md",
+  "skills": [],
+  "bundles": []
+}

@@ -9,7 +9,7 @@ description: |
   populating hook is provided.
 version: 0.1.0
 tags: [observability, hooks]
-providers: [claude-code, github-copilot, opencode]
+providers: [claude-code, github-copilot, opencode, gemini-cli]
 skills:
   - name: ia-stats
     version: 0.1.0

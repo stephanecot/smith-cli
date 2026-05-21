@@ -1,0 +1,2 @@
+name: smith-python-typing
+description: Strict type hints + static checker config for Python {{framework_version}} — annotation style, Protocol vs ABC, generics, runtime type guards, mypy / pyright settings. Apply when writing types or reviewing type hints.

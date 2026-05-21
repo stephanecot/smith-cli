@@ -1,0 +1,25 @@
+name: python-lib
+version: '1'
+description: |-
+  Bootstrap for a new pip-installable Python library. Asks for package
+  name, license, py.typed (PEP 561 typed-library marker), CI provider ;
+  generates pyproject.toml (PEP 621 + hatchling) + src/ layout + tests
+  + CHANGELOG + LICENSE + GitHub Actions CI. Runs `uv sync` +
+  `uv run pytest` as a smoke check.
+tags:
+- python
+- python3
+- library
+- packaging
+- pyproject
+assets:
+- LICENSE-MIT
+- LICENSE-Apache-2.0
+templates:
+- pyproject.toml.tmpl
+- README.md.tmpl
+- __init__.py.tmpl
+- test_smoke.py.tmpl
+- ci.yml.tmpl
+scripts:
+- smoke_check.sh

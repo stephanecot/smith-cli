@@ -1,0 +1,2 @@
+name: smith-django-rest-framework
+description: Django REST Framework (DRF) patterns for Django {{framework_version}} — ModelViewSet vs APIView, serializer choices, permissions, pagination, throttling, OpenAPI via drf-spectacular. Apply when building DRF APIs.

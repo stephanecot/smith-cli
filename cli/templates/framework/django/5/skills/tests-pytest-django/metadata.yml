@@ -1,0 +1,2 @@
+name: smith-django-tests-pytest-django
+description: pytest-django config + patterns for Django {{framework_version}} — db marker, fixtures (client, admin_client, settings), factory-boy, parametrise. Apply when writing Django tests.

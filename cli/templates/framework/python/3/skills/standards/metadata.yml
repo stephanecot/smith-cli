@@ -1,0 +1,2 @@
+name: smith-python-standards
+description: Idiomatic Python {{framework_version}} conventions — PEP 8 layout, naming rules, import order, error handling, structuring functions and classes. Apply on every Python file you write or review.

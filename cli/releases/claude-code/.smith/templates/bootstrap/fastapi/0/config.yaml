@@ -1,0 +1,23 @@
+name: fastapi
+version: '0'
+description: |-
+  Bootstrap for a new FastAPI 0.115+ service. Asks for package name,
+  database (none / sqlite / postgres), auth flow (none / JWT), Docker,
+  test setup ; generates pyproject.toml + src/<pkg>/main.py + routers
+  + tests + .env + optional Dockerfile + GitHub Actions CI. Runs
+  `uv sync` + `uv run pytest` as a smoke check.
+tags:
+- fastapi
+- python
+- python3
+- backend
+- rest
+- async
+assets: []
+templates:
+- .env.example.tmpl
+- Dockerfile.tmpl
+- pyproject.toml.tmpl
+- main.py.tmpl
+scripts:
+- smoke_check.sh

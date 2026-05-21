@@ -1,0 +1,2 @@
+name: smith-fastapi-standards
+description: FastAPI {{framework_version}} conventions — modular routers, endpoint signature style, response models, HTTP status codes, error responses. Apply when adding endpoints or routers.

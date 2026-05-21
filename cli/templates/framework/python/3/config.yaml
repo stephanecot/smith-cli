@@ -1,0 +1,30 @@
+framework: python
+version: "3"
+description: |
+  Language-level skill templates for Python 3.12+ projects — apply
+  regardless of the web framework used downstream (FastAPI, Django,
+  Flask, …) or whether the project is a library, CLI, or service.
+  Each skill targets a single concern : standards, tests, typing,
+  packaging, linting.
+skills:
+  - name: standards
+    version: 0.1.0
+    tags: [python, python3, language, idioms]
+  - name: tests-coverage
+    version: 0.1.0
+    tags: [python, python3, test, pytest]
+  - name: typing
+    version: 0.1.0
+    tags: [python, python3, typing, mypy]
+  - name: packaging
+    version: 0.1.0
+    tags: [python, python3, packaging, pyproject, build]
+  - name: linting
+    version: 0.1.0
+    tags: [python, python3, lint, format, ruff]
+adapter_placeholders:
+  "{{language}}": Always "python" for this template set.
+  "{{runtime}}": "python3"
+  "{{framework}}": "python"
+  "{{framework_version}}": "3"
+  "{{root_package}}": Project's top-level Python package (kebab → snake, e.g. "my_app").

@@ -6,7 +6,7 @@ description: |
   counters + failure cause.
 version: 0.1.0
 tags: [build, nodejs, frontend]
-providers: [claude-code, github-copilot, opencode]
+providers: [claude-code, github-copilot, opencode, gemini-cli]
 skills:
   - name: npm
     version: 0.1.0

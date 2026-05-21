@@ -1,0 +1,14 @@
+name: pip
+description: |-
+  pip offload — /pip <args> dispatches a Python pip command off the
+  parent context so multi-thousand-line resolver / install logs do not
+  flood the conversation. Returns a one-line verdict + counters
+  (installed / upgraded / removed / failed) + failure cause.
+version: 0.1.0
+tags:
+- build
+- python
+skills:
+- name: pip
+  version: 0.1.0
+hooks: []

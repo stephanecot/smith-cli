@@ -1,0 +1,40 @@
+kind: hook
+provider: gemini-cli
+title: Extension-declared hook (.gemini/extensions/<slug>/extension.json)
+consumer_path: .gemini/extensions/<slug>/extension.json
+example: example/example-hook.json
+
+events:
+  - name: on_session_start
+    fires: At the start of every Gemini CLI session, before the first prompt is sent.
+    can_block: false
+    default_timeout_seconds: 30
+
+  - name: on_command
+    fires: Before a user-invoked slash command runs.
+    can_block: true
+    matcher: command name (string) or null for any command.
+    default_timeout_seconds: 30
+
+  - name: on_tool_use
+    fires: Before a model-requested tool call.
+    can_block: true
+    matcher: tool name (string) or null for any tool.
+    default_timeout_seconds: 30
+
+handler_types:
+  - type: command
+    fields:
+      - command
+      - args
+    notes: "Shell command + args invoked when the event fires. stdout / stderr captured ; non-zero exit blocks the event when can_block is true."
+
+  - type: script
+    fields:
+      - path
+      - args
+    notes: "Path to an executable shipped inside the extension (.gemini/extensions/<slug>/<script>). Same blocking semantics as command."
+
+conventions:
+  - "Hooks are declared inside the extension's extension.json manifest under a top-level hooks array. They are NOT a separate file format."
+  - "Gemini CLI's hook surface is less mature than Claude Code's — only a subset of lifecycle events are exposed today. Treat the list above as best-known-set ; confirm against the official docs before authoring."

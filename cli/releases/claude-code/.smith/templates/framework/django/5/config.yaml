@@ -1,0 +1,40 @@
+framework: django
+version: '5'
+description: |-
+  Skill templates for Django 5.x projects. Covers Django-specific
+  conventions : project + app structure, ORM patterns, pytest-django
+  for tests, and the Django REST Framework (DRF) for API endpoints.
+  Pairs with `framework/python/3` for language-level conventions.
+skills:
+- name: standards
+  version: 0.1.0
+  tags:
+  - django
+  - python
+  - backend
+- name: orm-patterns
+  version: 0.1.0
+  tags:
+  - django
+  - orm
+  - database
+  - postgresql
+- name: tests-pytest-django
+  version: 0.1.0
+  tags:
+  - django
+  - test
+  - pytest
+- name: rest-framework
+  version: 0.1.0
+  tags:
+  - django
+  - drf
+  - rest
+  - api
+adapter_placeholders:
+  '{{language}}': Always "python" for this template set.
+  '{{runtime}}': python3
+  '{{framework}}': django
+  '{{framework_version}}': '5'
+  '{{root_package}}': Django project package (e.g. "config" for the settings module).

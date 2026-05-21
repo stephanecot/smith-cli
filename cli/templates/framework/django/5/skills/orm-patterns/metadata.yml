@@ -1,0 +1,2 @@
+name: smith-django-orm-patterns
+description: Django {{framework_version}} ORM idioms — querysets, select_related / prefetch_related, transaction.atomic, signals (sparingly), index choices, model managers. Apply when writing models or queries.

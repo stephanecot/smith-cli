@@ -1,0 +1,3 @@
+name: smith-python-lib-bootstrap
+description: Interactive scaffold of a pip-installable Python library — package name, license (MIT/Apache/none), py.typed marker, optional GitHub Actions CI. Generates pyproject.toml (PEP 621 + hatchling) + src/ layout + tests + LICENSE + CHANGELOG, runs `uv sync && uv run pytest` as a smoke check.
+model: medium

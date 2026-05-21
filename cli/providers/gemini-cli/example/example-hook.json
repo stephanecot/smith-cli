@@ -1,0 +1,29 @@
+{
+  "name": "ia-stats",
+  "version": "0.1.0",
+  "description": "Append one row to IA_STATS.MD on every command + tool use.",
+  "hooks": [
+    {
+      "event": "on_command",
+      "matcher": null,
+      "handler": {
+        "type": "script",
+        "path": "scripts/append-ia-stats.js",
+        "args": ["--event", "command"]
+      },
+      "timeout_seconds": 5,
+      "blocking": false
+    },
+    {
+      "event": "on_tool_use",
+      "matcher": null,
+      "handler": {
+        "type": "script",
+        "path": "scripts/append-ia-stats.js",
+        "args": ["--event", "tool-use"]
+      },
+      "timeout_seconds": 5,
+      "blocking": false
+    }
+  ]
+}

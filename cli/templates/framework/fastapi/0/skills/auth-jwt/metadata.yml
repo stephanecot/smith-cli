@@ -1,0 +1,2 @@
+name: smith-fastapi-auth-jwt
+description: JWT + OAuth2 Password flow for FastAPI {{framework_version}} — python-jose + passlib + bcrypt, access / refresh tokens, dependency-based authorisation. Apply when wiring auth.

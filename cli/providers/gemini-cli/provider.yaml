@@ -1,0 +1,59 @@
+slug: gemini-cli
+name: Gemini CLI
+description: >
+  Google's official command-line interface for Gemini models. Supports
+  Claude-style skills (.gemini/skills/<slug>/SKILL.md with YAML
+  frontmatter), TOML-based slash commands (separate concept), extensions
+  with hooks, and a settings.json for configuration.
+
+docs:
+  cli:        https://github.com/google-gemini/gemini-cli
+  skills:     https://github.com/google-gemini/gemini-cli/blob/main/docs/skills.md
+  commands:   https://github.com/google-gemini/gemini-cli/blob/main/docs/commands.md
+  extensions: https://github.com/google-gemini/gemini-cli/blob/main/docs/extensions.md
+  settings:   https://github.com/google-gemini/gemini-cli/blob/main/docs/settings.md
+
+kinds:
+  agent:
+    format: format-agent.yaml
+    consumer_path: .gemini/agents/<slug>.md
+    invocation: TBD — Gemini CLI's sub-agent dispatcher is evolving ; treat as a regular skill the parent calls explicitly for now.
+    example: example/example-agent.md
+  skill:
+    format: format-skill.yaml
+    consumer_path: .gemini/skills/<slug>/SKILL.md
+    invocation: Auto-invoked by Gemini when the user's prompt matches the skill description, OR explicitly via /<slug>.
+    example: example/example-skill.md
+  hook:
+    format: format-hook.yaml
+    consumer_path: .gemini/extensions/<slug>/extension.json (hooks declared inside the extension manifest)
+    invocation: fires on a Gemini CLI lifecycle event when the extension is installed.
+    example: example/example-hook.json
+  rules:
+    consumer_path: GEMINI.md (repo root) OR .gemini/rules.md
+    invocation: always-on in context (loaded by Gemini CLI at session start).
+
+build:
+  consumer_paths:
+    skill:    ".gemini/skills/{slug}/SKILL.md"
+    agent:    ".gemini/agents/{slug}.md"
+    hook_dir: ".gemini/hooks/{bundle}"
+    settings: ".gemini/settings.json"
+  agent_frontmatter:
+    emit_name: true
+    extra: {}
+  tools_style: claude-string
+  capability_map:
+    read:      read_file
+    glob:      find_files
+    grep:      search_text
+    bash:      run_shell_command
+    edit:      replace_in_file
+    write:     write_file
+    skill:     ~
+    agent:     ~
+    ask-user:  ~
+    web-fetch: web_fetch
+  skill_property_map:
+    model:          model
+    user-invocable: ~

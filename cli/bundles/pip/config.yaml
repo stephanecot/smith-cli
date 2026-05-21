@@ -6,7 +6,7 @@ description: |
   (installed / upgraded / removed / failed) + failure cause.
 version: 0.1.0
 tags: [build, python]
-providers: [claude-code, github-copilot, opencode]
+providers: [claude-code, github-copilot, opencode, gemini-cli]
 skills:
   - name: pip
     version: 0.1.0

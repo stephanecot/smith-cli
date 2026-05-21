@@ -1,0 +1,35 @@
+kind: skill
+provider: gemini-cli
+title: Skill (.gemini/skills/<slug>/SKILL.md)
+consumer_path: .gemini/skills/<slug>/SKILL.md
+example: example/example-skill.md
+
+frontmatter:
+  - field: name
+    required: true
+    default: null
+    allowed: kebab-case, lowercase + digits + hyphens
+    meaning: Unique slug. Filename does NOT have to match but conventionally does.
+
+  - field: description
+    required: true
+    default: null
+    allowed: one-line natural-language string
+    meaning: When Gemini should auto-invoke this skill. Pack triggers (verbs, file types, paths).
+
+  - field: model
+    required: false
+    default: session model
+    allowed: model id (gemini-2.5-pro, gemini-2.5-flash, ...)
+    meaning: Per-skill model override.
+
+  - field: tools
+    required: false
+    default: inherit all
+    allowed: comma-separated tool names
+    meaning: Allowlist of tools the skill may use (read_file, run_shell_command, ...).
+
+body_conventions:
+  - The body is the skill's prompt verbatim — same shape as Claude Code SKILL.md.
+  - Structure that works well — Mission → Inputs → Procedure → Outputs → Quality bar → Out of scope.
+  - Smith bin skills authored as Markdown with YAML frontmatter ship directly into this provider — no translation step needed.

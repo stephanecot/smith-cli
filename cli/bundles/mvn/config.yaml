@@ -6,7 +6,7 @@ description: |
   cause.
 version: 0.1.0
 tags: [build, java, backend]
-providers: [claude-code, github-copilot, opencode]
+providers: [claude-code, github-copilot, opencode, gemini-cli]
 skills:
   - name: mvn
     version: 0.1.0

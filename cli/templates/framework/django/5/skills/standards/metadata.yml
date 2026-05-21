@@ -1,0 +1,2 @@
+name: smith-django-standards
+description: Django {{framework_version}} project layout + conventions — project / app split, settings management, URL routing, view types, template paths. Apply when adding apps, views, or restructuring routes.

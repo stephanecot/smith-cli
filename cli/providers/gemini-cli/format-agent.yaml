@@ -1,0 +1,44 @@
+kind: agent
+provider: gemini-cli
+title: Sub-agent (.gemini/agents/<slug>.md)
+consumer_path: .gemini/agents/<slug>.md
+example: example/example-agent.md
+
+frontmatter:
+  - field: name
+    required: true
+    default: null
+    allowed: kebab-case slug
+    meaning: Unique slug — addressable by the parent skill / command when dispatching.
+
+  - field: description
+    required: true
+    default: null
+    allowed: one-line natural-language string
+    meaning: When a parent should delegate to this agent. Pack triggers.
+
+  - field: model
+    required: false
+    default: session model
+    allowed: model id (gemini-2.5-pro, gemini-2.5-flash, ...)
+    meaning: Per-agent model override.
+
+  - field: tools
+    required: false
+    default: inherit
+    allowed: comma-separated tool names
+    meaning: Allowlist of tools this agent may use.
+
+body_conventions:
+  - The body is the agent's system prompt verbatim — same shape as Claude Code agents.
+  - Gemini CLI's sub-agent dispatcher is evolving ; until the native dispatch API stabilises, treat the agent file as a regular skill the parent calls explicitly.
+  - Keep it tight — every line costs context on every invocation.
+
+builtin_tools:
+  - read_file — file reads
+  - find_files — pattern-based file lookup
+  - search_text — content search (grep equivalent)
+  - run_shell_command — shell execution
+  - replace_in_file — file edits
+  - write_file — file writes
+  - web_fetch — fetch a URL

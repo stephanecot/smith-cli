@@ -1,0 +1,32 @@
+{
+  "_comment": "MACRO TEMPLATE — filled by `/smith-init`. Strict shape : keep every key, replace each `{{placeholder}}` with the detected value, drop entire arrays (set to []) when nothing is detected for that category. Each list entry MUST carry name + version + tags[]. Tags are kebab-case keywords from the canonical taxonomy (see `/smith-bundle-add`).",
+  "version": 1,
+  "generated_at": "{{ISO_8601_UTC}}",
+  "project": {
+    "name": "{{project_name}}",
+    "description": "{{description_argument_verbatim}}",
+    "summary": "{{optional_one_line_tech_summary}}",
+    "languages": [
+      { "name": "{{language_name}}", "version": "{{language_version}}", "tags": ["{{tag1}}"] }
+    ],
+    "runtimes": [
+      { "name": "{{runtime_name}}", "version": "{{runtime_version}}", "tags": ["{{tag1}}"] }
+    ],
+    "frameworks": [
+      { "name": "{{framework_name}}", "version": "{{framework_version}}", "tags": ["{{tag1}}", "{{tag2}}"] }
+    ],
+    "build_tools": [
+      { "name": "{{build_tool_name}}", "version": "{{build_tool_version}}", "tags": ["{{tag1}}"] }
+    ],
+    "test_tools": [
+      { "name": "{{test_tool_name}}", "version": "{{test_tool_version}}", "tags": ["{{tag1}}"] }
+    ],
+    "infra_tools": [
+      { "name": "{{infra_tool_name}}", "version": "{{infra_tool_version}}", "tags": ["{{tag1}}"] }
+    ],
+    "databases": [
+      { "name": "{{database_name}}", "version": "{{database_version}}", "tags": ["{{tag1}}"] }
+    ],
+    "git_sha": "{{HEAD_sha_or_null}}"
+  }
+}

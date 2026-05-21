@@ -1,0 +1,2 @@
+name: smith-python-packaging
+description: pyproject.toml (PEP 621) + src/ layout + build / publish tooling for Python {{framework_version}}. Apply when adding the project's packaging config, dependencies, or release tooling.

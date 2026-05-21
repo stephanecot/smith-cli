@@ -4,7 +4,13 @@ templates:
   version: '21'
   directory: angular/21
   config: angular/21/config.yaml
-  description: Skill templates for Angular 21 projects (zoneless, signals, Tailwind v4, Vitest, Transloco i18n, OpenAPI-generated HTTP clients). Each skills/<slug>/ directory ships a body (template.md), common metadata (metadata.yml), and per-provider frontmatter overrides (<provider>.yml). smith-template-install composes the frontmatter at install time and names the destination skill `smith-angular-<slug>` in the consumer project's provider-native skill dir.
+  description: 'Skill templates for Angular 21 projects (zoneless, signals, Tailwind v4,
+
+    Vitest, Transloco i18n, OpenAPI-generated HTTP clients). Each skills/<slug>/
+
+    directory ships a body and metadata.yml. The consumer-side adapter resolves
+
+    placeholders + prunes absent-tech sections against the project stack.'
   skills:
   - name: standards
     version: 0.1.0
@@ -37,11 +43,108 @@ templates:
     - openapi-generator
     - rest
     - frontend
+- framework: django
+  version: '5'
+  directory: django/5
+  config: django/5/config.yaml
+  description: 'Skill templates for Django 5.x projects. Covers Django-specific
+
+    conventions : project + app structure, ORM patterns, pytest-django
+
+    for tests, and the Django REST Framework (DRF) for API endpoints.
+
+    Pairs with `framework/python/3` for language-level conventions.'
+  skills:
+  - name: standards
+    version: 0.1.0
+    tags:
+    - django
+    - python
+    - backend
+  - name: orm-patterns
+    version: 0.1.0
+    tags:
+    - django
+    - orm
+    - database
+    - postgresql
+  - name: tests-pytest-django
+    version: 0.1.0
+    tags:
+    - django
+    - test
+    - pytest
+  - name: rest-framework
+    version: 0.1.0
+    tags:
+    - django
+    - drf
+    - rest
+    - api
+- framework: fastapi
+  version: '0'
+  directory: fastapi/0
+  config: fastapi/0/config.yaml
+  description: 'Skill templates for FastAPI 0.115+ services. Covers conventions
+
+    specific to FastAPI : router structure, dependency injection,
+
+    Pydantic schema patterns, async patterns with SQLAlchemy ext.asyncio,
+
+    and JWT-based authentication. Pairs with the `framework/python/3`
+
+    skill set for language-level conventions.'
+  skills:
+  - name: standards
+    version: 0.1.0
+    tags:
+    - fastapi
+    - python
+    - backend
+    - rest
+    - async
+  - name: pydantic-models
+    version: 0.1.0
+    tags:
+    - fastapi
+    - pydantic
+    - schema
+    - validation
+  - name: async-patterns
+    version: 0.1.0
+    tags:
+    - fastapi
+    - async
+    - sqlalchemy
+    - backend
+  - name: auth-jwt
+    version: 0.1.0
+    tags:
+    - fastapi
+    - auth
+    - jwt
+    - security
 - framework: java-spring-boot
   version: '4'
   directory: java-spring-boot/4
   config: java-spring-boot/4/config.yaml
-  description: Skill templates for Java 24 + Spring Boot 4 services. Today the set ships a single `bootstrap` skill — interactive scaffold of a runnable service (pom.xml, application entry, optional REST controller, optional Liquibase changelog, application.yaml, .gitignore, README). More skills (coding standards, tests + coverage, JPA + transactions, OpenAPI contract, observability) can be added with /smith-template-add. Each skills/<slug>/ directory ships a body (template.md), common metadata (metadata.yml), and per-provider frontmatter overrides (<provider>.yml). smith-template-install composes the frontmatter at install time and names the destination skill `smith-java-spring-boot-<slug>` in the consumer project's provider-native skill dir.
+  description: 'Skill templates for Java 24 + Spring Boot 4 services. Today the set
+
+    ships a single `bootstrap` skill — interactive scaffold of a runnable
+
+    service (pom.xml, application entry, optional REST controller,
+
+    optional Liquibase changelog, application.yaml, .gitignore, README).
+
+    More skills (coding standards, tests + coverage, JPA + transactions,
+
+    OpenAPI contract, observability) can be added with /smith-template-add.
+
+    Each skills/<slug>/ directory ships a body and metadata.yml. The
+
+    consumer-side adapter resolves placeholders + prunes absent-tech
+
+    sections against the project stack at install time.'
   skills:
   - name: bootstrap
     version: 0.1.0
@@ -51,3 +154,54 @@ templates:
     - jvm
     - backend
     - maven
+- framework: python
+  version: '3'
+  directory: python/3
+  config: python/3/config.yaml
+  description: 'Language-level skill templates for Python 3.12+ projects — apply
+
+    regardless of the web framework used downstream (FastAPI, Django,
+
+    Flask, …) or whether the project is a library, CLI, or service.
+
+    Each skill targets a single concern : standards, tests, typing,
+
+    packaging, linting.'
+  skills:
+  - name: standards
+    version: 0.1.0
+    tags:
+    - python
+    - python3
+    - language
+    - idioms
+  - name: tests-coverage
+    version: 0.1.0
+    tags:
+    - python
+    - python3
+    - test
+    - pytest
+  - name: typing
+    version: 0.1.0
+    tags:
+    - python
+    - python3
+    - typing
+    - mypy
+  - name: packaging
+    version: 0.1.0
+    tags:
+    - python
+    - python3
+    - packaging
+    - pyproject
+    - build
+  - name: linting
+    version: 0.1.0
+    tags:
+    - python
+    - python3
+    - lint
+    - format
+    - ruff

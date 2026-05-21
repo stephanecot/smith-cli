@@ -1,0 +1,57 @@
+[project]
+name = "{{package_name}}"
+version = "0.1.0"
+description = "{{description}}"
+readme = "README.md"
+requires-python = ">={{python_version}}"
+authors = [{ name = "{{author_name}}", email = "{{author_email}}" }]
+license = { text = "{{license_id}}" }
+keywords = []
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8",
+  "pytest-cov>=5",
+  "ruff>=0.5",
+  "mypy>=1.10",
+]
+
+[project.urls]
+Homepage = ""
+Issues   = ""
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/{{package_name}}"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "UP", "SIM", "C4", "RUF", "N"]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["{{package_name}}"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts   = ["--strict-markers", "--strict-config"]
+
+[tool.coverage.run]
+branch = true
+source = ["src/{{package_name}}"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true

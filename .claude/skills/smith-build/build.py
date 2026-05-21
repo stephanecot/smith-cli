@@ -352,10 +352,8 @@ def build_bundles(repo_root: Path, release_root: Path, provider: str, rules: dic
     catalog_src = src_root / "index.yaml"
     if catalog_src.is_file():
         catalog = read_yaml(catalog_src)
-        built_names = {
-            p.name for p in (release_root / ".smith" / "bundles").iterdir()
-            if p.is_dir()
-        }
+        built_root = release_root / ".smith" / "bundles"
+        built_names = {p.name for p in built_root.iterdir() if p.is_dir()} if built_root.is_dir() else set()
         catalog["bundles"] = [
             {k: v for k, v in entry.items() if k != "providers"}
             for entry in catalog.get("bundles", [])

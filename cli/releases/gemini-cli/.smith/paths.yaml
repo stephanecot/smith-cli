@@ -1,0 +1,4 @@
+skill: .gemini/skills/{slug}/SKILL.md
+agent: .gemini/agents/{slug}.md
+hook_dir: .gemini/hooks/{bundle}
+settings: .gemini/settings.json
