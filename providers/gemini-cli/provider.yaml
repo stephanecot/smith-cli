@@ -39,6 +39,8 @@ build:
     agent:    ".gemini/agents/{slug}.md"
     hook_dir: ".gemini/hooks/{bundle}"
     settings: ".gemini/settings.json"
+    skill_invocation: "/{slug}"
+    agent_invocation: ~
   agent_frontmatter:
     emit_name: true
     extra: {}

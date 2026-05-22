@@ -135,13 +135,30 @@ an empty shell ; Steps 4 + 5 upsert into it.
 
 Pure filter + copy ; no sub-agent.
 
+0. **Propagate `paths.yaml` to the consumer** (one-time). If
+   `<consumer>/.smith/paths.yaml` does not exist, copy
+   `<release_root>/.smith/paths.yaml` to it verbatim. Atomic write.
+   Consumer-installed skills (e.g. the `dashboard-ai` bundle) read
+   this file at runtime so their bodies stay provider-agnostic —
+   no per-provider table inside the bundle.
 1. Read `<release_root>/.smith/bundles/index.yaml`.
-2. Pick bundles whose `tags[]` intersect the project's stack tags
-   (union of `tags[]` across every entry in `architecture.json`).
+2. Pick bundles using the union of two rules — a bundle is picked
+   if EITHER condition holds :
+   - `core: true` on the bundle entry. **Core bundles are
+     always installed**, regardless of stack tags. Today the
+     only one is `ia-stats` ; future base bundles join the same
+     auto-install set. See `smith-bundle-format::Core bundles`.
+   - `tags[]` intersect the project's stack tags (union of
+     `tags[]` across every entry in `architecture.json`).
 3. For each picked bundle, in deterministic alphabetical order :
    - For each `skill` in the bundle's `config.yaml::skills[]`, copy
      `<release_root>/.smith/bundles/<bundle>/skills/<slug>/SKILL.md` to
      `<consumer>/<paths.skill.format(slug=<slug>)>`.
+   - If `<release_root>/.smith/bundles/<bundle>/skills/<slug>/assets/`
+     exists, copy its tree verbatim to
+     `<consumer>/.smith/skills/<slug>/assets/` (preserving file
+     modes — Node scripts may need the executable bit). Missing
+     bucket → no-op.
    - For each file under `<release_root>/.smith/bundles/<bundle>/hooks/` :
      - If `paths.settings` is non-null AND the filename matches
        `*.hooks.json` → merge the JSON fragment into
@@ -211,7 +228,7 @@ collected change logs.
 
 ### Step 6 — Write `AGENTS.md` (sub-agent)
 
-Dispatch **`smith-new-project-agents-writer`** with
+Dispatch **`smith-project-agents-writer`** with
 `consumer_project_dir`, the original `description`, and
 `bootstrap_results: []`. It assembles the payload for
 `/smith-agents-md-write`, invokes the skill, atomic-writes
@@ -220,7 +237,7 @@ Dispatch **`smith-new-project-agents-writer`** with
 
 ### Step 7 — Verification sub-agent
 
-Dispatch **`smith-new-project-verifier`**. Confirms `.smith/smith.yaml`,
+Dispatch **`smith-project-verifier`**. Confirms `.smith/smith.yaml`,
 `architecture.json`, `config.json` shapes ; every
 `bundles[].files[].destination` exists ; every `skills[].path`
 exists ; `AGENTS.md` is ≤100 lines. Returns a structured

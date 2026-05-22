@@ -20,6 +20,12 @@ frontmatter unchanged, and rewrite only the body.
 - `destination` — absolute consumer-side path where the adapted
   SKILL.md will be written. Computed by the orchestrator from
   `<release_root>/paths.yaml::skill.format(slug=smith-<fw>-<slug>)`.
+- `mode` — `"new"` (default) or `"convert"`. Selects whether the
+  adapter may read the consumer's source tree to anchor the body on
+  the project's **existing** conventions. See "Mode-specific behaviour"
+  below.
+- `consumer_project_dir` — absolute path of the consumer project root.
+  REQUIRED when `mode == "convert"` ; ignored otherwise.
 
 ## Procedure
 
@@ -115,6 +121,10 @@ frontmatter unchanged, and rewrite only the body.
    longer exists) goes in the change log as an `api_drift` flag —
    never silently rewritten.
 
+   When `mode == "convert"`, additionally rewrite the body so it
+   reflects the **existing** project's conventions — see
+   "Mode-specific behaviour" below before continuing to step 5.
+
 5. **Reassemble the SKILL.md** : `frontmatter_block + "\n" + adapted_body`.
    Frontmatter is the verbatim `---` … `---` block read in Step 1.
    Never touch its keys, values, ordering, or whitespace.
@@ -159,6 +169,97 @@ frontmatter unchanged, and rewrite only the body.
      tech is absent from `project_stack`. Include a `count` field.
    - `api_drift` — possibly outdated API call surfaced but NOT
      rewritten.
+   - `convention_anchored` — body rewritten to match an observed
+     project convention (only in `mode=convert`). Include
+     `convention` (e.g. `test-location`, `i18n-key-style`,
+     `feature-folder-layout`) and `value` (the observed convention).
+   - `convention_unclear` — adapter looked for a convention in the
+     source but could not decide ; template default kept + surfaced
+     to the orchestrator (only in `mode=convert`).
+
+## Mode-specific behaviour
+
+The procedure above is identical across modes for steps 1, 2, 3,
+5, 6, 7. Step 4 ("Surface-level edits") is where the two modes
+diverge.
+
+### `mode == "new"` (default)
+
+Greenfield. The consumer project does not yet have idiomatic code
+to mine — there is nothing to read. The adapted body documents the
+**framework's recommended conventions** as written in the template,
+with version + dependency coordinates rewritten to the project's
+exact pins. Never read consumer source files in this mode ; emit
+no `convention_*` change entries.
+
+### `mode == "convert"`
+
+The consumer project already exists. The adapted body must teach
+the AI what THIS project does, not what a fresh project would do.
+After the standard placeholder + pruning + version-rewrite pass,
+mine the consumer source under `consumer_project_dir` to anchor
+the body on observed conventions. Read deliberately — you have a
+sub-agent context window, not infinite budget.
+
+**What to mine (in priority order, stop early if budget tight) :**
+
+1. **Layout & structure** — top-level dirs, source roots, where
+   tests live (`__tests__/`, `test/`, `spec/`, co-located `*.test.*`,
+   …), where build artefacts go, monorepo vs single tree.
+2. **Naming conventions** — file casing (kebab vs camel vs pascal),
+   plural vs singular folder names, `.spec.` vs `.test.` suffix,
+   feature-folder vs type-folder layout, barrel-file convention.
+3. **Framework-specific patterns** — for each `project_stack.frameworks[]`
+   present, look at 2-3 representative files :
+   - Angular : standalone components vs NgModules, signal vs
+     RxJS, file structure inside a feature folder.
+   - React : functional + hooks vs class, file colocation,
+     state-management lib actually wired (Redux, Zustand, …).
+   - Spring Boot : package layout (`com.company.project.*`), DTO
+     pattern, MapStruct vs manual mapping, controller vs
+     functional routing.
+   - Etc.
+4. **Tooling configs** — `eslint.config.*`, `.prettierrc`,
+   `tsconfig.json`, `karma.conf.js`, `jest.config.*`,
+   `vitest.config.*`, `playwright.config.*`, `pyproject.toml`,
+   `pom.xml` plugin section, `build.gradle` — these encode
+   formatting + test framework + lint rule choices the skill
+   must respect.
+5. **i18n / theming / state / routing** — if the template has a
+   section gated on one of these techs, grep for its config file
+   and a representative usage to learn the project's actual key
+   convention / theme tokens / store shape / route declaration.
+
+**How to apply findings :**
+
+- For every observed convention, rewrite the relevant section of
+  the body so the documented practice matches what the project
+  already does. Emit a `convention_anchored` change entry naming
+  the convention + the observed value.
+- When the template documents a practice that DIFFERS from what
+  the project does, the project wins — rewrite the template to
+  match the project (never the other way round). Do NOT include
+  "the recommended way is X but you do Y" hedge text — the
+  adapted skill is a description of THIS project, not a tutorial.
+- When you cannot determine a convention with reasonable
+  confidence after looking at 2-3 source files, keep the
+  template's default and emit a `convention_unclear` change entry
+  so the orchestrator can surface it in the report.
+
+**Hard limits in `convert` mode :**
+
+- 🚫 **STRICTLY READ-ONLY on `consumer_project_dir`.** Never
+  write, edit, rename, delete, or run any tool that mutates a
+  file inside the consumer project. No formatter, no `--fix`,
+  no "small cleanup" — zero writes. The orchestrator owns every
+  write and only to Smith-managed paths. Attempting to mutate
+  the source is a contract violation as serious as a `cli/` leak.
+- Do not read more than ~25 consumer files in total. Prefer
+  representative samples over exhaustive scans.
+- Do not infer business logic, domain model, or feature
+  inventory from the source — only conventions. Domain content
+  belongs to `/smith-generate-docs`, not to this adapter.
+- Frontmatter remains byte-identical regardless of mode.
 
 ## Quality bar
 

@@ -1,0 +1,3 @@
+name: smith-stack-detector
+description: "Walks an EXISTING consumer project tree and produces a partial `ProjectStack` (same shape as `.smith/architecture.json::project.*`) populated from observed files — package.json / pom.xml / build.gradle / pyproject.toml / go.mod / Cargo.toml / framework configs / Dockerfile. Returns a `seed_stack` ready to feed `smith-stack-discoverer` so the latter only asks the user about genuine gaps. Read-only — never writes. Dispatched by `/smith-convert-project` Step 2 ; never invoke directly."
+capabilities: [read, glob, grep]

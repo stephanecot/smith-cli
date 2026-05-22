@@ -33,7 +33,9 @@ bundles/<name>/
 ├── skills/
 │   └── <skill-slug>/
 │       ├── <skill-slug>.md              # BODY ONLY — no frontmatter
-│       └── metadata.yml                 # GENERIC metadata + optional skill properties
+│       ├── metadata.yml                 # GENERIC metadata + optional skill properties
+│       └── assets/                      # OPTIONAL — runtime resources the skill ships with
+│           └── ...                      # any tree: server.js, web/, package.json, …
 └── hooks/                               # optional — provider-specific event automation
     ├── claude-code/
     │   ├── <name>.hooks.json            # hook fragment for .claude/settings.json
@@ -47,6 +49,34 @@ No more per-provider yml files under `skills/<slug>/`. Provider-
 specific frontmatter is composed at **build time** from `metadata.yml`
 via the mapping declared in
 `providers/<provider>/provider.yaml::build.skill_property_map`.
+
+### Optional `skills/<slug>/assets/` bucket
+
+A skill that ships runtime resources (a Node script, a web UI, an
+HTML template, …) drops them under `skills/<slug>/assets/`. The
+tree is **opaque to Smith** — any layout the skill body knows how
+to consume is valid.
+
+Install destination (provider-agnostic) :
+`<consumer>/.smith/skills/<slug>/assets/...`. The path mirrors the
+source tree byte-for-byte. The skill body references it by the
+relative path `.smith/skills/<slug>/assets/…` from the project root.
+
+Rationale for landing under `.smith/` rather than next to the
+installed SKILL.md :
+
+- `github-copilot` and `opencode` skills install as a single flat
+  file (`.github/prompts/<slug>.prompt.md` /
+  `.opencode/commands/<slug>.md`) — there is no sibling folder to
+  drop assets into.
+- The `.smith/` convention works identically across every
+  provider and keeps the consumer's provider-runtime tree clean.
+- Bootstrap-template sidecars already use the same `.smith/`-rooted
+  pattern (`<consumer>/.smith/bootstraps/<name>/{assets,templates,scripts}/`).
+
+The orchestrators (`/smith-new-project`, `/smith-convert-project`)
+and `/smith-bundle-install` copy this folder verbatim on install
+when present. Empty / missing → no-op.
 
 ## Per-skill `metadata.yml`
 
@@ -138,6 +168,7 @@ name: <kebab-case-slug>             # bundle name, equals the directory name
 description: |
   Multi-line description of what the bundle does end-to-end.
 version: 0.1.0                      # bundle-level semver (independent of per-skill / per-hook versions)
+core: false                         # optional ; default false. See "Core bundles" below.
 tags: [<from taxonomy below>]
 providers: [claude-code, github-copilot, opencode]   # subset of supported providers
 skills:
@@ -160,6 +191,36 @@ hooks:
   redundant `providers:` field in the YAML entry.
 - The `providers:` field at the bundle level is stripped at release
   time (the release is already provider-scoped).
+- `core:` is OPTIONAL. Absent ≡ `false`. When `true`, the bundle is
+  treated as a **base bundle** — see the next section.
+
+## Core bundles
+
+A bundle with `core: true` is a **base bundle** : it is installed
+on every consumer project regardless of stack tags or user
+selection. Today the only core bundle is `ia-stats` (the per-agent
+usage tracker) ; the list will grow as Smith ships more
+project-level infrastructure.
+
+Contract :
+
+- `/smith-bundle-install`, `/smith-new-project`, and
+  `/smith-convert-project` MUST install every core bundle even
+  when the tag-intersection filter would have rejected it.
+- The user CAN opt a core bundle out only by explicit instruction
+  (`/smith-bundle-install --skip ia-stats`) — the default flow
+  always picks it up.
+- `core: true` overrides the tag-intersection logic ; it does NOT
+  override the `providers:` filter (a core bundle that doesn't
+  ship for the active provider is still skipped at build time —
+  not at install time).
+- `/smith-bundle-list` MUST display the core flag so the user
+  knows which bundles will be auto-installed.
+
+The `core:` field is propagated verbatim from `config.yaml` into
+`bundles/index.yaml` by the mutator skills, and from there into
+`<release>/.smith/bundles/index.yaml` by `/smith-build` (no
+special handling — it rides along with the other catalog fields).
 
 ## Canonical tag taxonomy (v0.1)
 
@@ -184,10 +245,9 @@ in-place from another skill.
 ### integration
 `hooks`, `slash-command`, `mcp`.
 
-### lifecycle
-`common` — special marker. Bundles carrying this tag are **always
-installed** during the workflow (`/smith-new-project` and friends),
-regardless of which bundles the user explicitly selects.
+**No `common` / `core` tag.** The always-installed semantics live in
+the first-class `core: true` property at the bundle level (see
+"Core bundles" above) — not in the tag taxonomy.
 
 **No provider tags.** Provider identity already lives in `config.yaml`
 `providers:` — don't duplicate it in `tags:`.

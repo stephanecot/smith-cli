@@ -1,6 +1,6 @@
 ---
 name: smith-bundle-add
-description: Scaffolds a NEW bundle under bundles/<name>/ following the canonical layout documented in the sibling skill `smith-bundle-format`. Defaults to scaffolding for **every supported provider** (claude-code + github-copilot) — pass `--ia` only to restrict. Validates every tag against the canonical taxonomy; regenerates bundles/index.yaml. Trigger with `/smith-bundle-add <name> "<description>" --tag t1,t2,t3 [--ia claude-code|github-copilot|both]`. CLI-maintainer command (operates on cli/, not on a consumer project).
+description: Scaffolds a NEW bundle under bundles/<name>/ following the canonical layout documented in the sibling skill `smith-bundle-format`. Defaults to scaffolding for **every supported provider** (claude-code + github-copilot) — pass `--ia` only to restrict. Validates every tag against the canonical taxonomy; regenerates bundles/index.yaml. Pass `--core` to mark the bundle as a base bundle (auto-installed on every project). Trigger with `/smith-bundle-add <name> "<description>" --tag t1,t2,t3 [--ia claude-code|github-copilot|both] [--core]`. CLI-maintainer command (operates on cli/, not on a consumer project).
 ---
 
 # Skill — `/smith-bundle-add`
@@ -24,8 +24,12 @@ in context. This skill only carries the scaffold-new-bundle procedure.
 ## How to invoke
 
 ```
-/smith-bundle-add <name> "<description>" --tag t1,t2,t3 [--ia claude-code|github-copilot|both]
+/smith-bundle-add <name> "<description>" --tag t1,t2,t3 [--ia claude-code|github-copilot|both] [--core]
 ```
+
+`--core` marks the bundle as a **base bundle** : it will be
+auto-installed on every consumer project regardless of stack
+tags. Default is non-core. See `smith-bundle-format::Core bundles`.
 
 Example :
 
@@ -59,12 +63,14 @@ distance ≤ 2).
 3. **Scaffold the folder** `bundles/<name>/` per the canonical
    layout in `smith-bundle-format` :
    - `config.yaml` with `name`, `description` (passed in), `version:
-     0.1.0`, `tags`, `providers` (= the resolved `--ia` set),
-     `skills:` (a `{name, version: 0.1.0}` entry per declared skill),
-     and `hooks:` (a `{name, version: 0.1.0}` entry per declared
-     hook — empty `[]` if no hook; the providers shipping the hook
-     are inferred from disk under `hooks/<provider>/`). No `files:`
-     map — the structure is self-describing.
+     0.1.0`, `core:` (write `true` only when `--core` was passed ;
+     omit otherwise — absent ≡ false), `tags`, `providers` (= the
+     resolved `--ia` set), `skills:` (a `{name, version: 0.1.0}`
+     entry per declared skill), and `hooks:` (a `{name, version:
+     0.1.0}` entry per declared hook — empty `[]` if no hook ; the
+     providers shipping the hook are inferred from disk under
+     `hooks/<provider>/`). No `files:` map — the structure is
+     self-describing.
    - `README.MD` (sections : Why, Installation, Usage, Tags).
    - `RELEASES.MD` (header + initial `0.1.0` entry stub).
    - For each declared skill `<slug>` :
@@ -101,8 +107,10 @@ distance ≤ 2).
 4. **Regenerate `bundles/index.yaml`** :
    - Walk every `bundles/*/config.yaml`.
    - Build the new `bundles[]` array : `{name, description,
-     directory, version, tags, providers}`. Sort by `name` for
-     deterministic output.
+     directory, version, core, tags, providers, skills, hooks}`.
+     Include `core` only when the source `config.yaml` carries it
+     (absent ≡ false — omit from the index entry too, to keep the
+     catalog tidy). Sort by `name` for deterministic output.
    - Atomic write (tempfile → fsync → rename).
 
 5. **Print** the post-add checklist :

@@ -112,13 +112,15 @@
         "consumer_paths": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["skill", "agent", "hook_dir", "settings"],
-          "description": "Consumer-side install path templates. Each value uses {slug} (skill / agent) or {bundle} (hook_dir) as the only placeholder.",
+          "required": ["skill", "agent", "hook_dir", "settings", "skill_invocation", "agent_invocation"],
+          "description": "Consumer-side install path templates + invocation templates. Path values use {slug} (skill / agent) or {bundle} (hook_dir). Invocation values use {slug} and tell consumer-side skills how the user (or another skill) addresses an installed skill / agent for this provider — propagated verbatim to <release>/.smith/paths.yaml so bundle bodies stay provider-agnostic.",
           "properties": {
             "skill":    { "type": "string" },
             "agent":    { "type": "string" },
             "hook_dir": { "type": "string" },
-            "settings": { "type": ["string", "null"], "description": "Consumer settings file for hook-fragment merges. null when the provider has no merge model." }
+            "settings": { "type": ["string", "null"], "description": "Consumer settings file for hook-fragment merges. null when the provider has no merge model." },
+            "skill_invocation": { "type": ["string", "null"], "description": "How a user invokes a skill — e.g. `/{slug}` for slash-command providers, `@{slug}` for chat-mention providers. null when the provider has no direct invocation surface." },
+            "agent_invocation": { "type": ["string", "null"], "description": "How an agent is addressed when user-invocable. null when agents are only dispatched internally (e.g. via the Agent tool, never by the user)." }
           }
         },
         "agent_frontmatter": {

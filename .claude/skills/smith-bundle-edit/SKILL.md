@@ -1,6 +1,6 @@
 ---
 name: smith-bundle-edit
-description: Modify an EXISTING bundle under bundles/<name>/ — add or remove a skill, add or remove a hook, add or remove a sidecar script, bump the bundle / per-skill / per-hook version, edit description or tags. Respects the canonical layout documented in `smith-bundle-format`. Regenerates bundles/index.yaml after the change. Trigger with `/smith-bundle-edit <name> [--add-skill <slug>] [--rm-skill <slug>] [--add-hook <n> --ia <provider>] [--rm-hook <n> --ia <provider>] [--add-script <file> --ia <provider>] [--rm-script <file> --ia <provider>] [--add-tag <t>] [--rm-tag <t>] [--add-provider <p>] [--rm-provider <p>] [--bump-version major|minor|patch] [--bump-skill <slug> major|minor|patch] [--bump-hook <n> major|minor|patch] [--description "<new>"]`. CLI-maintainer command.
+description: Modify an EXISTING bundle under bundles/<name>/ — add or remove a skill, add or remove a hook, add or remove a sidecar script, bump the bundle / per-skill / per-hook version, edit description or tags, flip the core flag. Respects the canonical layout documented in `smith-bundle-format`. Regenerates bundles/index.yaml after the change. Trigger with `/smith-bundle-edit <name> [--add-skill <slug>] [--rm-skill <slug>] [--add-hook <n> --ia <provider>] [--rm-hook <n> --ia <provider>] [--add-script <file> --ia <provider>] [--rm-script <file> --ia <provider>] [--add-tag <t>] [--rm-tag <t>] [--add-provider <p>] [--rm-provider <p>] [--bump-version major|minor|patch] [--bump-skill <slug> major|minor|patch] [--bump-hook <n> major|minor|patch] [--set-core true|false] [--description "<new>"]`. CLI-maintainer command.
 ---
 
 # Skill — `/smith-bundle-edit`
@@ -42,6 +42,7 @@ Supported flags (combinable in a single invocation) :
 | `--bump-version <kind>`             | Bump bundle-level `version:` in `config.yaml`. `kind` ∈ `major` / `minor` / `patch`. |
 | `--bump-skill <slug> <kind>`        | Bump `config.yaml` `skills[name=<slug>].version`. `<slug>` MUST be in `skills[]`. |
 | `--bump-hook <n> <kind>`            | Bump `config.yaml` `hooks[name=<n>].version`. `<n>` MUST be in `hooks[]`. |
+| `--set-core true\|false`            | Flip the `core:` flag in `config.yaml`. `true` marks the bundle as a base bundle (auto-installed on every project ; see `smith-bundle-format::Core bundles`). `false` writes the field as `false` for explicitness ; passing `false` on a bundle that already lacks the field MAY instead omit it to keep the file tidy. |
 | `--description "<new>"`             | Replace `description:` in `config.yaml`. |
 
 If no flag is given, halt and tell the user what `--add-*` / `--rm-*`
@@ -123,6 +124,14 @@ options exist.
      `config.yaml.hooks[name=<n>].version` (semver). Refuse if `<n>`
      is not listed.
    - **Replace description** : update `description:` in `config.yaml`.
+   - **Set core flag** (`--set-core true|false`) :
+     - `true` → write `core: true` in `config.yaml` (insert near the
+       top, ideally right after `version:`).
+     - `false` → either set `core: false` explicitly, or remove the
+       field altogether to keep the file tidy ; both are equivalent
+       per the spec (absent ≡ false). Refuse a no-op (e.g. setting
+       `false` on a bundle that already lacks the field) with a
+       harmless info line — do not error out.
 
 3. **Validate the resulting layout** :
    - Every `skills/<slug>/` directory has `<slug>.md` +
@@ -142,7 +151,10 @@ options exist.
 4. **Regenerate `bundles/index.yaml`** :
    - Walk every `bundles/*/config.yaml`.
    - Build the `bundles[]` array : `{name, description, directory,
-     version, tags, providers}`. Sort by `name`.
+     version, core, tags, providers, skills, hooks}`. Include
+     `core` only when the source `config.yaml` carries `core: true`
+     — absent / `false` entries omit the field from the index to
+     keep the catalog tidy. Sort by `name`.
    - Atomic write.
 
 5. **Print** the change summary :

@@ -1,0 +1,3 @@
+name: dashboard-ai
+description: "Launches a local web dashboard summarising what Smith has done in this project — installed skills, installed agents, installed bundles, project stack, narrative specs — with the provider-correct invocation command for every skill. Reads `.smith/architecture.json` + `.smith/config.json` + the consumer's installed-skills + installed-agents inventory ; writes `.smith/dashboard.json` (the data contract) ; launches `node .smith/skills/dashboard-ai/assets/server.js` on a free port. Zero npm install, no build step, no external runtime beyond Node ≥18. Trigger with `/dashboard-ai`. Requires `/smith-init` and `/smith-bundle-install --name dashboard-ai`."
+user-invocable: true

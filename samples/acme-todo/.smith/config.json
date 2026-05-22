@@ -100,6 +100,24 @@
       "hooks": [],
       "merged_into": [],
       "installed_at": "2026-05-19T22:30:00Z"
+    },
+    {
+      "name": "dashboard-ai",
+      "version": "0.1.0",
+      "tags": ["observability", "docs", "slash-command"],
+      "provider": "claude-code",
+      "skills": [
+        { "name": "dashboard-ai", "version": "0.1.0" }
+      ],
+      "hooks": [],
+      "merged_into": [],
+      "asset_paths": [
+        ".smith/skills/dashboard-ai/assets/server.js",
+        ".smith/skills/dashboard-ai/assets/web/index.html",
+        ".smith/skills/dashboard-ai/assets/web/app.js",
+        ".smith/skills/dashboard-ai/assets/web/styles.css"
+      ],
+      "installed_at": "2026-05-22T22:45:00Z"
     }
   ]
 }

@@ -35,6 +35,8 @@ build:
     agent:    ".github/agents/{slug}.agent.md"
     hook_dir: ".github/workflows/{bundle}"
     settings: ".vscode/tasks.json"
+    skill_invocation: "@{slug}"
+    agent_invocation: "@{slug}"
   agent_frontmatter:
     emit_name: true
     extra: {}

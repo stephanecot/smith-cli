@@ -40,6 +40,8 @@ build:
     agent:    ".claude/agents/{slug}.md"
     hook_dir: ".claude/hooks/{bundle}"
     settings: ".claude/settings.json"
+    skill_invocation: "/{slug}"
+    agent_invocation: ~
   agent_frontmatter:
     emit_name: true
     extra: {}

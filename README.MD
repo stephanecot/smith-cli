@@ -164,7 +164,7 @@ Under the provider runtime root (`.claude/` / `.github/` /
 | `/smith-init` | no — it IS the marker | Minimal init : creates `.smith/smith.yaml`. Does NOT write configs, AGENTS.md, or run discovery. Use `/smith-new-project` for the full pipeline. |
 | `/smith-help` | no | Reference — auto-loads on Smith questions. |
 | `/smith-generate-docs` | yes | Writes `.smith/FUNCTIONAL_SPECIFICATION.MD` + `TECHNICAL_SPECIFICATION.MD` from architecture.json. Dispatches two doc-writer agents in parallel. |
-| `/smith-dashboard` | yes | Renders `.smith/dashboard.html` from `architecture.json` + `config.json`. |
+| `/dashboard-ai` | yes | **Optional bundle.** Builds `.smith/dashboard.json` from `architecture.json` + `config.json` + every installed skill/agent (invocation command resolved per the active provider), then launches a zero-deps Node + React-via-CDN web UI. Install via `/smith-bundle-install --name dashboard-ai`. |
 | `/smith-bundle-list [--tag X[,Y]]` | yes | Lists the release bundle catalogue, optionally filtered (intersection). |
 | `/smith-bundle-install --name X [--consumer-dir <abs>]` | yes | Installs a single bundle from the release tree into the consumer project. Auto-merges hook fragments into the provider's settings file with `_smith_source` marker. Normally driven by `/smith-new-project` ; rarely invoked manually. |
 | `/smith-template-install --framework <name> [--version <ver>] [--consumer-dir <abs>]` | yes | Installs + adapts a framework template set. Stack-aware pruning removes mentions of techs not in `architecture.json`. |
@@ -210,8 +210,8 @@ body + `metadata.yml`) ; no per-provider frontmatter overrides — model
 |---|---|
 | `smith-stack-discoverer`                | `/smith-new-project` Step 2 (interactive Q&A, ≤2 rounds, ≤6 questions) |
 | `smith-single-template-adapter`         | `/smith-new-project` Step 5 (one per template skill, parallel ; preserves frontmatter, rewrites body) |
-| `smith-new-project-agents-writer`       | `/smith-new-project` Step 6 (assembles payload + invokes `/smith-agents-md-write`) |
-| `smith-new-project-verifier`            | `/smith-new-project` Step 7 (structural checks) |
+| `smith-project-agents-writer`           | `/smith-new-project` Step 6 + `/smith-convert-project` (assembles payload + invokes `/smith-agents-md-write`) |
+| `smith-project-verifier`                | `/smith-new-project` Step 7 + `/smith-convert-project` (structural checks) |
 | `smith-new-project-scaffold-coordinator`| `/smith-new-project` Step 8 (conflict guard + dispatches bootstrappers) |
 | `smith-new-project-bootstrapper`        | scaffold-coordinator (one per framework, parallel ; runs the framework's `bootstrap` skill) |
 | `smith-functional-doc-writer`           | `/smith-generate-docs` |

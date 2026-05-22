@@ -1,3 +1,0 @@
-name: smith-new-project-agents-writer
-description: "Assembles the payload for `/smith-agents-md-write` from the consumer project's state (`.smith/architecture.json`, `.smith/config.json`, the original `<description>`, and the orchestrator's `BootstrapResult` trace), invokes the skill, and reports back a structured result. Dispatched by `/smith-new-project` at step 6 — never invoke directly. Exists for context isolation : the AGENTS.md rendering + truncation pass stays out of the orchestrator's main thread."
-capabilities: [read, glob, grep, skill]

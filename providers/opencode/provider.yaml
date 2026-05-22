@@ -36,6 +36,8 @@ build:
     agent:    ".opencode/agents/{slug}.md"
     hook_dir: ".opencode/plugins"
     settings: ~
+    skill_invocation: "/{slug}"
+    agent_invocation: ~
   agent_frontmatter:
     emit_name: false
     extra:
