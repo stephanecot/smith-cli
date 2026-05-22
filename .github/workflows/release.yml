@@ -1,0 +1,100 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag to publish (e.g. v1.2.3). Will be created on the current commit if it does not exist.'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            version="${{ inputs.version }}"
+          else
+            version="${GITHUB_REF_NAME}"
+          fi
+          case "$version" in
+            v*) ;;
+            *) echo "::error::version must start with 'v' (got: $version)"; exit 1 ;;
+          esac
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "Resolved version: ${version}"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install Python dependencies
+        run: pip install --no-cache-dir pyyaml
+
+      - name: Build releases
+        run: python3 .claude/skills/smith-build/build.py
+
+      - name: Package per-provider tarballs
+        id: package
+        run: |
+          set -euo pipefail
+          version="${{ steps.version.outputs.version }}"
+          mkdir -p dist
+
+          if [ -z "$(ls -A releases 2>/dev/null)" ]; then
+            echo "::error::releases/ is empty after build"
+            exit 1
+          fi
+
+          for provider_dir in releases/*/; do
+            provider="$(basename "$provider_dir")"
+            archive="dist/smith-${provider}-${version}.tar.gz"
+            tar -czf "$archive" -C releases "$provider"
+            echo "  packed $archive"
+          done
+
+          ( cd dist && sha256sum *.tar.gz > checksums.txt )
+          echo "--- dist/ ---"
+          ls -la dist/
+
+      - name: Create tag (workflow_dispatch only)
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          version="${{ steps.version.outputs.version }}"
+          if git rev-parse -q --verify "refs/tags/${version}" >/dev/null; then
+            echo "::error::tag ${version} already exists — refusing to overwrite"
+            exit 1
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "${version}" -m "Release ${version}"
+          git push origin "refs/tags/${version}"
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          version="${{ steps.version.outputs.version }}"
+          gh release create "${version}" \
+            --title "${version}" \
+            --generate-notes \
+            dist/*.tar.gz dist/checksums.txt
