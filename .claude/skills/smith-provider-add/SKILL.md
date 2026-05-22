@@ -1,6 +1,6 @@
 ---
 name: smith-provider-add
-description: Scaffolds a NEW AI provider folder under cli/providers/<slug>/ from the JSON Schemas at cli/providers/specs/. Produces a schema-valid provider.yaml + format-skill.yaml + format-agent.yaml + format-hook.yaml + 3 example placeholder files. Validates every generated file against its schema before reporting success. Trigger with `/smith-provider-add <slug> "<one-line description>"`. CLI-maintainer command.
+description: Scaffolds a NEW AI provider folder under providers/<slug>/ from the JSON Schemas at providers/specs/. Produces a schema-valid provider.yaml + format-skill.yaml + format-agent.yaml + format-hook.yaml + 3 example placeholder files. Validates every generated file against its schema before reporting success. Trigger with `/smith-provider-add <slug> "<one-line description>"`. CLI-maintainer command.
 ---
 
 # Skill — `/smith-provider-add`
@@ -8,7 +8,7 @@ description: Scaffolds a NEW AI provider folder under cli/providers/<slug>/ from
 Scaffolds a **new** AI provider (e.g. `gemini-cli`, `opencode`). To
 modify an existing provider, use `/smith-provider-edit` instead.
 
-The canonical layout, the JSON Schemas under `cli/providers/specs/`,
+The canonical layout, the JSON Schemas under `providers/specs/`,
 and the cross-reference rules between format files and examples are
 documented in the sibling skill **`smith-provider-format`** — read it
 first if not already in context. This skill only carries the
@@ -18,8 +18,8 @@ schema-driven scaffold-new procedure.
 
 - `.smith/FUNCTIONAL_SPECIFICATION.MD` must exist (`/smith-init` marker).
 - `<slug>` must be kebab-case and not already exist under
-  `cli/providers/`.
-- All 4 schemas under `cli/providers/specs/` must exist and be valid
+  `providers/`.
+- All 4 schemas under `providers/specs/` must exist and be valid
   JSON Schema 2020-12.
 
 ## How to invoke
@@ -39,9 +39,9 @@ If args are missing, ask via `AskUserQuestion`.
 ## What you do
 
 1. **Validate `<slug>`** — kebab-case (regex `^[a-z0-9-]+$`), no
-   slashes, not already a sub-folder of `cli/providers/`.
+   slashes, not already a sub-folder of `providers/`.
 
-2. **Load the 4 schemas** from `cli/providers/specs/` :
+2. **Load the 4 schemas** from `providers/specs/` :
    - `provider.schema.json`
    - `format-agent.schema.json`
    - `format-skill.schema.json`
@@ -49,7 +49,7 @@ If args are missing, ask via `AskUserQuestion`.
    These define the **required keys, types, patterns, and enums** for
    every YAML the skill is about to produce.
 
-3. **Create the folder** `cli/providers/<slug>/` and its
+3. **Create the folder** `providers/<slug>/` and its
    `example/` sub-folder.
 
 4. **Scaffold `provider.yaml`** by emitting every required key from
@@ -141,17 +141,17 @@ If args are missing, ask via `AskUserQuestion`.
 - Don't re-document the provider folder layout, the schema contract,
   or the example cross-reference rules — those live in
   `smith-provider-format` + the 4 `.json` schemas under
-  `cli/providers/specs/`. Keep this skill focused on the
+  `providers/specs/`. Keep this skill focused on the
   schema-driven scaffold procedure.
-- Don't copy from `cli/providers/claude-code/` blindly. The schemas
+- Don't copy from `providers/claude-code/` blindly. The schemas
   are the source of truth for what to emit; claude-code is just one
   valid instance of the contract.
 - Don't translate the format bodies automatically — adapting them to
   a new provider's API is a manual job that requires reading that
   provider's documentation.
-- Don't touch `cli/.claude/`, `cli/templates/`, or `cli/bundles/`.
+- Don't touch `cli/.claude/`, `templates/`, or `bundles/`.
 - Don't register the new provider in any global index ; providers
-  are discovered by directory walking under `cli/providers/`. No
+  are discovered by directory walking under `providers/`. No
   catalogue file exists at the provider level.
 - Don't write any `rule-*.MD` or `RULES.MD` file — the old 5-`.MD`
   layout is gone. The canonical surface is 4 YAML files + 4 JSON
@@ -166,9 +166,9 @@ If args are missing, ask via `AskUserQuestion`.
 ## Reporting back
 
 ```
-✅ Provider `<slug>` scaffolded under cli/providers/<slug>/.
+✅ Provider `<slug>` scaffolded under providers/<slug>/.
    provider.yaml + 3 format-*.yaml + 3 examples produced from the
-   JSON Schemas at cli/providers/specs/. All 4 YAMLs validated.
+   JSON Schemas at providers/specs/. All 4 YAMLs validated.
 
 Next steps :
   - Rewrite `<slug>/format-agent.yaml` to match the provider's sub-agent format (re-validate against format-agent.schema.json).
@@ -187,5 +187,5 @@ Next steps :
      - <path> : <validator error>
      - <path> : <validator error>
    Folder removed; nothing left on disk. Re-run the skill or fix the
-   schemas under cli/providers/specs/ if the contract itself is wrong.
+   schemas under providers/specs/ if the contract itself is wrong.
 ```

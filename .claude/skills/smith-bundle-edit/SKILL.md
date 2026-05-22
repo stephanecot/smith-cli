@@ -1,6 +1,6 @@
 ---
 name: smith-bundle-edit
-description: Modify an EXISTING bundle under cli/bundles/<name>/ — add or remove a skill, add or remove a hook, add or remove a sidecar script, bump the bundle / per-skill / per-hook version, edit description or tags. Respects the canonical layout documented in `smith-bundle-format`. Regenerates cli/bundles/index.yaml after the change. Trigger with `/smith-bundle-edit <name> [--add-skill <slug>] [--rm-skill <slug>] [--add-hook <n> --ia <provider>] [--rm-hook <n> --ia <provider>] [--add-script <file> --ia <provider>] [--rm-script <file> --ia <provider>] [--add-tag <t>] [--rm-tag <t>] [--add-provider <p>] [--rm-provider <p>] [--bump-version major|minor|patch] [--bump-skill <slug> major|minor|patch] [--bump-hook <n> major|minor|patch] [--description "<new>"]`. CLI-maintainer command.
+description: Modify an EXISTING bundle under bundles/<name>/ — add or remove a skill, add or remove a hook, add or remove a sidecar script, bump the bundle / per-skill / per-hook version, edit description or tags. Respects the canonical layout documented in `smith-bundle-format`. Regenerates bundles/index.yaml after the change. Trigger with `/smith-bundle-edit <name> [--add-skill <slug>] [--rm-skill <slug>] [--add-hook <n> --ia <provider>] [--rm-hook <n> --ia <provider>] [--add-script <file> --ia <provider>] [--rm-script <file> --ia <provider>] [--add-tag <t>] [--rm-tag <t>] [--add-provider <p>] [--rm-provider <p>] [--bump-version major|minor|patch] [--bump-skill <slug> major|minor|patch] [--bump-hook <n> major|minor|patch] [--description "<new>"]`. CLI-maintainer command.
 ---
 
 # Skill — `/smith-bundle-edit`
@@ -16,7 +16,7 @@ the tag taxonomy are documented in the sibling skill
 ## Pre-conditions
 
 - `.smith/FUNCTIONAL_SPECIFICATION.MD` must exist (`/smith-init` marker).
-- `<name>` must be an existing sub-folder of `cli/bundles/` with a
+- `<name>` must be an existing sub-folder of `bundles/` with a
   valid `config.yaml`.
 
 ## How to invoke
@@ -50,7 +50,7 @@ options exist.
 ## What you do
 
 1. **Validate inputs.**
-   - `<name>` exists under `cli/bundles/` and has a valid `config.yaml`.
+   - `<name>` exists under `bundles/` and has a valid `config.yaml`.
    - For every `--add-*` flag : the target file / directory MUST NOT
      exist yet.
    - For every `--rm-*` flag : the target file / directory MUST exist.
@@ -61,7 +61,7 @@ options exist.
      (`smith-bundle-format`); for `--rm-tag`, the tag is currently
      present.
    - For `--add-provider` / `--rm-provider` : `<p>` MUST be a known
-     Smith provider (a folder under `cli/providers/`).
+     Smith provider (a folder under `providers/`).
 
 2. **Apply each requested change** (in order, atomic per file) :
    - **Add a skill** :
@@ -139,8 +139,8 @@ options exist.
      corresponds to a real `hooks/<provider>/<name>.<ext>` file (and
      vice-versa).
 
-4. **Regenerate `cli/bundles/index.yaml`** :
-   - Walk every `cli/bundles/*/config.yaml`.
+4. **Regenerate `bundles/index.yaml`** :
+   - Walk every `bundles/*/config.yaml`.
    - Build the `bundles[]` array : `{name, description, directory,
      version, tags, providers}`. Sort by `name`.
    - Atomic write.
@@ -153,7 +153,7 @@ options exist.
    Tags :    <new tag list>
    Providers: <new provider list>
    Version : <new version>
-   cli/bundles/index.yaml regenerated.
+   bundles/index.yaml regenerated.
    ```
 
 ## What you do NOT do
@@ -173,7 +173,7 @@ options exist.
   `/smith-bundle-add` if `<name>` does not exist.
 - Don't install the bundle anywhere ; `/smith-bundle-install` does
   that.
-- Don't patch `cli/bundles/index.yaml` line-by-line — always
+- Don't patch `bundles/index.yaml` line-by-line — always
   regenerate from disk.
 - Don't bump version automatically when changing files. The maintainer
   decides when to bump via `--bump-version`.

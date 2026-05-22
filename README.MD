@@ -9,10 +9,10 @@ templates adapted to the consumer's exact versions, an always-on
 the actual source tree scaffold — all in one agentic workflow.
 
 Ships per-provider releases (`claude-code` / `github-copilot` /
-`opencode`) built ahead of time by `/smith-build`. The consumer-side
-skills + agents are **identical across providers** ; everything that
-depends on the provider lives in the release tree itself
-(`<release>/.smith/paths.yaml`).
+`opencode` / `gemini-cli`) built ahead of time by `/smith-build`. The
+consumer-side skills + agents are **identical across providers** ;
+everything that depends on the provider lives in the release tree
+itself (`<release>/.smith/paths.yaml`).
 
 No server. No database. Markdown files + a couple of zero-dependency
 Node.js scripts where automation is needed. No Python in the consumer
@@ -22,8 +22,9 @@ project. No `npm install`, no `package.json` requirement.
 
 ```
 cd <your-project>                       # where you want Smith to land
-# Drop a release tree (claude-code / github-copilot / opencode) into
-# your project — typically via clone, submodule, or release archive.
+# Drop a release tree (claude-code / github-copilot / opencode /
+# gemini-cli) into your project — typically via clone, submodule, or
+# release archive.
 # Then, in your AI tool of choice :
 /smith-new-project "<one-line description of the project>"
 ```
@@ -96,7 +97,7 @@ across providers.
 │       │                                              ; body still has {{placeholder}} +
 │       │                                              stack-gated sections
 │       └── bootstrap/                          ← category : exactly 1 skill + sidecars
-│           ├── index.json
+│           ├── index.yaml
 │           └── <name>/<version>/
 │               ├── config.yaml
 │               ├── skill/<installed-name>/SKILL.md    ← dir = metadata.yml::name
@@ -110,9 +111,10 @@ across providers.
 
 For `github-copilot` releases the runtime root is `.github/` with
 `prompts/` (skills) + `agents/`. For `opencode` it's `.opencode/`
-with `commands/` (skills) + `agents/`. Bundle + template trees are
-structurally identical across providers — only the assembled SKILL.md
-frontmatter differs.
+with `commands/` (skills) + `agents/`. For `gemini-cli` it's
+`.gemini/` with `skills/<slug>/SKILL.md` + `agents/`. Bundle + template
+trees are structurally identical across providers — only the assembled
+SKILL.md frontmatter differs.
 
 `.smith/paths.yaml` is the **single source of truth** for consumer-side
 install paths used by `/smith-new-project` and its sub-agents :
@@ -154,7 +156,7 @@ Under the provider runtime root (`.claude/` / `.github/` /
 
 ## Slash commands
 
-### Consumer-facing (shipped under `cli/bin/skills/`)
+### Consumer-facing (shipped under `bin/skills/`)
 
 | Command | Pre-marker required ? | What it does |
 |---|:---:|---|
@@ -185,19 +187,19 @@ Under the provider runtime root (`.claude/` / `.github/` /
 
 | Command | What it does |
 |---|---|
-| `/smith-build [--provider <slug>] [--clean]` | **Deterministic Python script** (`build.py` sibling). Walks `cli/bin/`, `cli/bundles/`, `cli/templates/`, `cli/providers/` and produces one runnable release per provider under `cli/releases/<provider>/`. Resolves frontmatter + inlines `@smith-include` directives at build time. Writes `<release>/.smith/paths.yaml` + `<release>/.smith/release.yaml`. |
+| `/smith-build [--provider <slug>] [--clean]` | **Deterministic Python script** (`build.py` sibling). Walks `bin/`, `bundles/`, `templates/`, `providers/` and produces one runnable release per provider under `releases/<provider>/`. Resolves frontmatter + inlines `@smith-include` directives at build time. Writes `<release>/.smith/paths.yaml` + `<release>/.smith/release.yaml`. |
 | `/smith-bundle-add <name> "<desc>" --tag t1,t2 [--ia provider]` | Scaffold a new bundle. Validates tags against the canonical taxonomy. Regenerates `bundles/index.yaml`. |
 | `/smith-bundle-edit <name> [--add-skill ...] [...]` | Modify an existing bundle. |
-| `/smith-provider-add <slug> "<desc>"` | Scaffold a new AI provider format set under `cli/providers/<slug>/`. |
+| `/smith-provider-add <slug> "<desc>"` | Scaffold a new AI provider format set under `providers/<slug>/`. |
 | `/smith-provider-edit <slug> [...]` | Modify an existing provider format set. |
-| `/smith-template-add --framework <name> --version <ver> "<desc>"` | Scaffold a new framework/version template set. Regenerates `cli/templates/index.yaml`. |
+| `/smith-template-add --framework <name> --version <ver> "<desc>"` | Scaffold a new framework/version template set. Regenerates `templates/index.yaml`. |
 | `smith-bundle-format` / `smith-provider-format` | Auto-loaded format specs for maintainer skills. |
 
 All `/smith-*` commands except `/smith-init`, `/smith-new-project` and
 `/smith-help` check for the `.smith/smith.yaml` marker at the project
 root and refuse to run if it is missing.
 
-## Sub-agents shipped (`cli/bin/agents/`)
+## Sub-agents shipped (`bin/agents/`)
 
 Driven by `/smith-new-project` and `/smith-generate-docs` — not invoked
 by users directly. Each agent ships in split-folder layout (`<slug>.md`
@@ -233,7 +235,7 @@ smith-cli/                        # workspace root
     │   ├── skills/               # 12 consumer skills (see "Slash commands")
     │   └── agents/               # 8 sub-agents in split-folder layout
     ├── bundles/                  # opt-in libraries
-    │   ├── config.json           # catalogue, written by /smith-bundle-add
+    │   ├── index.yaml            # catalogue, written by /smith-bundle-add
     │   ├── ia-stats/ | mvn/ | npm/ | pip/
     │   └── <bundle>/
     │       ├── config.yaml
@@ -241,13 +243,13 @@ smith-cli/                        # workspace root
     │       └── hooks/<provider>/...
     ├── templates/                # skill template sets, split by category
     │   ├── framework/            # N skills per (name, version) — quality / conventions
-    │   │   ├── index.json        # per-category catalogue, written by /smith-template-add
+    │   │   ├── index.yaml        # per-category catalogue, written by /smith-template-add
     │   │   └── <name>/<version>/
     │   │       ├── config.yaml
     │   │       ├── README.md + CHANGELOG.md
     │   │       └── skills/<slug>/    # <slug>.md body + metadata.yml (generic props)
     │   └── bootstrap/            # exactly 1 skill per (name, version) — scaffolders
-    │       ├── index.json
+    │       ├── index.yaml
     │       └── <name>/<version>/
     │           ├── config.yaml
     │           ├── README.md + CHANGELOG.md
@@ -259,6 +261,7 @@ smith-cli/                        # workspace root
     │   ├── claude-code/          # format-{skill,agent,hook}.yaml + provider.yaml + example/
     │   ├── github-copilot/
     │   ├── opencode/
+    │   ├── gemini-cli/
     │   └── specs/                # JSON Schemas validating every provider folder
     ├── releases/                 # output of /smith-build
     │   └── <provider>/           # drop-in release tree (see "Release model")
@@ -286,6 +289,9 @@ Installed at Step 5 of `/smith-new-project` ; not executed. Each
 | Framework | Version | Skills |
 |---|---|---|
 | `angular`          | `21` | 5 skills — coding standards, tests + coverage (Vitest), design system (Tailwind v4), i18n (Transloco), HTTP client layer from OpenAPI. Adapter prunes optional techs (Tailwind, Transloco, OpenAPI) when absent from the project stack. |
+| `python`           | `3`  | 5 language-level skills — standards, tests + coverage, typing (mypy), packaging (PEP 621 / pyproject), linting (ruff). Apply to any Python 3.12+ project regardless of downstream web framework. |
+| `django`           | `5`  | 4 skills — standards, ORM patterns, tests (pytest-django), Django REST Framework. Pairs with `framework/python/3` for language-level conventions. |
+| `fastapi`          | `0`  | 4 skills — standards, Pydantic schemas, async patterns (SQLAlchemy ext.asyncio), JWT auth. Pairs with `framework/python/3`. |
 | `java-spring-boot` | `4`  | 1 skill — bootstrap (interactive scaffold). To migrate to the `bootstrap/` category in a follow-up. |
 
 ### `bootstrap/` category — scaffolders
@@ -294,9 +300,11 @@ Installed AND executed at Step 8 of `/smith-new-project`. Each
 (name, version) ships **exactly 1 skill** + optional `assets/` +
 `templates/` + `scripts/` sidecars.
 
-| Name      | Version | What it does |
+| Name         | Version | What it does |
 |---|---|---|
-| `angular` | `21`    | Interactive scaffold of a new Angular 21 SPA — package, routing, optional Tailwind v4 / Transloco / OpenAPI ; runs `npm run build` as a smoke check. |
+| `angular`    | `21`    | Interactive scaffold of a new Angular 21 SPA — package, routing, optional Tailwind v4 / Transloco / OpenAPI ; runs `npm run build` as a smoke check. |
+| `fastapi`    | `0`     | Interactive scaffold of a new FastAPI 0.115+ service — package, database (none / sqlite / postgres), auth (none / JWT), optional Docker + GitHub Actions CI ; runs `uv sync` + `uv run pytest` as a smoke check. |
+| `python-lib` | `1`     | Interactive scaffold of a new pip-installable Python library — package, license, PEP 561 `py.typed` marker, CI provider ; generates pyproject.toml (PEP 621 + hatchling) + src/ layout + tests + CHANGELOG + LICENSE. Runs `uv sync` + `uv run pytest` as a smoke check. |
 
 Templates ship as real skills (frontmatter composed at build time).
 The release-side body still carries `{{placeholder}}` markers and
@@ -310,16 +318,17 @@ at consumer-install time against the project's stack.
 | `claude-code`    | `.claude/`    | `skills/<slug>/SKILL.md`        | `agents/<slug>.md`         |
 | `github-copilot` | `.github/`    | `prompts/<slug>.prompt.md`      | `agents/<slug>.agent.md`   |
 | `opencode`       | `.opencode/`  | `commands/<slug>.md`            | `agents/<slug>.md`         |
+| `gemini-cli`     | `.gemini/`    | `skills/<slug>/SKILL.md`        | `agents/<slug>.md`         |
 
-Each `cli/providers/<slug>/` ships 4 format YAMLs (`provider.yaml` +
+Each `providers/<slug>/` ships 4 format YAMLs (`provider.yaml` +
 `format-skill.yaml` + `format-agent.yaml` + `format-hook.yaml`) + a
 3-file `example/` directory + JSON-schema validation under
-`cli/providers/specs/`.
+`providers/specs/`.
 
 ## Conventions
 
 - **Provider-agnostic skills + agents.** Every artefact under
-  `cli/bin/skills/` and `cli/bin/agents/` is identical regardless of
+  `bin/skills/` and `bin/agents/` is identical regardless of
   the provider it ends up running on. Provider-specific knowledge is
   baked into the release tree by `/smith-build`.
 - **Split-folder layout.** Agents and bundle / template skills follow
@@ -358,8 +367,16 @@ Each `cli/providers/<slug>/` ships 4 format YAMLs (`provider.yaml` +
   `claude-code` / `github-copilot` / `opencode` inside any consumer-
   side skill. The 3 obsolete planner agents (bundle-installer,
   template-installer, template-customizer) are removed.
+- **Gemini CLI provider** — fourth supported AI tool. Runtime root
+  `.gemini/`, skills under `.gemini/skills/<slug>/SKILL.md`, hooks
+  declared inside `.gemini/extensions/<slug>/extension.json` manifests.
 - **OpenCode provider** — third supported AI tool alongside Claude Code
   and GitHub Copilot.
+- **Python template line-up.** `framework/python/3` (5 language-level
+  skills) plus framework-specific sets `framework/django/5` and
+  `framework/fastapi/0`, and two new bootstrap scaffolders
+  `bootstrap/fastapi/0` (service) + `bootstrap/python-lib/1` (library,
+  PEP 621 + hatchling).
 - **Deterministic `/smith-build`** — Python script (`build.py`) walks
   the source tree and writes provider releases in milliseconds. No
   LLM reasoning at build time.
@@ -367,7 +384,7 @@ Each `cli/providers/<slug>/` ships 4 format YAMLs (`provider.yaml` +
   version), installed but not executed) and `bootstrap/` (exactly 1
   skill + optional assets / templates / scripts buckets, installed
   AND executed by Step 8 to scaffold the source tree). Per-category
-  index.json under `cli/templates/<category>/`. Iso-name rule applied
+  index.json under `templates/<category>/`. Iso-name rule applied
   at build time : every skill directory in the release matches the
   installed slug declared in `metadata.yml::name`.
 - **Generic skill properties.** Bundle + template metadata.yml carry
@@ -380,7 +397,7 @@ Each `cli/providers/<slug>/` ships 4 format YAMLs (`provider.yaml` +
 
 Each kind of artefact (skills, agents, hooks, providers) has
 comprehensive documentation in its template under
-`cli/providers/<provider>/`. Each format YAML lists every supported
+`providers/<provider>/`. Each format YAML lists every supported
 frontmatter field with type, default, allowed values, and meaning.
 
 For interactive exploration : run `/smith-help` in your AI tool — it

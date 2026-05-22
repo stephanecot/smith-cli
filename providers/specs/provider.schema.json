@@ -1,0 +1,194 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://smith-providers/specs/provider.schema.json",
+  "title": "Smith provider — provider.yaml",
+  "description": "Top-level YAML for a Smith AI-provider folder under providers/<slug>/. Declares the provider's identity, the per-kind format files, discovery precedence, cross-kind interactions, and the decision matrix authors use to pick a kind.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "slug",
+    "name",
+    "description",
+    "docs",
+    "kinds"
+  ],
+  "properties": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Provider slug. MUST equal the parent directory name."
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable provider name."
+    },
+    "description": {
+      "type": "string",
+      "description": "One-paragraph capability summary."
+    },
+    "docs": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "string",
+        "format": "uri"
+      },
+      "description": "Map of named links to the provider's official documentation pages."
+    },
+    "kinds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["agent", "skill", "hook"],
+      "description": "Per-kind index — MUST list agent, skill, hook (each with a matching format-*.yaml). May also list rules (no format file — minimal entry with consumer_path + invocation).",
+      "properties": {
+        "agent": { "$ref": "#/$defs/kindEntry" },
+        "skill": { "$ref": "#/$defs/kindEntry" },
+        "hook":  { "$ref": "#/$defs/kindEntry" },
+        "rules": { "$ref": "#/$defs/kindEntryRules" }
+      }
+    },
+    "discovery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["precedence", "identity_rules"],
+      "properties": {
+        "precedence": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["scope", "path", "priority"],
+            "properties": {
+              "scope":    { "type": "string" },
+              "path":     { "type": "string" },
+              "priority": { "type": "integer", "minimum": 1 }
+            }
+          }
+        },
+        "identity_rules": {
+          "type": "string",
+          "description": "How identical slugs are resolved across scopes."
+        }
+      }
+    },
+    "cross_kind_interactions": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" }
+    },
+    "naming_conventions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "when_to_pick": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["need", "use"],
+        "properties": {
+          "need": { "type": "string" },
+          "use":  { "type": "string" }
+        }
+      }
+    },
+    "smith_mapping": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "build": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "consumer_paths",
+        "agent_frontmatter",
+        "tools_style",
+        "capability_map"
+      ],
+      "description": "Configuration consumed by /smith-build — how to layout a release for this provider + how to map generic agent capabilities to native tool names. No business logic lives in the build script ; everything provider-specific is declared here.",
+      "properties": {
+        "consumer_paths": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["skill", "agent", "hook_dir", "settings"],
+          "description": "Consumer-side install path templates. Each value uses {slug} (skill / agent) or {bundle} (hook_dir) as the only placeholder.",
+          "properties": {
+            "skill":    { "type": "string" },
+            "agent":    { "type": "string" },
+            "hook_dir": { "type": "string" },
+            "settings": { "type": ["string", "null"], "description": "Consumer settings file for hook-fragment merges. null when the provider has no merge model." }
+          }
+        },
+        "agent_frontmatter": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["emit_name", "extra"],
+          "properties": {
+            "emit_name": { "type": "boolean", "description": "true → emit a `name:` field ; false → the filename carries the slug." },
+            "extra":     { "type": "object", "description": "Constant frontmatter keys to inject (e.g. `mode: subagent` for opencode)." }
+          }
+        },
+        "tools_style": {
+          "type": "string",
+          "enum": ["claude-string", "yaml-list", "opencode-permission"],
+          "description": "How the resolved tool allowlist is rendered into the agent frontmatter."
+        },
+        "capability_map": {
+          "type": "object",
+          "description": "Map of generic capability slug (read / glob / grep / bash / edit / write / skill / agent / ask-user / web-fetch) to the provider's native tool name. null when the capability has no equivalent on this provider — silently dropped from the resolved list.",
+          "additionalProperties": { "type": ["string", "null"] }
+        },
+        "skill_property_map": {
+          "type": "object",
+          "description": "Map of generic bundle-skill property slug (model / user-invocable / ...) to the provider's native frontmatter key. null when the property has no equivalent on this provider — silently dropped from the rendered frontmatter. Values are passed through verbatim (no normalisation).",
+          "additionalProperties": { "type": ["string", "null"] }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "kindEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["format", "consumer_path", "invocation", "example"],
+      "properties": {
+        "format": {
+          "type": "string",
+          "pattern": "^format-(agent|skill|hook)\\.yaml$",
+          "description": "Relative path to the matching format-*.yaml file."
+        },
+        "consumer_path": {
+          "type": "string",
+          "description": "Where this kind lives in a consumer project."
+        },
+        "invocation": {
+          "type": "string",
+          "description": "How the user (or the AI) invokes this kind."
+        },
+        "example": {
+          "type": "string",
+          "pattern": "^example/example-(agent|skill|hook)[^/]*\\.[^/]+$",
+          "description": "Relative path to the worked-out example under example/. Filename MUST start with example-<kind> and may carry a provider-specific suffix before the extension (e.g. example-agent.agent.md, example-hook-tasks.json)."
+        }
+      }
+    },
+    "kindEntryRules": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["consumer_path", "invocation"],
+      "description": "Optional `rules` kind. Rules surfaces (CLAUDE.md, AGENTS.md, .github/copilot-instructions.md, ...) carry minimal or no frontmatter and do NOT get a dedicated format-*.yaml or worked-out example.",
+      "properties": {
+        "consumer_path": {
+          "type": "string",
+          "description": "Where the rules artefact lives in a consumer project."
+        },
+        "invocation": {
+          "type": "string",
+          "description": "How rules are loaded (typically always-on or path-scoped)."
+        }
+      }
+    }
+  }
+}

@@ -1,6 +1,6 @@
 ---
 name: smith-provider-format
-description: Source of truth for the layout of a Smith AI-provider reference folder under `cli/providers/<slug>/`. Documents the canonical 4-file YAML set (provider.yaml + format-skill.yaml + format-agent.yaml + format-hook.yaml), the companion `example/` directory (3 worked-out example files), the top-level fields contract on every format-*.yaml (`kind`, `provider`, `title`, `consumer_path`, `example`), and the cross-references between format files and examples. Auto-load whenever the user asks how a provider folder is laid out, what each YAML documents, or which file owns what. Consumed by `/smith-provider-add` (new provider) and `/smith-provider-edit` (modify existing provider).
+description: Source of truth for the layout of a Smith AI-provider reference folder under `providers/<slug>/`. Documents the canonical 4-file YAML set (provider.yaml + format-skill.yaml + format-agent.yaml + format-hook.yaml), the companion `example/` directory (3 worked-out example files), the top-level fields contract on every format-*.yaml (`kind`, `provider`, `title`, `consumer_path`, `example`), and the cross-references between format files and examples. Auto-load whenever the user asks how a provider folder is laid out, what each YAML documents, or which file owns what. Consumed by `/smith-provider-add` (new provider) and `/smith-provider-edit` (modify existing provider).
 when_to_use: User asks about provider folder structure, provider.yaml vs format-*.yaml vs example/, the format-*.yaml field shape, or how examples are linked back to format files. Also fires when an author / mutator skill needs the canonical layout before scaffolding or editing.
 user-invocable: false
 ---
@@ -8,7 +8,7 @@ user-invocable: false
 # Smith providers — format reference
 
 This skill is the **single source of truth** for the layout of an AI
-provider's reference folder under `cli/providers/<slug>/`. Two other
+provider's reference folder under `providers/<slug>/`. Two other
 Smith skills depend on it :
 
 - `/smith-provider-add`  — scaffolds a new provider following this layout.
@@ -26,7 +26,7 @@ the exact frontmatter to emit.
 Every provider folder MUST follow this layout :
 
 ```
-cli/providers/<slug>/
+providers/<slug>/
 ├── provider.yaml                        # ROUTER — provider-level overview (capabilities + kinds map)
 ├── format-agent.yaml                    # per-kind doc : agent frontmatter spec
 ├── format-skill.yaml                    # per-kind doc : skill / prompt frontmatter spec
@@ -38,12 +38,12 @@ cli/providers/<slug>/
 ```
 
 The 4 YAML files MUST validate against the JSON Schemas at
-`cli/providers/specs/` :
+`providers/specs/` :
 
-- `cli/providers/specs/provider.schema.json`
-- `cli/providers/specs/format-agent.schema.json`
-- `cli/providers/specs/format-skill.schema.json`
-- `cli/providers/specs/format-hook.schema.json`
+- `providers/specs/provider.schema.json`
+- `providers/specs/format-agent.schema.json`
+- `providers/specs/format-skill.schema.json`
+- `providers/specs/format-hook.schema.json`
 
 These schemas are the **authoritative** contract. The English prose
 below is a human-friendly summary — if the two ever disagree, the
@@ -139,7 +139,7 @@ skeleton. Showcases :
 ## Discovery
 
 Providers are discovered by **directory walking** under
-`cli/providers/`. There is **no `cli/providers/config.json`** — the
+`providers/`. There is **no `providers/config.json`** — the
 filesystem is the truth. To list providers, walk the directory and
 read each `<slug>/provider.yaml` for the metadata.
 
@@ -149,7 +149,7 @@ Any Smith skill that creates or modifies a provider folder MUST :
 
 1. **Read this skill** to know the canonical layout.
 2. **Validate every changed YAML against its schema** under
-   `cli/providers/specs/` before reporting success. A YAML that fails
+   `providers/specs/` before reporting success. A YAML that fails
    schema validation MUST be rejected — never write a partial result.
 3. **Preserve unknown top-level keys** in any YAML file — round-trip
    anything the current code doesn't recognise (the schemas use
@@ -163,7 +163,7 @@ Any Smith skill that creates or modifies a provider folder MUST :
 5. **Keep every `example/example-<kind>[.suffix].<ext>` in sync** with
    its companion format file — if a format's `consumer_path:` or
    `example:` changes, the example file must move accordingly.
-6. **NEVER write a provider-level index** at `cli/providers/config.json`
+6. **NEVER write a provider-level index** at `providers/config.json`
    — providers are filesystem-discovered. Mutators that look for "the
    list of providers" must walk the directory.
 7. **NEVER add YAML comments** (`#` at the YAML level) inside any

@@ -2,9 +2,9 @@
 """
 smith-build — deterministic release builder.
 
-Walks the Smith CLI source tree (cli/bin/, cli/bundles/, cli/templates/,
-cli/providers/) and produces one runnable release per AI provider under
-cli/releases/<provider>/.
+Walks the Smith CLI source tree (bin/, bundles/, templates/,
+providers/) and produces one runnable release per AI provider under
+releases/<provider>/.
 
 No LLM reasoning — pure file walking, YAML parsing, frontmatter
 assembly.
@@ -12,8 +12,8 @@ assembly.
 Usage:
     python3 build.py [--provider <slug>] [--clean]
 
-Defaults : every provider listed under cli/providers/ (minus specs/) is
-built ; the target tree cli/releases/<provider>/ is always wiped before
+Defaults : every provider listed under providers/ (minus specs/) is
+built ; the target tree releases/<provider>/ is always wiped before
 the build.
 """
 
@@ -44,11 +44,11 @@ import yaml
 # ---------------------------------------------------------------------------
 
 def load_provider_build_config(repo_root: Path, provider: str) -> dict:
-    """Read `cli/providers/<provider>/provider.yaml::build` — the single
+    """Read `providers/<provider>/provider.yaml::build` — the single
     source of truth for everything provider-specific consumed by the
     build. Refuse cleanly if missing : the script carries no fallbacks
     or business logic of its own."""
-    pyaml = repo_root / "cli" / "providers" / provider / "provider.yaml"
+    pyaml = repo_root / "providers" / provider / "provider.yaml"
     if not pyaml.is_file():
         raise SystemExit(f"error: provider config not found at {pyaml}")
     data = read_yaml(pyaml)
@@ -56,7 +56,7 @@ def load_provider_build_config(repo_root: Path, provider: str) -> dict:
     if not isinstance(build, dict):
         raise SystemExit(
             f"error: {pyaml} is missing a `build:` section "
-            f"(see cli/providers/specs/provider.schema.json)"
+            f"(see providers/specs/provider.schema.json)"
         )
     return build
 
@@ -195,7 +195,7 @@ def build_bin_skills(repo_root: Path, release_root: Path, rules: dict) -> dict:
     (i.e. ends with /SKILL.md — only true for claude-code today)."""
     stats = {"built": 0, "skipped": 0, "warnings": []}
 
-    src_root = repo_root / "cli" / "bin" / "skills"
+    src_root = repo_root / "bin" / "skills"
     if not src_root.is_dir():
         return stats
 
@@ -233,7 +233,7 @@ def build_bin_agents(repo_root: Path, release_root: Path, rules: dict) -> dict:
     write to release."""
     stats = {"built": 0, "skipped": 0, "warnings": []}
 
-    src_root = repo_root / "cli" / "bin" / "agents"
+    src_root = repo_root / "bin" / "agents"
     if not src_root.is_dir():
         return stats
 
@@ -284,7 +284,7 @@ def build_bundles(repo_root: Path, release_root: Path, provider: str, rules: dic
     built-only filter."""
     stats = {"built": 0, "skipped": []}
 
-    src_root = repo_root / "cli" / "bundles"
+    src_root = repo_root / "bundles"
     if not src_root.is_dir():
         return stats
 
@@ -459,11 +459,11 @@ def _filter_catalog_yaml(catalog_src: Path, built_keys: set, key_fields: tuple, 
 
 def build_templates(repo_root: Path, release_root: Path, provider: str, rules: dict) -> dict:
     """Walks every template category (framework / bootstrap / …) under
-    cli/templates/<category>/ and applies the matching builder. Each category
+    templates/<category>/ and applies the matching builder. Each category
     is self-contained : its own builder + its own index.yaml."""
     stats = {"built": 0, "skipped": []}
 
-    src_root = repo_root / "cli" / "templates"
+    src_root = repo_root / "templates"
     if not src_root.is_dir():
         return stats
 
@@ -512,7 +512,7 @@ def build_templates(repo_root: Path, release_root: Path, provider: str, rules: d
 # ---------------------------------------------------------------------------
 
 def build_provider(repo_root: Path, provider: str, rules: dict) -> dict:
-    release_root = repo_root / "cli" / "releases" / provider
+    release_root = repo_root / "releases" / provider
     if release_root.exists():
         shutil.rmtree(release_root)
     release_root.mkdir(parents=True)
@@ -564,9 +564,9 @@ def main() -> int:
     args = ap.parse_args()
 
     repo_root = Path(args.repo_root or Path.cwd()).resolve()
-    providers_dir = repo_root / "cli" / "providers"
+    providers_dir = repo_root / "providers"
     if not providers_dir.is_dir():
-        print(f"error: cli/providers/ not found under {repo_root}", file=sys.stderr)
+        print(f"error: providers/ not found under {repo_root}", file=sys.stderr)
         return 2
 
     available = sorted(
@@ -605,7 +605,7 @@ def main() -> int:
         )
 
     print()
-    print("OK — manifests : cli/releases/<provider>/.smith/release.yaml")
+    print("OK — manifests : releases/<provider>/.smith/release.yaml")
     return 0
 
 

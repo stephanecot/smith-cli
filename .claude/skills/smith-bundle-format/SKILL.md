@@ -1,6 +1,6 @@
 ---
 name: smith-bundle-format
-description: Source of truth for the layout of a Smith bundle under `cli/bundles/<name>/`. Documents the canonical directory tree (config.yaml + skills/<slug>/{<slug>.md, metadata.yml} + hooks/<provider>/), the per-skill metadata shape (generic name + description + model + user-invocable resolved per provider at build time), and the canonical tag taxonomy used by `bundles/index.yaml`. Auto-load whenever the user asks how a bundle is laid out, where to put a new skill body, or which tags are valid. Consumed by `/smith-bundle-add`, `/smith-bundle-edit`, and `/smith-build`.
+description: Source of truth for the layout of a Smith bundle under `bundles/<name>/`. Documents the canonical directory tree (config.yaml + skills/<slug>/{<slug>.md, metadata.yml} + hooks/<provider>/), the per-skill metadata shape (generic name + description + model + user-invocable resolved per provider at build time), and the canonical tag taxonomy used by `bundles/index.yaml`. Auto-load whenever the user asks how a bundle is laid out, where to put a new skill body, or which tags are valid. Consumed by `/smith-bundle-add`, `/smith-bundle-edit`, and `/smith-build`.
 when_to_use: User asks about bundle structure, skills/<slug>/ layout, metadata.yml shape, hooks/<provider>/ folder, what tags exist, or which file owns what. Also fires when an author / mutator skill needs the canonical layout before scaffolding.
 user-invocable: false
 ---
@@ -8,7 +8,7 @@ user-invocable: false
 # Smith bundle — format reference
 
 This skill is the **single source of truth** for the layout of a Smith
-bundle under `cli/bundles/<name>/`. Three other Smith skills depend on
+bundle under `bundles/<name>/`. Three other Smith skills depend on
 it :
 
 - `/smith-bundle-add`  — scaffolds a new bundle following this layout.
@@ -16,7 +16,7 @@ it :
   this layout.
 - `/smith-build`       — assembles the per-provider artefacts from
   this layout when packaging a release under
-  `cli/releases/<provider>/.smith/bundles/`.
+  `releases/<provider>/.smith/bundles/`.
 
 ## Canonical bundle layout
 
@@ -26,7 +26,7 @@ skills** ; each skill is a directory under `skills/` with a fixed
 start (no shared body) and live under `hooks/<provider>/`.
 
 ```
-cli/bundles/<name>/
+bundles/<name>/
 ├── config.yaml                          # bundle-level metadata (name, description, version, tags, providers)
 ├── README.MD                            # human-readable intro
 ├── RELEASES.MD                          # changelog
@@ -46,7 +46,7 @@ cli/bundles/<name>/
 No more per-provider yml files under `skills/<slug>/`. Provider-
 specific frontmatter is composed at **build time** from `metadata.yml`
 via the mapping declared in
-`cli/providers/<provider>/provider.yaml::build.skill_property_map`.
+`providers/<provider>/provider.yaml::build.skill_property_map`.
 
 ## Per-skill `metadata.yml`
 
@@ -68,7 +68,7 @@ file** :
   frontmatter for every provider. The other properties are GENERIC —
   the build script translates each to the provider's native
   frontmatter key via
-  `cli/providers/<provider>/provider.yaml::build.skill_property_map`.
+  `providers/<provider>/provider.yaml::build.skill_property_map`.
   A property mapped to `null` for a provider (e.g. `user-invocable`
   on github-copilot / opencode) is silently dropped from that
   provider's release.
@@ -117,7 +117,7 @@ there is no shared `common/` folder.
 `/smith-build` produces the destination skill file by **composing the
 frontmatter** :
 
-1. Read `cli/providers/<provider>/provider.yaml::build` for the
+1. Read `providers/<provider>/provider.yaml::build` for the
    provider's `skill_property_map`.
 2. Read the skill's `metadata.yml`.
 3. Emit `name` + `description` verbatim.
@@ -126,7 +126,7 @@ frontmatter** :
    `{native_key: <value>}`. Properties mapped to `null` are dropped.
 5. Prepend `--- <frontmatter> ---` to the contents of `<slug>.md` and
    write the assembled file to
-   `cli/releases/<provider>/.smith/bundles/<name>/skills/<slug>/SKILL.md`.
+   `releases/<provider>/.smith/bundles/<name>/skills/<slug>/SKILL.md`.
 
 Hooks are NOT assembled — they are copied verbatim from
 `hooks/<provider>/` to `<release>/.smith/bundles/<name>/hooks/`.
@@ -203,8 +203,8 @@ Any Smith skill that creates or modifies a bundle MUST :
 2. **Preserve unknown keys** in `config.yaml` and in any per-skill
    `metadata.yml` — round-trip anything that the current code doesn't
    recognise.
-3. **Update `cli/bundles/index.yaml`** (the bundle catalogue) after
-   any change, by walking `cli/bundles/*/config.yaml` and regenerating
+3. **Update `bundles/index.yaml`** (the bundle catalogue) after
+   any change, by walking `bundles/*/config.yaml` and regenerating
    the index from disk. Sort by `name` for deterministic output.
    Atomic write.
 4. **Validate every tag** against the taxonomy above. Reject unknown

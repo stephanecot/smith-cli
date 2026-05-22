@@ -1,12 +1,12 @@
 ---
 name: smith-template-add
-description: Scaffolds a new template folder under `cli/templates/<category>/<name>/<version>/`. Two categories supported — `framework` (N skills under skills/<slug>/) and `bootstrap` (exactly 1 skill under skill/, plus optional assets/ + templates/ + scripts/ buckets). Writes config.yaml + version-level README.md + CHANGELOG.md, scaffolds the canonical 2-file skill shape (<slug>.md body + metadata.yml), and regenerates the per-category `index.yaml`. Trigger with `/smith-template-add --category framework|bootstrap --name <name> --version <ver> "<description>" [--skill <slug>]`. Requires /smith-init to have run on the Smith CLI workspace.
+description: Scaffolds a new template folder under `templates/<category>/<name>/<version>/`. Two categories supported — `framework` (N skills under skills/<slug>/) and `bootstrap` (exactly 1 skill under skill/, plus optional assets/ + templates/ + scripts/ buckets). Writes config.yaml + version-level README.md + CHANGELOG.md, scaffolds the canonical 2-file skill shape (<slug>.md body + metadata.yml), and regenerates the per-category `index.yaml`. Trigger with `/smith-template-add --category framework|bootstrap --name <name> --version <ver> "<description>" [--skill <slug>]`. Requires /smith-init to have run on the Smith CLI workspace.
 ---
 
 # Skill — `/smith-template-add`
 
-Scaffolds a new template directory under `cli/templates/`. Is the
-**sole writer** of `cli/templates/<category>/index.yaml` for the
+Scaffolds a new template directory under `templates/`. Is the
+**sole writer** of `templates/<category>/index.yaml` for the
 target category (regenerated from disk, never patched).
 
 ## Categories
@@ -26,7 +26,7 @@ rules are enforced at scaffold time.
   (`.smith/architecture.json` exists at the workspace root —
   `/smith-init` was run on the cli/ project).
 - `<name>/<version>` must not already exist under
-  `cli/templates/<category>/`.
+  `templates/<category>/`.
 
 ## How to invoke
 
@@ -65,9 +65,9 @@ If any required arg is missing, ask via `AskUserQuestion`.
 
 1. **Validate inputs.** `<name>` + `<version>` are kebab-case ; the
    pair must not already exist under
-   `cli/templates/<category>/`. `<category>` ∈ `{framework, bootstrap}`.
+   `templates/<category>/`. `<category>` ∈ `{framework, bootstrap}`.
 
-2. **Create the folder tree** `cli/templates/<category>/<name>/<version>/`.
+2. **Create the folder tree** `templates/<category>/<name>/<version>/`.
 
 3. **Write the version-level docs** :
    - `README.md` — human-readable doc stub (sections : What ships
@@ -167,8 +167,8 @@ If any required arg is missing, ask via `AskUserQuestion`.
 
 ### Common — regenerate the index
 
-7. **Regenerate `cli/templates/<category>/index.yaml`** :
-   - Walk every `cli/templates/<category>/<name>/<version>/config.yaml`.
+7. **Regenerate `templates/<category>/index.yaml`** :
+   - Walk every `templates/<category>/<name>/<version>/config.yaml`.
    - Build the entry list :
      - framework : `templates[]` with `{framework, version,
        directory, config, description, skills}`. Each `skills[]`
@@ -185,10 +185,10 @@ If any required arg is missing, ask via `AskUserQuestion`.
    ```
    ✅ Template `<category>/<name>/<version>` scaffolded.
    Skill : <name + suffix per category>.
-   cli/templates/<category>/index.yaml regenerated.
+   templates/<category>/index.yaml regenerated.
 
    Next steps :
-     - Fill the body of cli/templates/<category>/<name>/<version>/{skill|skills/<slug>}/<file>.md.
+     - Fill the body of templates/<category>/<name>/<version>/{skill|skills/<slug>}/<file>.md.
      - Refine metadata.yml (name + description ; optional model / user-invocable).
      - Fill README.md + CHANGELOG.md at the version level.
      - (bootstrap only) Add assets / templates / scripts files as needed.
@@ -208,6 +208,6 @@ If any required arg is missing, ask via `AskUserQuestion`.
 - Don't ship a `skills:` array on a `--category bootstrap` config —
   the singleton skill is implicit.
 - Don't touch other template folders or other categories.
-- Don't modify `cli/bundles/` or `cli/.claude/`.
+- Don't modify `bundles/` or `cli/.claude/`.
 - Don't patch any `index.json` line-by-line — always regenerate from
   disk so the index stays in sync with the on-disk truth.

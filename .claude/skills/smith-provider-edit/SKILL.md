@@ -1,12 +1,12 @@
 ---
 name: smith-provider-edit
-description: Modify an EXISTING AI provider folder under cli/providers/<slug>/ — rewrite a format YAML, rewrite its companion example, edit the provider.yaml metadata, or refresh examples after a provider API change. Every change is validated against the JSON Schemas at cli/providers/specs/ before being reported as successful. Trigger with `/smith-provider-edit <slug> [--edit-format agent|skill|hook] [--edit-example agent|skill|hook] [--edit-provider] [--sync-example-from-format <kind>] [--sync-format-from-example <kind>] [--description "<new>"]`. CLI-maintainer command.
+description: Modify an EXISTING AI provider folder under providers/<slug>/ — rewrite a format YAML, rewrite its companion example, edit the provider.yaml metadata, or refresh examples after a provider API change. Every change is validated against the JSON Schemas at providers/specs/ before being reported as successful. Trigger with `/smith-provider-edit <slug> [--edit-format agent|skill|hook] [--edit-example agent|skill|hook] [--edit-provider] [--sync-example-from-format <kind>] [--sync-format-from-example <kind>] [--description "<new>"]`. CLI-maintainer command.
 ---
 
 # Skill — `/smith-provider-edit`
 
 Modify an **existing** provider folder while preserving the canonical
-4-YAML layout and the schema contract under `cli/providers/specs/`. To
+4-YAML layout and the schema contract under `providers/specs/`. To
 create a new provider, use `/smith-provider-add` instead.
 
 The layout, the schema contract, and the cross-references between
@@ -16,9 +16,9 @@ format files and examples are documented in the sibling skill
 ## Pre-conditions
 
 - `.smith/FUNCTIONAL_SPECIFICATION.MD` must exist (`/smith-init` marker).
-- `<slug>` must be an existing sub-folder of `cli/providers/` with the
+- `<slug>` must be an existing sub-folder of `providers/` with the
   canonical layout (provider.yaml + 3 format-*.yaml + example/).
-- All 4 schemas under `cli/providers/specs/` must exist and be valid
+- All 4 schemas under `providers/specs/` must exist and be valid
   JSON Schema 2020-12.
 
 ## How to invoke
@@ -44,7 +44,7 @@ If no flag is given, halt and tell the user which `--edit-*` /
 ## What you do
 
 1. **Validate inputs.**
-   - `<slug>` exists under `cli/providers/` and has the canonical
+   - `<slug>` exists under `providers/` and has the canonical
      4-YAML core (provider.yaml + format-agent.yaml + format-skill.yaml
      + format-hook.yaml).
    - For every `--edit-format` / `--edit-example` / `--sync-*` flag —
@@ -52,7 +52,7 @@ If no flag is given, halt and tell the user which `--edit-*` /
    - `<kind>` MUST be one of `agent`, `skill`, `hook`. Refuse any
      other value with a one-line message — the 3 kinds are hardcoded
      in `provider.schema.json` via the `kinds.required` list.
-   - Load the 4 schemas from `cli/providers/specs/` so they are
+   - Load the 4 schemas from `providers/specs/` so they are
      available for post-edit validation.
 
 2. **Apply each requested change** in order :
@@ -111,7 +111,7 @@ If no flag is given, halt and tell the user which `--edit-*` /
 
 - Don't re-document the layout or the schema contract — those live in
   `smith-provider-format` + the 4 `.json` schemas under
-  `cli/providers/specs/`.
+  `providers/specs/`.
 - Don't create a brand-new provider ; route the user to
   `/smith-provider-add` if `<slug>` does not exist.
 - Don't add or remove a 4th format YAML — the 3 kinds (agent / skill
@@ -119,7 +119,7 @@ If no flag is given, halt and tell the user which `--edit-*` /
   live inline in `provider.yaml`.
 - Don't reintroduce the old `RULES.MD` / `rule-*.MD` layout — refuse
   with a one-line message if the maintainer asks for it.
-- Don't write a `cli/providers/config.json` index ; providers stay
+- Don't write a `providers/config.json` index ; providers stay
   filesystem-discovered.
 - Don't add YAML comments to any `provider.yaml` or `format-*.yaml`.
 - Don't translate format bodies automatically when the maintainer

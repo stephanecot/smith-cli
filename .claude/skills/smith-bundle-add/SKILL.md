@@ -1,6 +1,6 @@
 ---
 name: smith-bundle-add
-description: Scaffolds a NEW bundle under cli/bundles/<name>/ following the canonical layout documented in the sibling skill `smith-bundle-format`. Defaults to scaffolding for **every supported provider** (claude-code + github-copilot) — pass `--ia` only to restrict. Validates every tag against the canonical taxonomy; regenerates cli/bundles/index.yaml. Trigger with `/smith-bundle-add <name> "<description>" --tag t1,t2,t3 [--ia claude-code|github-copilot|both]`. CLI-maintainer command (operates on cli/, not on a consumer project).
+description: Scaffolds a NEW bundle under bundles/<name>/ following the canonical layout documented in the sibling skill `smith-bundle-format`. Defaults to scaffolding for **every supported provider** (claude-code + github-copilot) — pass `--ia` only to restrict. Validates every tag against the canonical taxonomy; regenerates bundles/index.yaml. Trigger with `/smith-bundle-add <name> "<description>" --tag t1,t2,t3 [--ia claude-code|github-copilot|both]`. CLI-maintainer command (operates on cli/, not on a consumer project).
 ---
 
 # Skill — `/smith-bundle-add`
@@ -17,7 +17,7 @@ in context. This skill only carries the scaffold-new-bundle procedure.
 
 - `.smith/FUNCTIONAL_SPECIFICATION.MD` must exist (`/smith-init` marker).
 - `<name>` must be kebab-case and not already a sub-folder of
-  `cli/bundles/`.
+  `bundles/`.
 - Each `<tag>` must be in the **canonical taxonomy** documented in
   `smith-bundle-format`.
 
@@ -56,7 +56,7 @@ distance ≤ 2).
    to the provider's built-in agents (Agent tool / chat-mode agents)
    inline when needed.
 
-3. **Scaffold the folder** `cli/bundles/<name>/` per the canonical
+3. **Scaffold the folder** `bundles/<name>/` per the canonical
    layout in `smith-bundle-format` :
    - `config.yaml` with `name`, `description` (passed in), `version:
      0.1.0`, `tags`, `providers` (= the resolved `--ia` set),
@@ -98,8 +98,8 @@ distance ≤ 2).
      - Optional sidecar scripts go next to the fragment in the same
        `hooks/<provider>/` folder.
 
-4. **Regenerate `cli/bundles/index.yaml`** :
-   - Walk every `cli/bundles/*/config.yaml`.
+4. **Regenerate `bundles/index.yaml`** :
+   - Walk every `bundles/*/config.yaml`.
    - Build the new `bundles[]` array : `{name, description,
      directory, version, tags, providers}`. Sort by `name` for
      deterministic output.
@@ -107,17 +107,17 @@ distance ≤ 2).
 
 5. **Print** the post-add checklist :
    ```
-   ✅ Bundle `<name>` scaffolded under cli/bundles/<name>/.
+   ✅ Bundle `<name>` scaffolded under bundles/<name>/.
    Tags: <t1>, <t2>, <t3> (all valid).
    Providers: <list>.
    Skills:    <slug1>, <slug2>, ...
    Hooks:     <list>, or "(none)".
-   cli/bundles/index.yaml regenerated ({{N}} bundles total).
+   bundles/index.yaml regenerated ({{N}} bundles total).
 
    Next steps :
-     - Fill the body of cli/bundles/<name>/skills/<slug>/<slug>.md.
-     - Refine cli/bundles/<name>/skills/<slug>/metadata.yml (name + description ; optional model / user-invocable).
-     - Fill cli/bundles/<name>/README.MD (Why + Usage sections).
+     - Fill the body of bundles/<name>/skills/<slug>/<slug>.md.
+     - Refine bundles/<name>/skills/<slug>/metadata.yml (name + description ; optional model / user-invocable).
+     - Fill bundles/<name>/README.MD (Why + Usage sections).
    ```
 
 ## What you do NOT do
@@ -139,6 +139,6 @@ distance ≤ 2).
 - Don't install the new bundle anywhere; that's the release-build's
   job.
 - Don't modify an EXISTING bundle — that's `/smith-bundle-edit`'s job.
-- Don't touch `cli/.claude/` or `cli/templates/`.
-- Don't patch `cli/bundles/index.yaml` line-by-line — always
+- Don't touch `cli/.claude/` or `templates/`.
+- Don't patch `bundles/index.yaml` line-by-line — always
   regenerate from disk to avoid drift.
