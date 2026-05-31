@@ -51,10 +51,11 @@ or `.github/prompts/` + `.github/agents/`, or `.opencode/commands/` +
 used by this workflow :
 
 ```yaml
-skill:    "<template using {slug}>"      # consumer destination for installed skills
-agent:    "<template using {slug}>"      # consumer destination for installed agents
-hook_dir: "<template using {bundle}>"    # where bundle hook files land
-settings: "<consumer settings file>"     # for *.hooks.json fragment merges ; may be null
+skill:      "<template using {slug}>"    # consumer destination for installed skills
+agent:      "<template using {slug}>"    # consumer destination for installed agents
+hook_dir:   "<template using {bundle}>"  # where standalone bundle hook files land
+script_dir: "<scripts directory>"        # where bundle sidecar scripts land ; fragments reference this path
+settings:   "<consumer settings file>"   # for *.hooks.json fragment merges ; may be null
 ```
 
 Read `.smith/paths.yaml` once at the start of the workflow and
@@ -164,8 +165,13 @@ Pure filter + copy ; no sub-agent.
        `*.hooks.json` → merge the JSON fragment into
        `<consumer>/<paths.settings>` tagged with
        `_smith_source: <bundle>`.
-     - Else → copy verbatim to
-       `<consumer>/<paths.hook_dir.format(bundle=<bundle>)>/<file>`.
+     - Else (sidecar script — `.js` / `.sh` / `.py` / `.ts`) → copy
+       verbatim to `<consumer>/<paths.script_dir>/<file>`, setting the
+       executable bit on `.js` / `.sh` / `.py`. This is the path the
+       merged fragment's command references (e.g.
+       `node .claude/scripts/append-ia-stats.js`), so `script_dir`
+       and the fragment MUST stay consistent — same convention as
+       `/smith-bundle-install`.
 4. Upsert `.smith/config.json::bundles[]` with one entry per bundle
    listing the consumer-relative paths written. Atomic write of
    `config.json` at the end, bump `generated_at`.

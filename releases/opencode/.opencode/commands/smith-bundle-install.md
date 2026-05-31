@@ -58,6 +58,12 @@ and only this directory.**
 
 ## What you do
 
+0. **Propagate `paths.yaml` to the consumer** (one-time). If
+   `<consumer>/.smith/paths.yaml` does not exist, copy the
+   release-side `<release_root>/.smith/paths.yaml` to it verbatim.
+   Atomic write. Consumer-installed skills (e.g. `dashboard-ai`)
+   read this file at runtime so their bodies stay provider-agnostic.
+
 1. **Look up the bundle** in `bundles/index.yaml` (read-only). Bail
    if the name is unknown; suggest the closest match by string distance.
 
@@ -183,6 +189,32 @@ and only this directory.**
       If ANY check fails, abort the bundle install with a clear
       diagnostic naming the failing check + the destination path.
 
+4-bis. **Copy the skill's `assets/` bucket if present.** For each
+   `skills/<slug>/` directory in the bundle, check whether
+   `bundles/<bundle>/skills/<slug>/assets/` exists. If it does,
+   copy its tree verbatim to `<consumer>/.smith/skills/<slug>/assets/`,
+   preserving file modes (Node scripts may need the executable
+   bit on `.js` / `.sh` / `.py`). The destination is
+   provider-agnostic — same path for every provider so the skill
+   body can hardcode it.
+
+   - **Path-safety guard** : confirm the destination resolves
+     INSIDE `<consumer>` (`realpath` check) before writing the
+     first file. Abort with `path-escape-detected` if not.
+   - **Idempotent re-install** : on overwrite, only replace files
+     whose source byte content differs. Refuse to overwrite a
+     file the consumer hand-edited (heuristic : the destination
+     file exists, differs from the bundle source, AND lacks the
+     `_smith_source` marker comment — bail with
+     `consumer-edited-asset` naming the path).
+   - Track every written path under the consumer-side
+     `.smith/config.json` bundle entry's `asset_paths[]` array
+     (see step 7) so a future uninstall knows what to scrub.
+
+   Missing bucket → no-op for that skill. Most bundles do not
+   ship assets ; the `dashboard-ai` bundle is the reference
+   example.
+
 5. **Walk `bundles/<bundle>/hooks/<provider>/`** and process each
    file. For each file :
 
@@ -276,6 +308,9 @@ and only this directory.**
      - `merged_into: [<path>, ...]` — every consumer-side config
        file the install merged into during step 5-bis. Empty when
        the bundle ships no hooks.
+     - `asset_paths: [<path>, ...]` — every consumer-relative
+       path written under `.smith/skills/<slug>/assets/` during
+       step 4-bis. Empty when the bundle ships no assets.
    - **Preserve unknown keys** : round-trip anything you don't touch.
    - **Update `generated_at`** to the current ISO-8601 UTC time.
    - Atomic write.

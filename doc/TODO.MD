@@ -1,15 +1,11 @@
 Check the content of every skills
 
+Template:
+ revoir la forme -> plus une liste d'item ?
+ 
 A rajouter: 
   MCP ??
   RULES / Instruction
-
-rajouter des scripts python pour optimiser le contexte ?
-
-/Generate dashboard
-   - Générer une appli dashboard qui permet de consulter toute la conf actuelle
-       - de modifier les sills / agent / etc
-   - lancement automatiquement des commandes ?
 
 sdlc:
 - /plan

@@ -34,6 +34,7 @@ build:
     skill:    ".github/prompts/{slug}.prompt.md"
     agent:    ".github/agents/{slug}.agent.md"
     hook_dir: ".github/workflows/{bundle}"
+    script_dir: ".vscode/scripts"
     settings: ".vscode/tasks.json"
     skill_invocation: "@{slug}"
     agent_invocation: "@{slug}"

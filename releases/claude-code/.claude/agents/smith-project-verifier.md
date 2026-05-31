@@ -1,11 +1,7 @@
 ---
-description: Verifies that a `/smith-new-project` run produced a consistent Smith workspace. Walks `.smith/`, `AGENTS.md`, and every artefact path declared in `config.json::bundles[]` / `skills[]`. Read-only — never mutates anything. Returns a structured `VerifyReport` listing pass / fail / warn checks so step 9 (`/smith-report-write`) can render the verifier table. Dispatched by `/smith-new-project` at step 8 ; never invoke directly.
-mode: subagent
-permission:
-  read: allow
-  glob: allow
-  grep: allow
-  bash: allow
+name: smith-project-verifier
+description: Verifies that a `/smith-new-project` or `/smith-convert-project` run produced a consistent Smith workspace. Walks `.smith/`, `AGENTS.md`, and every artefact path declared in `config.json::bundles[]` / `skills[]`. Read-only — never mutates anything. Returns a structured `VerifyReport` listing pass / fail / warn checks so the run-report step can render the verifier table. Dispatched by the project-level orchestrators ; never invoke directly.
+tools: Read, Glob, Grep, Bash
 ---
 
 # Agent — Smith new-project verifier

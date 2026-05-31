@@ -8,6 +8,7 @@ description: |-
   skill only — VS Code tasks cannot carry per-event payloads, so no
   populating hook is provided.
 version: 0.1.0
+core: true
 tags:
 - observability
 - hooks

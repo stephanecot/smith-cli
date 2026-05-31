@@ -1,7 +1,9 @@
 ---
-name: smith-new-project-agents-writer
-description: 'Assembles the payload for `/smith-agents-md-write` from the consumer project''s state (`.smith/architecture.json`, `.smith/config.json`, the original `<description>`, and the orchestrator''s `BootstrapResult` trace), invokes the skill, and reports back a structured result. Dispatched by `/smith-new-project` at step 6 — never invoke directly. Exists for context isolation : the AGENTS.md rendering + truncation pass stays out of the orchestrator''s main thread.'
-tools: read_file, find_files, search_text
+name: smith-project-agents-writer
+description: 'Assembles the payload for `/smith-agents-md-write` from the consumer project''s state (`.smith/architecture.json`, `.smith/config.json`, the original `<description>`, and the orchestrator''s `BootstrapResult` trace), invokes the skill, and reports back a structured result. Dispatched by `/smith-new-project` and `/smith-convert-project` — never invoke directly. Exists for context isolation : the AGENTS.md rendering + truncation pass stays out of the orchestrator''s main thread.'
+tools:
+- search/codebase
+- search/usages
 ---
 
 # Agent — Smith new-project AGENTS.md writer

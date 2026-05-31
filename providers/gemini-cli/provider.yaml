@@ -38,6 +38,7 @@ build:
     skill:    ".gemini/skills/{slug}/SKILL.md"
     agent:    ".gemini/agents/{slug}.md"
     hook_dir: ".gemini/hooks/{bundle}"
+    script_dir: ".gemini/scripts"
     settings: ".gemini/settings.json"
     skill_invocation: "/{slug}"
     agent_invocation: ~

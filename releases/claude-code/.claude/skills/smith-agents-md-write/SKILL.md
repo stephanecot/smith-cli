@@ -119,7 +119,7 @@ or
 ```
 
 Structured return for callers (orchestrators dispatch you via the
-sibling sub-agent `smith-new-project-agents-writer`, which expects
+sibling sub-agent `smith-project-agents-writer`, which expects
 this shape) :
 
 ```json

@@ -1,6 +1,6 @@
 ---
 name: smith-bundle-list
-description: Lists every bundle declared in bundles/index.yaml, optionally filtered by one or more tags. Read-only — does NOT modify any file. Trigger with `/smith-bundle-list [--tag X[,Y,...]]`. Requires /smith-init to have run.
+description: Lists every bundle declared in bundles/index.yaml, optionally filtered by one or more tags or by core-only. Read-only — does NOT modify any file. The Core column flags bundles auto-installed on every project. Trigger with `/smith-bundle-list [--tag X[,Y,...]] [--core-only]`. Requires /smith-init to have run.
 ---
 
 # Skill — `/smith-bundle-list`
@@ -20,23 +20,31 @@ writes.
 /smith-bundle-list                       # all bundles
 /smith-bundle-list --tag build           # bundles tagged "build"
 /smith-bundle-list --tag build,frontend  # bundles tagged BOTH "build" AND "frontend"
+/smith-bundle-list --core-only           # only base bundles (core: true)
 ```
 
-Multiple tags are an **intersection** (AND), not a union.
+Multiple tags are an **intersection** (AND), not a union. `--core-only`
+can be combined with `--tag` (the intersection then applies on top of
+the core filter).
 
 ## What you do
 
 1. Read `bundles/index.yaml`. Parse the `bundles[]` array.
 2. If `--tag` is given, filter to bundles whose `tags[]` contains EVERY
    requested tag.
-3. Render a markdown table :
+3. If `--core-only` is given, additionally filter to entries where
+   `core == true`. (Treat absent `core` field as `false`.)
+4. Render a markdown table :
    ```
-   | Name | Version | Tags | Description |
-   |---|---|---|---|
-   | mvn | 0.1.0 | build, java, backend | Maven Haiku-offload — … |
+   | Name | Core | Version | Tags | Description |
+   |---|---|---|---|---|
+   | ia-stats | ✓ | 0.1.0 | observability, hooks | Automatic per-agent / per-skill usage tracker … |
+   | mvn |   | 0.1.0 | build, java, backend | Maven offload — … |
    ```
-4. End with a one-line summary : `Total: {{N}} bundles`.
-5. If no bundle matches the filter, say so explicitly and suggest dropping a
+   Use `✓` (U+2713) in the Core column when `core == true` ; leave the
+   cell empty otherwise. Sort core bundles first, then alphabetical.
+5. End with a one-line summary : `Total: {{N}} bundles ({{C}} core)`.
+6. If no bundle matches the filter, say so explicitly and suggest dropping a
    tag.
 
 ## What you do NOT do

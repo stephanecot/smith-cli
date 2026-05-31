@@ -33,7 +33,7 @@ by `/smith-init` and never re-written by other Smith skills.
 | Template              | `templates/config.template.json` |
 | Created by            | `/smith-init` (idempotent — if file exists, do not touch). |
 | Updated by            | `/smith-bundle-install` (upserts `bundles[]`), `/smith-template-install` (upserts `skills[]`). |
-| Read by               | `/smith-dashboard`, `/smith-bundle-install`, `/smith-template-install`, `/smith-generate-docs`. |
+| Read by               | `/dashboard-ai`, `/smith-bundle-install`, `/smith-template-install`, `/smith-generate-docs`. |
 
 ## Top-level keys
 
@@ -169,4 +169,3 @@ Any Smith skill that mutates `.smith/config.json` MUST :
 | `/smith-bundle-install`   | Reads the bundle entry shape, upserts the `bundles[]` array keyed by `name`. |
 | `/smith-template-install` | Reads the skill entry shape, upserts the `skills[]` array keyed by `name`. |
 | `/smith-generate-docs`    | Reads `specifications.*` to know where to write the spec files. Read-only on this skill's shape. |
-| `/smith-dashboard`        | Reads the written JSON to render the dashboard. Doesn't read `templates/` directly. |

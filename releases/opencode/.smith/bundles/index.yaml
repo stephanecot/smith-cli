@@ -1,9 +1,22 @@
 version: 1
 bundles:
+- name: dashboard-ai
+  description: Browseable web dashboard for a Smith-managed project. Launches a zero-dependency Node HTTP server (no npm install) serving a React UI loaded from CDN. The server discovers everything by scanning the consumer's filesystem from the path + invocation templates declared in `.smith/paths.yaml` — no provider list is hardcoded in the bundle. For every installed skill the dashboard surfaces the name, description, and the provider-correct invocation command. Writes a `.smith/dashboard.json` snapshot at startup ; read-only on the consumer source for everything else.
+  directory: dashboard-ai
+  version: 0.1.0
+  tags:
+  - observability
+  - docs
+  - slash-command
+  skills:
+  - name: dashboard-ai
+    version: 0.1.0
+  hooks: []
 - name: ia-stats
   description: Automatic per-agent / per-skill usage tracker. Every event appends a row to IA_STATS.MD at the consumer project's root via a Node.js script. Cross-platform (Windows + macOS + Linux), zero npm deps. Shipped for Claude Code (real event hooks) and OpenCode (plugin lifecycle hooks). GitHub Copilot ships the read-only `/ia-stats` skill only — VS Code tasks cannot carry per-event payloads, so no populating hook is provided.
   directory: ia-stats
   version: 0.1.0
+  core: true
   tags:
   - observability
   - hooks

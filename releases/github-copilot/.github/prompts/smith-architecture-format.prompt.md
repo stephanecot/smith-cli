@@ -30,7 +30,7 @@ by `/smith-init` and never re-written by other Smith skills.
 | Template              | `templates/architecture.template.json` |
 | Created by            | `/smith-init` (idempotent — if file exists, do not touch). |
 | Re-written by         | Nobody. To re-detect the stack, delete the file and re-run `/smith-init`. |
-| Read by               | `/smith-dashboard`, `/smith-template-install`, `/smith-generate-docs`. |
+| Read by               | `/dashboard-ai` (optional bundle), `/smith-template-install`, `/smith-generate-docs`. |
 
 ## Top-level keys
 
@@ -92,4 +92,3 @@ Today the only writer is `/smith-init`. Every other Smith skill treats
 | `/smith-init`             | Reads `templates/architecture.template.json`, fills the placeholders from stack detection, atomic-writes the file. The ONLY writer. |
 | `/smith-template-install` | Reads `project.frameworks[]` to pick the right framework template set (`angular/21`, `java-spring-boot/4`, …). Read-only. |
 | `/smith-generate-docs`    | Reads the descriptor to seed the technical / functional specifications. Read-only. |
-| `/smith-dashboard`        | Reads it to render the «Project» card of the HTML dashboard. Read-only. |

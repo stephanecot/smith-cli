@@ -39,6 +39,7 @@ build:
     skill:    ".claude/skills/{slug}/SKILL.md"
     agent:    ".claude/agents/{slug}.md"
     hook_dir: ".claude/hooks/{bundle}"
+    script_dir: ".claude/scripts"
     settings: ".claude/settings.json"
     skill_invocation: "/{slug}"
     agent_invocation: ~

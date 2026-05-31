@@ -1,4 +1,7 @@
 skill: .opencode/commands/{slug}.md
 agent: .opencode/agents/{slug}.md
 hook_dir: .opencode/plugins
+script_dir: .opencode/plugins
 settings: null
+skill_invocation: /{slug}
+agent_invocation: null
